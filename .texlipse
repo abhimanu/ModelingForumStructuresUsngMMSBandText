@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Mon Jun 24 09:10:31 EDT 2013
+markTmpDer=true
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=ThreadbasedMMSBwriteup.tex
+outputFile=ThreadbasedMMSBwriteup.pdf
+langSpell=en
+markDer=true
+srcDir=
