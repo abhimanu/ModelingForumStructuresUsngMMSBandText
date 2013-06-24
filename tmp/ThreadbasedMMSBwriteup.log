@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.11.3)  24 JUN 2013 09:10
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.11.3)  24 JUN 2013 18:20
 entering extended mode
  Source specials enabled.
  %&-line parsing enabled.
@@ -325,21 +325,21 @@ LaTeX Font Info:    Overwriting symbol font `ugrf@m' in version `bold'
 (./ThreadbasedMMSBwriteup.aux)
 \openout1 = `ThreadbasedMMSBwriteup.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 38.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 41.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
@@ -358,7 +358,7 @@ ABD: EveryShipout initializing macros
 \MPnumerator=\count128
 \everyMPtoPDFconversion=\toks22
 )
-Package hyperref Info: Link coloring OFF on input line 38.
+Package hyperref Info: Link coloring OFF on input line 41.
  (/usr/share/texmf-texlive/tex/latex/hyperref/nameref.sty
 Package: nameref 2007/05/29 v2.31 Cross-referencing by name of section
 
@@ -367,8 +367,8 @@ Package: refcount 2008/08/11 v3.1 Data extraction from references (HO)
 )
 \c@section@level=\count129
 )
-LaTeX Info: Redefining \ref on input line 38.
-LaTeX Info: Redefining \pageref on input line 38.
+LaTeX Info: Redefining \ref on input line 41.
+LaTeX Info: Redefining \pageref on input line 41.
 
 (./ThreadbasedMMSBwriteup.out) (./ThreadbasedMMSBwriteup.out)
 \@outlinefile=\write3
@@ -376,32 +376,35 @@ LaTeX Info: Redefining \pageref on input line 38.
 
 \AtBeginShipoutBox=\box31
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 40.
-LaTeX Font Info:    Try loading font information for U+msa on input line 40.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
+LaTeX Font Info:    Try loading font information for U+msa on input line 43.
 
 (/usr/share/texmf-texlive/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 40.
+LaTeX Font Info:    Try loading font information for U+msb on input line 43.
 
 (/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 40.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 40.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 43.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 41.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
  (./intro.tex)
-(./approach.tex
+(./relatedWork.tex [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+
+])
+(./approach.tex [2]
 ! Missing \endcsname inserted.
 <to be read again> 
                    \textwidth 
-l.9 ...raphics[0.3\textwidth]{pgm_ThreadBased.png}
+l.46 ...aphics[0.3\textwidth]{pgm_ThreadBased.png}
                                                   
 The control sequence marked <to be read again> should
 not appear between \csname and \endcsname.
@@ -409,7 +412,7 @@ not appear between \csname and \endcsname.
 ! Missing number, treated as zero.
 <to be read again> 
                    \endcsname 
-l.9 ...raphics[0.3\textwidth]{pgm_ThreadBased.png}
+l.46 ...aphics[0.3\textwidth]{pgm_ThreadBased.png}
                                                   
 A number should have been here; I inserted `0'.
 (If you can't figure out why I needed to see a number,
@@ -418,7 +421,7 @@ look up `weird error' in the index to The TeXbook.)
 ! Illegal unit of measure (pt inserted).
 <to be read again> 
                    \endcsname 
-l.9 ...raphics[0.3\textwidth]{pgm_ThreadBased.png}
+l.46 ...aphics[0.3\textwidth]{pgm_ThreadBased.png}
                                                   
 Dimensions can be in units of em, ex, in, pt, pc,
 cm, mm, dd, cc, nd, nc, bp, or sp; but yours is a new one!
@@ -430,7 +433,7 @@ two letters. (See Chapter 27 of The TeXbook.)
 ! Extra \endcsname.
 <recently read> \endcsname 
                            
-l.9 ...raphics[0.3\textwidth]{pgm_ThreadBased.png}
+l.46 ...aphics[0.3\textwidth]{pgm_ThreadBased.png}
                                                   
 I'm ignoring this, since I wasn't doing a \csname.
 
@@ -441,31 +444,29 @@ See the keyval package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.9 ...raphics[0.3\textwidth]{pgm_ThreadBased.png}
+l.46 ...aphics[0.3\textwidth]{pgm_ThreadBased.png}
                                                   
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
-<pgm_ThreadBased.png, id=11, 341.77687pt x 660.21657pt>
+<pgm_ThreadBased.png, id=87, 341.77687pt x 660.21657pt>
 File: pgm_ThreadBased.png Graphic file (type png)
 
 <use pgm_ThreadBased.png>
 
-LaTeX Warning: Float too large for page by 43.94987pt on input line 13.
+LaTeX Warning: Float too large for page by 43.94987pt on input line 50.
 
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 17.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 54.
 (/usr/share/texmf-texlive/tex/latex/psnfss/omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 17.
- [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
-
-] [2 <./pgm_ThreadBased.png (PNG copy)>]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 54.
+ [3] [4 <./pgm_ThreadBased.png (PNG copy)>]
 ! Extra }, or forgotten \right.
 <template> }
             $\@eqnsel \endtemplate 
-l.111  \sum
+l.148  \sum
            _{p} \! \log \left[ \prod_{k}
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -476,7 +477,7 @@ deleted material, e.g., by typing `I$}'.
 ! Missing \right. inserted.
 <inserted text> 
                 \right .
-l.111  \sum
+l.148  \sum
            _{p} \! \log \left[ \prod_{k}
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -487,7 +488,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.111  \sum
+l.148  \sum
            _{p} \! \log \left[ \prod_{k}
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -498,7 +499,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.120 ... \cdot \exp(-B_{g,h}/\eta) \right) \right
+l.157 ... \cdot \exp(-B_{g,h}/\eta) \right) \right
                                                   ]
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -507,14 +508,14 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 ! Extra \right.
-l.120 ...\cdot \exp(-B_{g,h}/\eta) \right) \right]
+l.157 ...\cdot \exp(-B_{g,h}/\eta) \right) \right]
                                                   
 I'm ignoring a \right that had no matching \left.
 
-! Incomplete \ifcase; all text was ignored after line 122.
+! Incomplete \ifcase; all text was ignored after line 159.
 <inserted text> 
                 \fi 
-l.122 \end{eqnarray}
+l.159 \end{eqnarray}
                     
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
@@ -523,7 +524,7 @@ the matching `\fi'. I've inserted a `\fi'; this might work.
 ! Extra alignment tab has been changed to \cr.
 <recently read> \endtemplate 
                              
-l.122 \end{eqnarray}
+l.159 \end{eqnarray}
                     
 You have given more \span or & marks than there were
 in the preamble to the \halign or \valign now in progress.
@@ -532,14 +533,14 @@ So I'll assume that you meant to type \cr instead.
 ! Extra \or.
 \@@eqncr ... {& & &}\or \def \reserved@a {& &}\or 
                                                   \def \reserved@a {&}\else ...
-l.122 \end{eqnarray}
+l.159 \end{eqnarray}
                     
 I'm ignoring this; it doesn't match any \if.
 
 ! Extra \else.
 \@@eqncr ...@a {& &}\or \def \reserved@a {&}\else 
                                                   \let \reserved@a \@empty \...
-l.122 \end{eqnarray}
+l.159 \end{eqnarray}
                     
 I'm ignoring this; it doesn't match any \if.
 
@@ -550,7 +551,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.122 \end{eqnarray}
+l.159 \end{eqnarray}
                     
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -558,29 +559,28 @@ If that doesn't work, type  X <return>  to quit.
 ! Extra \fi.
 \@@eqncr ...mns in eqnarray environment}\@ehc \fi 
                                                   \reserved@a \if@eqnsw \@eq...
-l.122 \end{eqnarray}
+l.159 \end{eqnarray}
                     
 I'm ignoring this; it doesn't match any \if.
 
 ! Missing { inserted.
 <inserted text> 
                 {
-l.122 \end{eqnarray}
+l.159 \end{eqnarray}
                     
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
 
-Overfull \hbox (61.52301pt too wide) in alignment at lines 105--122
+Overfull \hbox (61.52301pt too wide) in alignment at lines 142--159
  [][][] []
  []
 
-[3]
 ! Extra }, or forgotten \right.
 <template> }
             $\@eqnsel \endtemplate 
-l.129  \sum
+l.166  \sum
             \! \log \big[ \prod_{k} \! (\Pi_{p,k})^{\Delta_{\pi_{pk}}-1}
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -591,7 +591,7 @@ deleted material, e.g., by typing `I$}'.
 ! Missing \right. inserted.
 <inserted text> 
                 \right .
-l.129  \sum
+l.166  \sum
             \! \log \big[ \prod_{k} \! (\Pi_{p,k})^{\Delta_{\pi_{pk}}-1}
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -602,7 +602,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.129  \sum
+l.166  \sum
             \! \log \big[ \prod_{k} \! (\Pi_{p,k})^{\Delta_{\pi_{pk}}-1}
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -613,7 +613,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.137 ...\exp(-B_{g,h}/\Delta_{\eta}) \big] \right
+l.174 ...\exp(-B_{g,h}/\Delta_{\eta}) \big] \right
                                                   ]
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -622,14 +622,14 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 ! Extra \right.
-l.137 ...exp(-B_{g,h}/\Delta_{\eta}) \big] \right]
+l.174 ...exp(-B_{g,h}/\Delta_{\eta}) \big] \right]
                                                   
 I'm ignoring a \right that had no matching \left.
 
-! Incomplete \ifcase; all text was ignored after line 139.
+! Incomplete \ifcase; all text was ignored after line 176.
 <inserted text> 
                 \fi 
-l.139 \end{eqnarray}
+l.176 \end{eqnarray}
                     
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
@@ -638,7 +638,7 @@ the matching `\fi'. I've inserted a `\fi'; this might work.
 ! Extra alignment tab has been changed to \cr.
 <recently read> \endtemplate 
                              
-l.139 \end{eqnarray}
+l.176 \end{eqnarray}
                     
 You have given more \span or & marks than there were
 in the preamble to the \halign or \valign now in progress.
@@ -647,14 +647,14 @@ So I'll assume that you meant to type \cr instead.
 ! Extra \or.
 \@@eqncr ... {& & &}\or \def \reserved@a {& &}\or 
                                                   \def \reserved@a {&}\else ...
-l.139 \end{eqnarray}
+l.176 \end{eqnarray}
                     
 I'm ignoring this; it doesn't match any \if.
 
 ! Extra \else.
 \@@eqncr ...@a {& &}\or \def \reserved@a {&}\else 
                                                   \let \reserved@a \@empty \...
-l.139 \end{eqnarray}
+l.176 \end{eqnarray}
                     
 I'm ignoring this; it doesn't match any \if.
 
@@ -665,7 +665,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.139 \end{eqnarray}
+l.176 \end{eqnarray}
                     
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -673,61 +673,59 @@ If that doesn't work, type  X <return>  to quit.
 ! Extra \fi.
 \@@eqncr ...mns in eqnarray environment}\@ehc \fi 
                                                   \reserved@a \if@eqnsw \@eq...
-l.139 \end{eqnarray}
+l.176 \end{eqnarray}
                     
 I'm ignoring this; it doesn't match any \if.
 
 ! Missing { inserted.
 <inserted text> 
                 {
-l.139 \end{eqnarray}
+l.176 \end{eqnarray}
                     
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
 
-Overfull \hbox (12.41974pt too wide) in alignment at lines 123--139
+Overfull \hbox (12.41974pt too wide) in alignment at lines 160--176
  [][][] []
  []
 
-) (./ThreadbasedMMSBwriteup.bbl
-
-LaTeX Warning: Empty `thebibliography' environment on input line 3.
-
-) [4pdfTeX warning (ext4): destination with the same identifier (name{equation.
-2.5}) has been already used, duplicate ignored
+) (./dataset.tex) (./results.tex) (./conclusion.tex)
+(./ThreadbasedMMSBwriteup.bbl [5pdfTeX warning (ext4): destination with the sam
+e identifier (name{equation.3.5}) has been already used, duplicate ignored
 
 \@EveryShipout@Output ...@Org@Shipout \box \@cclv 
                                                   
-l.67 \end{document}
-                   ] (./ThreadbasedMMSBwriteup.aux) ) 
+l.19 \bibitem{Fu:2009:DMM:1553374.1553416}
+                                          ]) [6] (./ThreadbasedMMSBwriteup.aux)
+ ) 
 Here is how much of TeX's memory you used:
- 6138 strings out of 495061
- 86165 string characters out of 1182621
- 172540 words of memory out of 3000000
- 9156 multiletter control sequences out of 15000+50000
- 15828 words of font info for 39 fonts, out of 3000000 for 9000
+ 6196 strings out of 495061
+ 87236 string characters out of 1182621
+ 173158 words of memory out of 3000000
+ 9178 multiletter control sequences out of 15000+50000
+ 17512 words of font info for 41 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 42i,12n,36p,288b,465s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/share/texmf-texlive/
-fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texlive/fonts/type1/public/amsfon
-ts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cmextra/
-cmex7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
-/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/t
-exmf-texlive/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-texlive
-/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1
-/public/amsfonts/cm/cmr5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfo
-nts/cm/cmr7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10
-.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/s
-hare/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-t
-exlive/fonts/type1/public/amsfonts/euler/eurm10.pfb></usr/share/texmf-texlive/f
-onts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/hel
-vetic/uhvb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></u
-sr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb>
-Output written on ThreadbasedMMSBwriteup.pdf (4 pages, 216037 bytes).
+ 42i,12n,36p,288b,436s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
+ve/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/ty
+pe1/public/amsfonts/cmextra/cmex7.pfb></usr/share/texmf-texlive/fonts/type1/pub
+lic/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfont
+s/cm/cmmi5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi7.p
+fb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/sha
+re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texmf-texl
+ive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-texlive/fonts/typ
+e1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/a
+msfonts/cm/cmsy5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/c
+msy7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/euler/eurm10.pfb
+></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf
+-texlive/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share/texmf-texlive/fonts/ty
+pe1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a
+.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
+Output written on ThreadbasedMMSBwriteup.pdf (6 pages, 252068 bytes).
 PDF statistics:
- 122 PDF objects out of 1000 (max. 8388607)
- 25 named destinations out of 1000 (max. 500000)
- 22 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 194 PDF objects out of 1000 (max. 8388607)
+ 47 named destinations out of 1000 (max. 500000)
+ 70 words of extra memory for PDF output out of 10000 (max. 10000000)
 

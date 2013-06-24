@@ -13,8 +13,10 @@
 \usepackage{upgreek}
 
 % \title{Modeling Network and Text Structure in Online Forums}
-\title{Simultaneous text \& Network modeling in MMSB for Learning Structured
-Interactions on Online Forums}
+% \title{Simultaneous text \& Network modeling in MMSB for Learning Structured
+% Interactions on Online Forums}
+% \title{Modeling Structured Interaction in Big Online User Forums }
+\title{Modeling Structured Interaction in \\ Large Online User Forums }
 
 % \author{
 % Abhimanu Kumar \\
@@ -32,29 +34,47 @@ Interactions on Online Forums}
 
 \newcommand{\fix}{\marginpar{FIX}}
 \newcommand{\new}{\marginpar{NEW}}
+\newcommand{\comment}[1]{{\color{red}{#1}}}
 
 %\nipsfinalcopy
 
 \begin{document}
 \maketitle
+\begin{abstract}
+We present here an approach to model online social forums that respects the
+structure of the discussion and thus inturn provides researcher with unique
+insights into the myriads of user forums in the todays online communties. We
+bring together the structure of the forum network as well as texts posted
+in a model that respects the structure of the conversation in the forum. The
+work also focuses on large scal interaction and provides an efficient
+approximate estimation technique that is scalable~\comment{i am thinking of
+using stochastic variational for scalability if time permits} .
+Analysing Wikipidia edit and cancer patient online user forums using this 
+technique provides us interesting
+insights into these online user communities.
+\end{abstract}
 
-\section{Tentative Ideas}
+\section{Introduction}
 \input{intro}
 
-\section{Graphical Model \& Generative Story}
+\section{Related Work}
+\input{relatedWork}
+
+% \section{Graphical Model \& Generative Story}
+\section{Approach}
 \input{approach}
-% 
-% \section{Dataset}
-% \input{dataset}
+
+\section{Datasets}
+\input{dataset}
 % 
 % \section{Our Method \& Tasks Finished}
 % \input{approach&tasks}
 % 
-% \section{Experiments \& Results \& Evaluations}
-% \input{results}
-% 
-% \section{Conclusion \& Future Work}
-% \input{conclusion}
+\section{Experiments \& Results \& Evaluations}
+\input{results}
+
+\section{Conclusion \& Future Work}
+\input{conclusion}
 
 %o\section{Finished Task Split-up}
 
