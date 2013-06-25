@@ -1,0 +1,52 @@
+This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
+The top-level auxiliary file: ThreadbasedMMSBwriteup.aux
+The style file: plain.bst
+Database file #1: mybib.bib
+Warning--entry type for "ICWSM124638" isn't style-file defined
+--line 167 of file mybib.bib
+Repeated entry---line 275 of file mybib.bib
+ : @inproceedings{Yadati:2011:GTM:1963192.1963316
+ :                                               ,
+I'm skipping whatever remains of this entry
+You've used 14 entries,
+            2118 wiz_defined-function locations,
+            608 strings with 7143 characters,
+and the built_in function-call counts, 5631 in all, are:
+= -- 589
+> -- 235
+< -- 6
++ -- 93
+- -- 78
+* -- 385
+:= -- 880
+add.period$ -- 48
+call.type$ -- 14
+change.case$ -- 80
+chr.to.int$ -- 0
+cite$ -- 14
+duplicate$ -- 226
+empty$ -- 447
+format.name$ -- 78
+if$ -- 1230
+int.to.chr$ -- 0
+int.to.str$ -- 14
+missing$ -- 14
+newline$ -- 73
+num.names$ -- 28
+pop$ -- 85
+preamble$ -- 1
+purify$ -- 67
+quote$ -- 0
+skip$ -- 172
+stack$ -- 0
+substring$ -- 403
+swap$ -- 70
+text.length$ -- 6
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 54
+warning$ -- 0
+while$ -- 56
+width$ -- 16
+write$ -- 169
+(There was 1 error message)

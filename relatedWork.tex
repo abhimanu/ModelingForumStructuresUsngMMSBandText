@@ -1,0 +1,45 @@
+Our project lies at the intersection of graph clustering and social emergence.
+Wikipedia's talk pages are an instance of a large social community where we can
+observe social emergence. Sociologists divide emergents into various
+levels \cite{keith} e.g. Individual-specific interactions, Ephemeral emergent
+interactions, Stable emergent interaction etc.
+
+For role-identification and clustering users based on roles in online communities, 
+White et al.\cite{ICWSM124638} proposed a mixed-membership model that obtained
+membership probabilities for discussion-forum users for each statistic
+(in- and out-degrees, initiation rate and reciprocity) in various profiles and 
+clustered the users into ``extreme profiles''. Ho et al.
+\cite{Ho:2012:DHT:2187836.2187936} presented TopicBlock that combines text and 
+network data for building a taxonomy
+for a corpus. 
+
+Griffiths et al. \cite{griffiths2004finding} described a generative model for 
+Blei et al.'s LDA model \cite{blei2003latent} using an MCMC algorithm for 
+bayesian inference queries on the model.
+
+The LDA model and MMSB models were combined by
+Nallapati et al. \cite{Nallapati:2008:JLT:1401890.1401957} using the Pairwise-Link-LDA
+and Link-PLSA-LDA models where documents are assigned membership probabilities into
+bins obtained by topic-models.
+
+For simultaneously modeling topics in bilingual-corpora, Smet et al.
+\cite{Smet:2011:KTA:2017863.2017915} proposed the Bi-LDA model which generates
+topics from the target languages for paired documents in these very languages.
+The end-goal of their approach is to classify any document to one of the
+obtained set of topics.
+
+For modeling the behavioral aspects of entities and discovering communities in 
+social networks, several game-theoretic approaches have been proposed 
+(Chen et al. \cite{Chen:2010:GFI:1842547.1842566}, Yadati and Narayanam
+\cite{Yadati:2011:GTM:1963192.1963316}).
+
+Our work is unique in this context as it tries to bridge the gap between 
+community discovery and social emergence. A very popular approach for network
+clustering is to use a generative framework to infer the underlying structure of
+communities in a graph. Airoldi et al.\cite{Airoldi:2008:MMS:1390681.1442798}
+proposed a mixed membership stochastic block model to infer community structure
+in a network. Here they use a generative scheme which captures membership of a
+user to multiple communities using latent variables. There are other
+variants of mixed membership stochastic models, e.g. Ho et
+al.\cite{HoSonXin11} that study evolving clusters over time varying networks while Fu
+et al.\cite{Fu:2009:DMM:1553374.1553416} explore dynamic mixed membership models.

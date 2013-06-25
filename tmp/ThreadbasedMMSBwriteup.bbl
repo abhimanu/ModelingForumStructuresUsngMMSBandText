@@ -1,0 +1,88 @@
+\begin{thebibliography}{10}
+
+\bibitem{Airoldi:2008:MMS:1390681.1442798}
+Edoardo~M. Airoldi, David~M. Blei, Stephen~E. Fienberg, and Eric~P. Xing.
+\newblock Mixed membership stochastic blockmodels.
+\newblock {\em J. Mach. Learn. Res.}, 9:1981--2014, June 2008.
+
+\bibitem{blei2003latent}
+D.M. Blei, A.Y. Ng, and M.I. Jordan.
+\newblock Latent dirichlet allocation.
+\newblock {\em the Journal of machine Learning research}, 3:993--1022, 2003.
+
+\bibitem{Chen:2010:GFI:1842547.1842566}
+Wei Chen, Zhenming Liu, Xiaorui Sun, and Yajun Wang.
+\newblock A game-theoretic framework to identify overlapping communities in
+  social networks.
+\newblock {\em Data Min. Knowl. Discov.}, 21(2):224--240, September 2010.
+
+\bibitem{Fu:2009:DMM:1553374.1553416}
+Wenjie Fu, Le~Song, and Eric~P. Xing.
+\newblock Dynamic mixed membership blockmodel for evolving networks.
+\newblock In {\em Proceedings of the 26th Annual International Conference on
+  Machine Learning}, ICML '09, pages 329--336, New York, NY, USA, 2009. ACM.
+
+\bibitem{griffiths2004finding}
+T.L. Griffiths and M.~Steyvers.
+\newblock Finding scientific topics.
+\newblock {\em Proceedings of the National Academy of Sciences of the United
+  States of America}, 101(Suppl 1):5228--5235, 2004.
+
+\bibitem{HoSonXin11}
+Q.~Ho, L.~Song, and E.~Xing.
+\newblock Evolving cluster mixed-membership blockmodel for time-evolving
+  networks.
+\newblock In {\em International Conference on Artifical Intelligence and
+  Statistics (AISTATS)}, 2011.
+
+\bibitem{Ho:2012:DHT:2187836.2187936}
+Qirong Ho, Jacob Eisenstein, and Eric~P. Xing.
+\newblock Document hierarchies from text and links.
+\newblock In {\em Proceedings of the 21st international conference on World
+  Wide Web}, WWW '12, pages 739--748, New York, NY, USA, 2012. ACM.
+
+\bibitem{Nallapati:2008:JLT:1401890.1401957}
+Ramesh~M. Nallapati, Amr Ahmed, Eric~P. Xing, and William~W. Cohen.
+\newblock Joint latent topic models for text and citations.
+\newblock In {\em Proceedings of the 14th ACM SIGKDD international conference
+  on Knowledge discovery and data mining}, KDD '08, pages 542--550, New York,
+  NY, USA, 2008. ACM.
+
+\bibitem{keith}
+R.~Keith (Robert~Keith) Sawyer.
+\newblock {\em Social emergence : societies as complex systems / R. Keith
+  Sawyer}.
+\newblock Cambridge ; New York : Cambridge University Press, 2005.
+\newblock Formerly CIP.
+
+\bibitem{Shi00learningsegmentation}
+Jianbo Shi.
+\newblock Learning segmentation by random walks.
+\newblock In {\em In Advances in Neural Information Processing}, pages
+  470--477. MIT Press, 2000.
+
+\bibitem{Shi:2000:NCI:351581.351611}
+Jianbo Shi and Jitendra Malik.
+\newblock Normalized cuts and image segmentation.
+\newblock {\em IEEE Trans. Pattern Anal. Mach. Intell.}, 22(8):888--905, August
+  2000.
+
+\bibitem{Smet:2011:KTA:2017863.2017915}
+Wim~De Smet, Jie Tang, and Marie-Francine Moens.
+\newblock Knowledge transfer across multilingual corpora via latent topics.
+\newblock In {\em Proceedings of the 15th Pacific-Asia conference on Advances
+  in knowledge discovery and data mining - Volume Part I}, PAKDD'11, pages
+  549--560, Berlin, Heidelberg, 2011. Springer-Verlag.
+
+\bibitem{ICWSM124638}
+Arthur White, Jeffrey Chan, Conor Hayes, and Brendan Murphy.
+\newblock Mixed membership models for exploring user roles in online fora,
+  2012.
+
+\bibitem{Yadati:2011:GTM:1963192.1963316}
+Narahari Yadati and Ramasuri Narayanam.
+\newblock Game theoretic models for social network analysis.
+\newblock In {\em Proceedings of the 20th international conference companion on
+  World wide web}, WWW '11, pages 291--292, New York, NY, USA, 2011. ACM.
+
+\end{thebibliography}
