@@ -7,12 +7,16 @@ B = eye(K).*0.99+1e-6;
 log(B)
 log(1-B)
 %rB = rand(K,K)
-gamma = repmat(alpha,N,1)+(rand(N,K)-0.5).*0.1
+% gamma = repmat(alpha,N,1)+(rand(N,K)-0.5).*0.1
+% gamma = abs((rand(N,K)-0.5)*N)
+gamma = initializeGamma(N,K)
+% gamma(gamma<=0)=0.1;
+% gamma
 ll_iters = [];
 
 for iter=1:maxit
-    [gamma,B,ll] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter);
-    alpha = updateAlpha(gamma,alpha);
+    [gamma,B,ll, alpha] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter);
+    
     ll_iters = [ll_iters ll];
 end
 
@@ -22,7 +26,15 @@ plot(1:size(ll_iters,2) , ll_iters);
 pi = gamma./repmat(sum(gamma,2),1,K);
 end
 
-function [gamma, B, ll] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter)
+function gamma = initializeGamma(N,K)
+gamma = rand(N,K)*N;
+for i=1:N
+    ind = ceil(rand*K);
+    gamma(i,ind)=gamma(i,ind)+N;
+end
+end
+
+function [gamma, B, ll, alpha] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter)
 N = size(Y,1);
 K = size(alpha,2);
 phi = ones(N,N,2,K)*1.0/K;
@@ -36,7 +48,7 @@ for p=1:N
 %     ll = ll - gammaln(sum(gamma(p,:))) + sum(gammaln(gamma(p,:)));          % line 5
 %     ll = ll - sum((gamma(p,:)-1).*deriv_phi_p);                             % line 5
     
-    gamma_p = alpha;
+%     gamma_p = alpha;
     for q=1:N
         % calculate log-likelihoods
 %         f_B = Y(p,q)*log(B) + (1-Y(p,q))*log(1-B);
@@ -49,6 +61,10 @@ for p=1:N
 %         ll = ll - sum(squeeze(phi(p,q,1,:)).*log(squeeze(phi(p,q,1,:))));                     % line 6
 %         ll = ll - sum(squeeze(phi(p,q,2,:)).*log(squeeze(phi(p,q,2,:))));                     % line 6
         
+%         old_phi1 = phi(p,q,1,:);
+%         old_phi2 = phi(p,q,2,:);
+%         old_alpha = alpha;
+        
         % get new phi_pq
 %        temp_phi1 = variationalUpdatesPhi(Y(p,q),phi(2,p,q),B,1);
         phi(p,q,:,:) = variationalUpdatesPhi(Y(p,q),phi(p,q),B,gamma(p,:),gamma(q,:),alpha,inner_iter);
@@ -57,16 +73,28 @@ for p=1:N
         % update gamma
 %         squeeze(phi(p,q,1,:))'
 %         squeeze(phi(p,q,2,:))'
-        gamma_p = gamma_p + squeeze(phi(p,q,1,:))' + squeeze(phi(p,q,2,:))';
+
+%          gamma_p = gamma_p + squeeze(phi(p,q,1,:))' + squeeze(phi(p,q,2,:))';
+        gamma(p,:) = updateGamma(phi,alpha,p,N);
 
         % update B
-        B=updateB(phi,Y,K);              % write a more efficient code for updates
+         B=updateB(phi,Y,K);              % write a more efficient code for updates
+%          alpha = updateAlpha(gamma,alpha);
+        
+%         gamma_p = gamma(p,:) - old_alpha + alpha - squeeze(old_phi1)' - squeeze(old_phi2)'...
+%             + squeeze(phi(p,q,1,:))' + squeeze(phi(p,q,2,:))';
+%         gamma_p(gamma_p<=0) = 0.1;
+%         gamma(p,:) = gamma_p;
 %         getLogLikelihood(gamma,B,alpha,Y,phi)
     end
-    gamma(p,:) = gamma_p;
+%     gamma(p,:) = gamma_p;
+%     B=updateB(phi,Y,K);              % write a more efficient code for updates
+
 end
 %ll
-ll = getLogLikelihood(gamma,B,alpha,Y,phi)
+     alpha = updateAlpha(gamma,alpha);
+     ll = getLogLikelihood(gamma,B,alpha,Y,phi)
+     pi = gamma./repmat(sum(gamma,2),1,K)
 end
 
 function ll = getLogLikelihood(gamma,B,alpha,Y,phi)
@@ -144,11 +172,25 @@ end
 B = B/denB;
 end
 
+function gamma_p = updateGamma(phi,alpha,p,N)
+gamma_p=alpha;
+for q=1:N
+    gamma_p = gamma_p + squeeze(phi(p,q,1,:))' + squeeze(phi(p,q,2,:))';
+end
+end
+
+
 function alpha_new = updateAlpha(gamma,alpha)
 N = size(gamma,1);
+K = size(alpha,2);
+% alpha
+% try 
 g = N.*(psi(sum(alpha)) - psi(alpha)) + sum(gamma,1) - sum(psi(sum(gamma,2))); % size 1*K
 H = N.*(diag(psi(1,alpha)) - psi(1,sum(alpha)));
 alpha_new = alpha+g*inv(H)*1e-5;
+% catch exception
+%     pi = gamma./repmat(sum(gamma,2),1,K)
+% end
 end
 
 % function ll = getLogLikelihood()
