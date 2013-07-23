@@ -1,10 +1,31 @@
+We analyse two different forums: 1) Wikipdia talk pages, and 2) Cancer forum.
+The two datasets mentioned above represnt two different sets of
+online gatherings which helps us genearlize pur claims. 
+\subsection{Wikipedia talk pages}
+Wikipedia currently hosts more than four million articles on a wide range of topics.
+Quality control on Wikipedia occurs through discussions on the Wikipedia talk pages. 
+Every article on Wikipedia has a corresponding talk-page. Contributors to Wikipedia 
+discuss edits by other users, topics that can be used to extend the article, 
+the veracity of the article's contents etc. Talk-pages provide functionality
+for threaded discussions that are used as dialog among users. This rich
+structured discussion manifests itself as a social network that can be mined and
+studied.  A standard Wikipedia talk page consists of topics which hold
+discussion threads. For building our dataset, we used a snapshot of Wikipedia on
+the 1st of October 2012 \cite{wikipedia}. We built a parser and extracted the
+thread structure in the talk-pages to build the matrices. There are 20,000 users
+in our datasets that span accross 30,000 talk pages ~(\comment{These figures
+will change depending on whether we want to incorporate more or less users in
+future}).
+The talk pages become the threads in context of our graphical model.
 
+\subsection{Cancer Forum}
+The cancer forum is an online forum where users discuss about their cancer
+treatment and any thing else under the sun. Here again the conversation happens
+in a structured way where users post their responses on a thread by thread
+basis. Users also call each other by their names (or nick-names) while posting
+in many cases. This forum has around 3000 users and 10,000 threads, and a user
+on average posts around 120 words in a post.
 
-
-
-
-
-
-
-
-
+\comment{Need to expand more in the dataset section with more numbers and
+stats. Though the stats would be much clearer as and when we perform the
+experiments}

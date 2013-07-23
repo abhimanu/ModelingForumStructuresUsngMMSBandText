@@ -1,0 +1,92 @@
+\documentclass{article}
+\usepackage{nips12submit_e,times}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx, subfigure, fink, grffile, placeins}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{upgreek}
+
+% \title{Modeling Network and Text Structure in Online Forums}
+% \title{Simultaneous text \& Network modeling in MMSB for Learning Structured
+% Interactions on Online Forums}
+% \title{Modeling Structured Interaction in Big Online User Forums }
+\title{Modeling Structured Interaction in \\ Large Online User Forums }
+
+% \author{
+% Abhimanu Kumar \\
+% Carnegie Mellon University\\
+% \texttt{abhimank@cs.cmu.edu}\\
+% \And
+% Chong Wang \\
+% Carnegie Mellon University\\
+% \texttt{chongw@cs.cmu.edu}\\
+% \And
+% Carolyn P. Rose \\
+% Carnegie Mellon University\\
+% \texttt{cprose@cs.cmu.edu}\\
+% }
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand{\comment}[1]{{\color{red}{#1}}}
+
+%\nipsfinalcopy
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We present here an approach to model online social forums that respects the
+structure of the discussion and thus inturn provides researchers with unique
+insights into the myriads of user forums in the todays online world. We
+bring together the structure of the forum as well as texts posted there
+in a model that respects the structure of the conversation in the forum. The
+model incorporates the strength of interaction among user as well, as compared
+to binary case that cares just for presence or absence of interaction. The
+work has a scalability focus and provides an efficient approximate estimation 
+technique that is scalable
+to very large forums~(\comment{I am thinking of using stochastic variational for
+scalability if time permits.}).
+Analysing Wikipidia edits and cancer patients online user forums using this 
+technique provides us interesting insights into these communities.
+We also perform a set of prediction tasks to validate our claim
+further~(\comment{We need to decide this soon, though it hinges on once the
+final model is coded and we have analysed the data using it})
+\end{abstract}
+
+\section{Introduction}
+\input{intro}
+
+\section{Related Work}
+\input{relatedWork}
+
+% \section{Graphical Model \& Generative Story}
+\section{Approach}
+\input{approach}
+
+\section{Datasets}
+\input{dataset}
+% 
+% \section{Our Method \& Tasks Finished}
+% \input{approach&tasks}
+% 
+\section{Experiments \& Results \& Evaluations}
+\input{results}
+
+\section{Conclusion \& Future Work}
+\input{conclusion}
+
+%o\section{Finished Task Split-up}
+
+%\input{appendix}
+
+%\input{06Eval01}
+%\input{06Eval02}
+\bibliography{mybib}
+\bibliographystyle{plain}
+\end{document}

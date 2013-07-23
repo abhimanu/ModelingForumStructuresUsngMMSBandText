@@ -1,5 +1,5 @@
 #TeXlipse project settings
-#Tue Jun 25 04:59:56 EDT 2013
+#Tue Jun 25 10:24:10 EDT 2013
 markTmpDer=true
 builderNum=2
 outputDir=
@@ -7,8 +7,8 @@ makeIndSty=
 bibrefDir=
 outputFormat=pdf
 tempDir=tmp
-mainTexFile=document.tex
-outputFile=document.pdf
+mainTexFile=ForumStructureWithTextAndMMSB.tex
+outputFile=ForumStructureWithTextAndMMSB.pdf
 langSpell=en
 markDer=true
 srcDir=

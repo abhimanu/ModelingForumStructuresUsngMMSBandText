@@ -1,52 +1,52 @@
-Online forums have a generally a specific structure that provides a lot of
-context to all the interactions among the users. Ignoring this in the analysis
-makes us lose a lot of precious information as we will see in later sections.
-Here we describe a typeical forum and the answers that we plan to obtain.
+Online forums generally have a specific structure that provides a lot of
+context to all the interactions occuring among the users. Ignoring this in the
+analysis makes researhers lose a lot of precious information as we will see in
+later sections.
+Here we describe a typeical forum \& related structure and the answers that we
+are looking for.
 
-\subsection{structure in online forums}
-We discuss here the ideas and questions that are important for modeling
-structure in online forums. Following are the questions that we want answered:
-\begin{enumerate}
-  \item When two persons interact in a thread or a post which topic/community they
-each belong to
-	\item When a user U is in communnity C what type of text does he use to
-	communicate
-	\item Multi-user-Interaction: In a thread a user can post by addressing to a
-	specific user but he is also talking to other users in the thread simultaneously. Can we model this
-	phenomenon
-	\item There is an inherent bias towards the thread starter or in turn topic of
-	the theread; can such an information be utilised in some form of a prior
-	value/input
-	\item Multi-layer-Interaction: On the network side of things there are multiple
-	signals which cannt be simply added to make a single signal e.g. different
-	types of edges in the graphs (user calling by username and nick-name). Can the
-	model take this into account. We are not doing this at present.
-	\item User posts aggregation; there are multiple ways to aggreagte
-	\begin{enumerate}
-		\item Network Layer aggregation: We call all types of edges as a single
-		edge type and use this combined signal. 
-		\item aggregating user posts accross multiple threads in the forum.
-		\item Aggregating user post only in the same thread
-		\item Aggregating user post only for same user-user pair interaction; i.e. a user might have
-		posted multiple replies to another user and we aggregate all such replies into
-		one for this user pair interaction.
-		\item No aggregation at all.
-	\end{enumerate}
-\end{enumerate}
+\subsection{Structure in online forums}
+In an online forum when two users interact in a thread or through a post
+they probably bring from their own individual point of views or come
+form possibly different communities.
+It is valuable to know which topic/community they each belong to in that
+interaction. When a user U is representing community C out of all communties
+that he is part of, he tailors his post content accordingly to suit the
+explicit or implicit community norms. Knowing the style of community
+specific text content provides a lot of information about the community in general. 
+It also provides information about what role user U plays when he is in community
+C. In online forums multi-user interactions happen a lot i.e.
+in a thread a user can post by addressing to another specific user but he is
+also addressing other users in the thread explicitly or implicitly. Modeling
+this phenomenon would bring our model closer to reality. This knowledge 
+can be modelled by aggregating
+users posts acorss a thread, though not across the whole of the forum. We will
+elaborate on this more in the generative story section.
+Another interesting property of such structured conversations is that there is 
+an inherent bias towards the thread starter or in turn topic of the thread. 
+It would be interesting to see what 
+insights this knowledge provides given that a model can make use of such an
+information (\comment{right now our graphical model doesn't support this but
+it would be interesting to see how this can be brought in. It might not be
+too difficult to do this}).
 
-\subsection{graphical model \& generative story}
-Based on the discussions above we came up with the following final model shown
-in figure~1. In this model,
-figure~1 below, we aggregate the posts of 
-a given user in a given thread into one document called $R_p$. 
 
-The generative process for the figure is as follows:
+\subsection{Graphical model \& generative story}
+Based on the discussions above our graphical model is designed as shown
+in figure~\ref{fig:finalThreadAggregationModel}. In this model,
+figure~\ref{fig:finalThreadAggregationModel} below, we aggregate the posts of 
+a given user in a given thread into one document called $R_p$. This helps us
+incorporate the knowledge that a user's post is influenced by all the posts of
+other users present on the thread.
+
+The generative process for the model is as follows:
 
 \begin{figure}
-\includegraphics[0.3\textwidth]{pgm_ThreadBased.png}
-\label{fig:finalThreadAggregationModel}
+\centering
+\includegraphics[width=0.6\textwidth]{pgm_ThreadBased.png}
 \caption{This graphical model takes into account multi-way interaction among
 users in a thread simultaneously}
+\label{fig:finalThreadAggregationModel}
 \end{figure}
 
 Assuming that there are total $N_t$ users in the thread $t$.  
@@ -73,9 +73,6 @@ Assuming that there are total $N_t$ users in the thread $t$.
     \item Sample the value of their interaction, $Y(p,q,t) \sim$
     Poisson(${\overset{\rightarrow}{z}}^{\top}_{(p \rightarrow q,t)}
     B~\overset{\rightarrow}{z}_{(p \leftarrow q,t)}$). 
-%     We make the assumption that
-%     two interactions are independent of each other i.e $Y(p,q,i)$ and $Y(p,q,j)$
-%     are independent of each other where $i\neq j$.
 	\end{itemize}
 	\item For each user $p \in \mathcal{N}_t$
 	\begin{itemize}
@@ -86,10 +83,6 @@ Assuming that there are total $N_t$ users in the thread $t$.
 	    \item For each word $w \in R_{p,t}$ 
 	    \item Draw $w \sim \phi(w|z_{(p \rightarrow q,t)}, \forall q\in Q_{p,t})$  
 	  \end{itemize}
-% 	  \item Draw $W \sim $
-%     \item Draw $z_{u,m}$ topic for user $U$'s document from $\pi_u$.
-%     \item Draw $\tau_{k}$ from $Dirichlet(\beta)$.
-%     \item Draw a word $w_{u,m}$ from $\tau_{z}$
   \end{itemize}
 \end{itemize}  
 \end{itemize}
@@ -140,48 +133,55 @@ L_{\Delta} &= E_{q}\bigg[ \log \! P(Y, W, z_{\rightarrow}, z_{\leftarrow}, \Phi,
 \end{align}
 
 \begin{eqnarray}
-L_{\Delta} = E_{q} \left[ \sum_{t} \! \sum_{p,q} \! \log \bigg(
-B_{g,h}^{Y_{p,q}^t} \frac{e^{-B_{gh}}}{Y_{pq}^{t}!} \bigg) +
-\sum_{t} \! \sum_{pq} \! \log\bigg( \prod_{k} (\pi_{p,k}^{z_{p \rightarrow q} =
-k}) \bigg) + \sum_{t} \! \sum_{p,q} \log \! \bigg( \prod_{k}(\pi_{q,k})^{z_{p
-\leftarrow q} = k} \bigg) ~+ \nonumber\\
- \sum_{p} \! \log \left[ \prod_{k}
+L_{\Delta} = E_{q} \Bigg[ \sum_{t} \! \sum_{p,q} \! \log \left(
+B_{g,h}^{Y_{p,q}^t} \frac{e^{-B_{gh}}}{Y_{pq}^{t}!} \right) +
+\sum_{t} \! \sum_{pq} \! \log\left( \prod_{k} (\pi_{p,k}^{z_{p \rightarrow q} =
+k}) \right) + \sum_{t} \! \sum_{p,q} \log \! \left( \prod_{k}(\pi_{q,k})^{z_{p
+\leftarrow q} = k} \right) ~+ \nonumber\\
+ \sum_{p} \! \log \left( \prod_{k}
 (\Pi_{p,k})^{\alpha_{k} - 1} \cdot \frac{\Gamma(\sum \alpha_{k})}{\prod_{k}
-\Gamma(\alpha_{k})} \right] +
-\sum_{t} \! \sum_{p} \! \sum_{w\in R_p^t}  \log \! \bigg(
-\prod_{u\in V}(\bar{z}^T\phi_u)^{w = u} \bigg) + \nonumber\\
- \sum_{k} \! \log\left[ \prod_{u\in V}
+\Gamma(\alpha_{k})} \right) +
+\sum_{t} \! \sum_{p} \! \sum_{w\in R_p^t}  \log \! \left(
+\prod_{u\in V}(\bar{z}^T\phi_u)^{w = u} \right) + \nonumber\\
+ \sum_{k} \! \log\left( \prod_{u\in V}
 (\phi_{k,u})^{\beta_{k} - 1} \cdot \frac{\Gamma(\sum \beta_{k})}{\prod_{k}
-\Gamma(\beta_{k})} \right] +
+\Gamma(\beta_{k})} \right) +
  \sum_{g,h} \! \log \! \left( B_{g,h}^{\kappa - 1} /
-\eta^{\kappa} \Gamma(\kappa) \cdot \exp(-B_{g,h}/\eta) \right) \right] 
-\nonumber
-\end{eqnarray}
-\begin{eqnarray}
- -E_{q} \left[ \sum_{t} \! \sum_{p,q} \log \big( \prod_{k} (\Delta_{z_{p
+\eta^{\kappa} \Gamma(\kappa) \cdot \exp(-B_{g,h}/\eta) \right) \Bigg]
+\nonumber\\
+% 
+% \end{eqnarray}
+% \begin{eqnarray}
+ -E_{q} \Bigg[ \sum_{t} \! \sum_{p,q} \log \big( \prod_{k} (\Delta_{z_{p
 \rightarrow q}, k})^{z_{p \rightarrow q}=k} \big) + \sum_{t} \! \sum_{p,q}
-\! \log \! \big(
-\prod_{k} \! (\Delta_{z_{p \leftarrow q}, k})^{z_{p \leftarrow q} = k} \big)
+\! \log \! \left(
+\prod_{k} \! (\Delta_{z_{p \leftarrow q}, k})^{z_{p \leftarrow q} = k} \right)
  + \nonumber \\
- \sum \! \log \big[ \prod_{k} \! (\Pi_{p,k})^{\Delta_{\pi_{pk}}-1}
-\frac{\Gamma(\Delta_{\Pi_{p}})}{\prod_{k=1} \! \Gamma(\Delta_{\Pi_{p,k}})} \big]
- + 
-\sum_{k} \log \! \big[ \prod_{u \in v}
+ \sum \! \log \left( \prod_{k} \! (\Pi_{p,k})^{\Delta_{\pi_{pk}}-1}
+\frac{\Gamma(\Delta_{\Pi_{p}})}{\prod_{k=1} \! \Gamma(\Delta_{\Pi_{p,k}})}
+\right) + 
+\sum_{k} \log \! \left( \prod_{u \in v}
 (\Phi_{k,u})^{\Delta_{\Phi_{ku}} - 1)} \frac{\Gamma(\Delta_{\Phi_{k}})}
-{\prod_{u \in v} \! \Gamma(\Delta_{\Phi_{k,u}})} \big] + \nonumber \\ 
-\sum_{g,h} \log \! \big[
+{\prod_{u \in v} \! \Gamma(\Delta_{\Phi_{k,u}})} \right) + \nonumber \\ 
+\sum_{g,h} \log \! \left(
 \frac{B_{g,h}^{\Delta_{\kappa = 1}}}{\Delta_{\eta}^{\Delta_{\kappa}}
-\Gamma(\Delta_{\kappa})} \exp(-B_{g,h}/\Delta_{\eta}) \big] \right]
+\Gamma(\Delta_{\kappa})} \exp(-B_{g,h}/\Delta_{\eta}) \right) \Bigg]
 \label{eqn:VarLowerBound}
 \end{eqnarray}
+
 
 Equation~\ref{eqn:VarLowerBound} is the variational lower bound of the log
 likelihood function which is to be maximized.
 There are terms like $ E_q\left[\sum_{g,h} \! \log \! \left( B_{g,h}^{\kappa -
 1} / \eta^{\kappa} \Gamma(\kappa) \cdot \exp(-B_{g,h}/\eta) \right) \right]$
 which can be obtained by taking derivation of the partition function of the exponential
-family form of gamma distribution. I still have to figure out an effective way
-to evaluate $E_q\left[ \sum_{t} \! \sum_{p} \! \sum_{w\in R_p^t}  \log \! \bigg(
-\prod_{u\in V}(\bar{z}^T\phi_u)^{w = u} \bigg)\right]$ which Chong suggested
-(and Eric too in the last meeting) to evaluate by intriducing an additional
-latent variable $\bar{z}_p$ which is a realization of the average $\frac{\sum_{q\in Q} z_{p\rightarrow q}}{|Q|}$. 
+family form of gamma distribution. An effective way
+to evaluate $E_q\left[ \sum_{t} \! \sum_{p} \! \sum_{w\in R_p^t}  \log \! \left(
+\prod_{u\in V}(\bar{z}^T\phi_u)^{w = u} \right)\right]$ 
+is by introducing an additional latent variable $\bar{z}_p$ which is a
+realization of the average $\frac{\sum_{q\in Q} z_{p\rightarrow q}}{|Q|}$. 
+~\comment{So figure~\ref{fig:finalThreadAggregationModel} will be modifed
+slightly in future where $R_p$ is drawn from $\bar{z}$ and $\bar{Z}$ is drawn from
+$z_{p\rightarrow q}$. This was suggested by Chong as well as Eric but I
+finally figured out the equation of the vriational approximation for this. I
+will update the equations once I have coded it and verified.}.

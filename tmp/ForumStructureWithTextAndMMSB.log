@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.23)  25 JUN 2013 10:14
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.23)  25 JUN 2013 10:24
 entering extended mode
-**ThreadbasedMMSBwriteup.tex
+**ForumStructureWithTextAndMMSB.tex
 
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ThreadbasedMMSBwri
-teup.tex
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
+TextAndMMSB.tex
 LaTeX2e <2011/06/27>
 Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, ar
 abic, armenian, assamese, basque, bengali, bokmal, bulgarian, catalan, coptic, 
@@ -204,8 +204,8 @@ Package etexcmds Info: Could not find \expanded.
 (etexcmds)             that some package has redefined \expanded.
 (etexcmds)             In the latter case, load this package earlier.
 )))
-Package FiNK Info: main file set to "./ThreadbasedMMSBwriteup.tex" on input lin
-e 82.
+Package FiNK Info: main file set to "./ForumStructureWithTextAndMMSB.tex" on in
+put line 82.
 )
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\oberdiek\grffile.sty"
 Package: grffile 2010/12/09 v1.13 Extended file name support for graphics (HO)
@@ -353,8 +353,8 @@ Package upgreek Info: Using Euler Roman for upright Greek on input line 31.
 LaTeX Font Info:    Overwriting symbol font `ugrf@m' in version `bold'
 (Font)                  U/eur/m/n --> U/eur/b/n on input line 38.
 )
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ThreadbasedMMSBwri
-teup.aux)
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
+TextAndMMSB.aux)
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 41.
 LaTeX Font Info:    ... okay on input line 41.
 LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 41.
@@ -374,8 +374,7 @@ LaTeX Font Info:    Try loading font information for OT1+ptm on input line 41.
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 \AtBeginShipoutBox=\box30
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
+ ("C:\Program Files (x86)\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count124
 \scratchdimen=\dimen120
@@ -402,10 +401,10 @@ LaTeX Info: Redefining \ref on input line 41.
 LaTeX Info: Redefining \pageref on input line 41.
 LaTeX Info: Redefining \nameref on input line 41.
 
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ThreadbasedMMSBwri
-teup.out)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ThreadbasedMMSBwri
-teup.out)
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
+TextAndMMSB.out)
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
+TextAndMMSB.out)
 \@outlinefile=\write3
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
@@ -414,8 +413,7 @@ LaTeX Font Info:    Try loading font information for U+msa on input line 43.
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
 LaTeX Font Info:    Try loading font information for U+msb on input line 43.
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
+ ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
@@ -459,30 +457,30 @@ Overfull \hbox (60.87856pt too wide) in alignment at lines 135--170
 [4]) (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\dataset.tex
 [5]) (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\results.tex)
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\conclusion.tex)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ThreadbasedMMSBwri
-teup.bbl
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
+TextAndMMSB.bbl
 Missing character: There is no é in font ptmr7t!
  [6])
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 92.
  [7]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 92.
 
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ThreadbasedMMSBwri
-teup.aux)
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
+TextAndMMSB.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 92.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 92.
-Package rerunfilecheck Info: File `ThreadbasedMMSBwriteup.out' has not changed.
-
+Package rerunfilecheck Info: File `ForumStructureWithTextAndMMSB.out' has not c
+hanged.
 (rerunfilecheck)             Checksum: CD632C91E124F874BE048EAE6DF088CC;619.
  ) 
 Here is how much of TeX's memory you used:
  7145 strings out of 494045
- 103820 string characters out of 3145956
- 208434 words of memory out of 3000000
+ 103932 string characters out of 3145956
+ 208441 words of memory out of 3000000
  10269 multiletter control sequences out of 15000+200000
  17512 words of font info for 41 fonts, out of 3000000 for 9000
  715 hyphenation exceptions out of 8191
- 37i,12n,39p,299b,475s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 37i,12n,39p,306b,475s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files (x86)/MiKTeX 2.9/fonts/enc/dvips/fontname/8r.enc}<C:/Progra
 m Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Program 
 Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cmextra/cmex7.pfb><C:/Progra
@@ -500,7 +498,7 @@ onts/type1/urw/courier/ucrr8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type
 1/urw/helvetic/uhvb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/ti
 mes/utmb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.
 pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on ThreadbasedMMSBwriteup.pdf (7 pages, 258081 bytes).
+Output written on ForumStructureWithTextAndMMSB.pdf (7 pages, 258081 bytes).
 PDF statistics:
  193 PDF objects out of 1000 (max. 8388607)
  36 named destinations out of 1000 (max. 500000)
