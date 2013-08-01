@@ -11,6 +11,14 @@ Wei Chen, Zhenming Liu, Xiaorui Sun, and Yajun Wang.
   social networks.
 \newblock {\em Data Min. Knowl. Discov.}, 21(2):224--240, September 2010.
 
+\bibitem{conf/nips/GopalanMGFB12}
+Prem Gopalan, David~M. Mimno, Sean Gerrish, Michael~J. Freedman, and David~M.
+  Blei.
+\newblock Scalable inference of overlapping communities.
+\newblock In Peter~L. Bartlett, Fernando C.~N. Pereira, Christopher J.~C.
+  Burges, Léon Bottou, and Kilian~Q. Weinberger, editors, {\em NIPS}, pages
+  2258--2266, 2012.
+
 \bibitem{Ho:2012:DHT:2187836.2187936}
 Qirong Ho, Jacob Eisenstein, and Eric~P. Xing.
 \newblock Document hierarchies from text and links.
@@ -24,6 +32,11 @@ Qirong Ho, Junming Yin, and Eric~P. Xing.
 \newblock In Peter~L. Bartlett, Fernando C.~N. Pereira, Christopher J.~C.
   Burges, Léon Bottou, and Kilian~Q. Weinberger, editors, {\em NIPS}, pages
   2141--2149, 2012.
+
+\bibitem{Hoffman:2013:SVI}
+Matthew~D. Hoffman, David~M. Blei, Chong Wang, and John Paisley.
+\newblock Stochastic variational inference.
+\newblock {\em J. Mach. Learn. Res.}, 14(1):1303--1347, May 2013.
 
 \bibitem{Nallapati:2008:JLT:1401890.1401957}
 Ramesh~M. Nallapati, Amr Ahmed, Eric~P. Xing, and William~W. Cohen.
@@ -56,15 +69,15 @@ Arthur White, Jeffrey Chan, Conor Hayes, and Brendan Murphy.
 \newblock Mixed membership models for exploring user roles in online fora,
   2012.
 
-\bibitem{wikipedia}
-Wikipedia.
-\newblock Wikipedia data dump october-01-2012.
-\newblock \url{http://dumps.wikimedia.org/enwiki/20121001/}, October 2012.
-
 \bibitem{Yadati:2011:GTM:1963192.1963316}
 Narahari Yadati and Ramasuri Narayanam.
 \newblock Game theoretic models for social network analysis.
 \newblock In {\em Proceedings of the 20th international conference companion on
   World wide web}, WWW '11, pages 291--292, New York, NY, USA, 2011. ACM.
+
+\bibitem{Zhu:getoor:MMSB-text}
+Y.~{Zhu}, X.~{Yan}, L.~{Getoor}, and C.~{Moore}.
+\newblock {Scalable Text and Link Analysis with Mixed-Topic Link Models}.
+\newblock {\em ArXiv e-prints}, March 2013.
 
 \end{thebibliography}

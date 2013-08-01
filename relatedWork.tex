@@ -24,11 +24,15 @@ The end-goal of their approach is to classify any document into one of the
 obtained set of topics. For modeling the behavioral aspects of entities and
 discovering communities in social networks, several game-theoretic approaches
 have been proposed (Chen et al. \cite{Chen:2010:GFI:1842547.1842566}, Yadati and
-Narayanam \cite{Yadati:2011:GTM:1963192.1963316}).
+Narayanam \cite{Yadati:2011:GTM:1963192.1963316}). Zhu et
+al.~\cite{Zhu:getoor:MMSB-text} combine MMSB and text for link prediction and
+scal it to 44K links.
 
 Ho et al.~\cite{HoYX12} provide a unique triangulated sampling schemes for scaling
 mixed membership stochastic block models~\cite{Airoldi:2008:MMS:1390681.1442798} to
-hundreds of thousands users based communities.
+hundreds of thousands users based communities. Prem et al.~\cite{conf/nips/GopalanMGFB12}
+use stochastic variational inference coupled with sub-sampling techniques to
+scale MMSB like models to hundreds of thousands of users.
 
 None of the works above address the strucutre of the information flow in an
 online community. Our work is unique in this context as it tries to bridge the

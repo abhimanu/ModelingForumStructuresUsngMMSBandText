@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.23)  25 JUN 2013 10:24
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.23)  23 JUL 2013 05:17
 entering extended mode
 **ForumStructureWithTextAndMMSB.tex
 
@@ -427,15 +427,17 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
 
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\intro.tex)
-[1{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\relatedWork.tex
+Underfull \vbox (badness 2326) has occurred while \output is active []
 
-]
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\relatedWork.tex)
+ [1{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}
+
+])
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\approach.tex
-Underfull \vbox (badness 1442) has occurred while \output is active []
+Underfull \vbox (badness 1796) has occurred while \output is active []
 
  [2]
-<pgm_ThreadBased.png, id=82, 341.77687pt x 660.21657pt>
+<pgm_ThreadBased.png, id=92, 341.77687pt x 660.21657pt>
 File: pgm_ThreadBased.png Graphic file (type png)
 
 <use pgm_ThreadBased.png>
@@ -460,24 +462,25 @@ Overfull \hbox (60.87856pt too wide) in alignment at lines 135--170
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
 TextAndMMSB.bbl
 Missing character: There is no é in font ptmr7t!
+Missing character: There is no é in font ptmr7t!
  [6])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 92.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 94.
  [7]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 92.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 94.
 
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
 TextAndMMSB.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 92.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 92.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 94.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 94.
 Package rerunfilecheck Info: File `ForumStructureWithTextAndMMSB.out' has not c
 hanged.
-(rerunfilecheck)             Checksum: CD632C91E124F874BE048EAE6DF088CC;619.
+(rerunfilecheck)             Checksum: 34C5947E0741EACBF9D92A4EB604479E;670.
  ) 
 Here is how much of TeX's memory you used:
- 7145 strings out of 494045
- 103932 string characters out of 3145956
- 208441 words of memory out of 3000000
- 10269 multiletter control sequences out of 15000+200000
+ 7151 strings out of 494045
+ 104074 string characters out of 3145956
+ 208537 words of memory out of 3000000
+ 10272 multiletter control sequences out of 15000+200000
  17512 words of font info for 41 fonts, out of 3000000 for 9000
  715 hyphenation exceptions out of 8191
  37i,12n,39p,306b,475s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -498,9 +501,9 @@ onts/type1/urw/courier/ucrr8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type
 1/urw/helvetic/uhvb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/ti
 mes/utmb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.
 pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on ForumStructureWithTextAndMMSB.pdf (7 pages, 258081 bytes).
+Output written on ForumStructureWithTextAndMMSB.pdf (7 pages, 256038 bytes).
 PDF statistics:
- 193 PDF objects out of 1000 (max. 8388607)
- 36 named destinations out of 1000 (max. 500000)
- 86 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 202 PDF objects out of 1000 (max. 8388607)
+ 39 named destinations out of 1000 (max. 500000)
+ 94 words of extra memory for PDF output out of 10000 (max. 10000000)
 
