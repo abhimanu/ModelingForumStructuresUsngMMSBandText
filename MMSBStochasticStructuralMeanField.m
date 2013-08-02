@@ -1,9 +1,11 @@
-function[pi,B,alpha] = MMSBStructuralMeanField(Y, K, maxit, inner_iter)
+function[pi,B,alpha] = MMSBStochasticStructuralMeanField(Y, K, maxit, inner_iter)
 N = size(Y,1);
 % gamma = repmat(ones(1,K)*2*N/K, N, 1);
 
 alpha = 0.5+(rand(1,K)-0.5)*0.1
-B = eye(K).*0.99+1e-6;
+B_lower_limit = 1e-6;
+B_upper_limit= 0.99;
+B = eye(K).*B_upper_limit+B_lower_limit;
 log(B)
 log(1-B)
 %rB = rand(K,K)
@@ -14,10 +16,11 @@ gamma = repmat(alpha,N,1)+(rand(N,K)-0.5).*0.1;
 % gamma(gamma<=0)=0.1;
 % gamma
 ll_iters = [];
-
+step_iter = 0;
 for iter=1:maxit
-    [gamma,B,ll] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter);
-    alpha = updateAlpha(gamma,alpha);
+    
+    [gamma,B,ll, alpha,step_iter] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter,step_iter);
+    
     ll_iters = [ll_iters ll];
 end
 
@@ -57,37 +60,52 @@ function gamma = initGammaTrue()
    33.6886    0.7254    0.7739    0.7885];
 end
 
-function [gamma, B, ll] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter)
+function step_size = getStepSize(step_iter)
+tau=1;
+kappa=0.5;
+step_size = 1/power(step_iter+tau,kappa);
+end
+
+function [gamma, B, ll, alpha, step_iter] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter,step_iter)
 N = size(Y,1);
 K = size(alpha,2);
 phi = zeros(K,K,N,N);%.*(1.0/(K*K)); %            Note that it is K><K
-
 ll=0;
 for i=1:inner_iter
+    step_iter = step_iter+1;
+        step_size = getStepSize(step_iter);
 for p=1:N
-%     gamma_p = alpha;
-    for q=1:N
-        % get new phi_pq
-%        temp_phi1 = variationalUpdatesPhi(Y(p,q),phi(2,p,q),B,1);
-%         if p==q
-%             continue
-%         end
+    for q=p:N
+        
         temp_phi=variationalUpdatesPhi(Y(p,q),phi(:,:,p,q),B,gamma(p,:),gamma(q,:),alpha,inner_iter);
         phi(:,:,p,q) = temp_phi;
+%         temp_phi
+        % update B
+         B=stochasticUpdateB(temp_phi,Y(p,q),K,B,step_size);
+%         B
+        if q~=p
+        temp_phi=variationalUpdatesPhi(Y(q,p),phi(:,:,q,p),B,gamma(q,:),gamma(p,:),alpha,inner_iter);
+        phi(:,:,q,p) = temp_phi;
+%         temp_phi
+        % update B
+         B=stochasticUpdateB(temp_phi,Y(q,p),K,B,step_size);
+        end
+        % update gamma
+        [gamma_p,gamma_q] = stochasticUpdateGamma(phi,alpha,p,q,N,step_size, gamma(p,:), gamma(q,:));
+        gamma(p,:) = (1-step_size)*gamma(p,:)+step_size*gamma_p;
+        if q~=p
+            gamma(q,:) = (1-step_size)*gamma(q,:)+step_size*gamma_q;        
+        end
 
-        
+%         ll = getLogLikelihood(gamma,B,alpha,Y,phi)
     end
+end
+alpha = stochasticUpdateAlpha(gamma,alpha,step_size);
+ll = getLogLikelihood(gamma,B,alpha,Y,phi)
+
+       pi = gamma./repmat(sum(gamma,2),1,K)
 
 end
-for p=1:N
-     gamma(p,:) = updateGamma(phi,alpha,p,N);
-     B=updateB(phi,Y,K);
-end
-      ll = getLogLikelihood(gamma,B,alpha,Y,phi)
-%       pi = gamma./repmat(sum(gamma,2),1,K)
-end
-%ll
-
 end
 
 function ll = getLogLikelihood(gamma,B,alpha,Y,phi)
@@ -121,14 +139,55 @@ for p=1:N
         
     end
 end
-
 end
+
+
+function ll = getLogLikelihoodOld(gamma,B,alpha,Y,phi)
+N = size(Y,1);
+K = size(alpha,2);
+ll=0;
+% I am not sure how squeeze function works in case of 4D array
+ll1 = N*(gammaln(sum(alpha)) - sum(gammaln(alpha)));
+ll = ll + ll1;                    % line 4
+
+for p=1:N
+    deriv_phi_p = psi(gamma(p,:)) - repmat(psi(sum(gamma(p,:))),1,K);
+    ll2 = sum((alpha-1).*deriv_phi_p);
+    ll = ll + ll2;                                  % line 4
+    
+    ll3 = gammaln(sum(gamma(p,:))) + sum(gammaln(gamma(p,:)));
+    ll = ll - ll3;          % line 5
+    ll4 = sum((gamma(p,:)-1).*deriv_phi_p);
+    ll = ll - ll4;                             % line 5
+
+    for q=1:N
+%         if p==q
+%             continue
+%         end
+        % calculate log-likelihoods
+%         squeeze(phi(:,:,p,q))
+        f_B = Y(p,q)*log(B) + (1-Y(p,q))*log(1-B);
+%         fprintf('start debug');
+        ll5 = sum(sum(squeeze(phi(:,:,p,q)) .* f_B));
+        ll = ll + ll5;                   % line 1
+        ll6 = sum(sum(squeeze(phi(:,:,p,q)),2)'.*deriv_phi_p);
+        ll = ll + ll6;                          % line 2
+        
+        deriv_phi_q = psi(gamma(q,:)) - repmat(psi(sum(gamma(q,:))),1,K);
+        ll7 = sum(sum(squeeze(phi(:,:,p,q)),1).*deriv_phi_q);
+        ll = ll + ll7;                           % line 3
+        
+        ll8 = sum(sum(squeeze(phi(:,:,p,q)).*log(squeeze(phi(:,:,p,q)))));
+        ll = ll - ll8;              % line 6
+    end
+end
+end
+
 % interestingly this function doenst take previous value of phi from outer loops into
 % account
 function phi_new = variationalUpdatesPhi(Y_pq,phi_pq,B,gamma_p,gamma_q,alpha,inner_iter)
 %N = size(Y,1);
 K = size(alpha,2);
-
 deriv_phi_p = (psi(gamma_p) - repmat(psi(sum(gamma_p)),1,K))';
 deriv_phi_q = (psi(gamma_q) - repmat(psi(sum(gamma_q)),1,K));
 phi_new = exp( Y_pq.*log(B) + (1-Y_pq).*log(1-B) + repmat(deriv_phi_p,1,K) + repmat(deriv_phi_q, K, 1));
@@ -139,12 +198,9 @@ function B = updateB(phi,Y,K)
 N = size(Y,1);
 B = zeros(K,K);
 denBmat = zeros(K,K);
-
 for p=1:N
     for q=1:N
-%         if p==q
-%             continue
-%         end
+        
         B = B + Y(p,q).*squeeze(phi(:,:,p,q));
         denBmat = denBmat + squeeze(phi(:,:,p,q));
     end
@@ -154,29 +210,50 @@ end
 
 function gamma_p = updateGamma(phi,alpha,p,N)
 gamma_p=alpha;
-
 % I am not sure how squeeze function works in case of 4D array
-
 for q=1:N
-%     if p==q
-%         continue
-%     end
     gamma_p = gamma_p + sum(squeeze(phi(:,:,p,q)),2)' + sum(squeeze(phi(:,:,q,p)),1);
 end
+end
+
+function B_hat = stochasticUpdateB(phi_pq,Y_pq,K,B,step_size)
+B_lower_limit= 1e-6;
+B_upper_limit=0.99;
+% not the sub-sampling style but stochastic variational paper style
+B_hat = B + step_size.*phi_pq.*(repmat([Y_pq],K,K)-B)./(B.*(1-B));
+B_hat(B_hat<0)=B_lower_limit;
+B_hat(B_hat>1)=B_upper_limit;
+end
+
+function [gamma_p,gamma_q] = stochasticUpdateGamma(phi,alpha,p,q,N,step_size, gamma_p, gamma_q)
+% I am not sure how squeeze function works in case of 4D array
+% gamma_p = gamma_p + step_size.*(alpha + sum(squeeze(phi(:,:,p,q)),2)' + sum(squeeze(phi(:,:,q,p)),1));
+% gamma_q = gamma_q + step_size.*(alpha + sum(squeeze(phi(:,:,q,p)),2)' + sum(squeeze(phi(:,:,p,q)),1));
+
+gamma_p = alpha + N*(sum(squeeze(phi(:,:,p,q)),2)' + sum(squeeze(phi(:,:,q,p)),1));
+gamma_q = alpha + N*(sum(squeeze(phi(:,:,q,p)),2)' + sum(squeeze(phi(:,:,p,q)),1));
 
 end
 
+function alpha_new = stochasticUpdateAlpha(gamma,alpha,step_size)
+N = size(gamma,1);
+K = size(alpha,2);
+% alpha
+% try 
+% gamma
+g = N.*(psi(sum(alpha)) - psi(alpha)) + sum(gamma,1) - sum(psi(sum(gamma,2))); % size 1*K
+H = N.*(diag(psi(1,alpha)) - psi(1,sum(alpha)));
+alpha_new = alpha+step_size*g*inv(H)*1e-7;
+end
 
 function alpha_new = updateAlpha(gamma,alpha)
 N = size(gamma,1);
 K = size(alpha,2);
-RCOND = 0;%eye(K)*1e-8;
-
 % alpha
 % try 
 g = N.*(psi(sum(alpha)) - psi(alpha)) + sum(gamma,1) - sum(psi(sum(gamma,2))); % size 1*K
 H = N.*(diag(psi(1,alpha)) - psi(1,sum(alpha)));
-alpha_new = alpha+g*inv(H+RCOND)*1e-6;
+alpha_new = alpha+g*inv(H)*1e-7;
 % catch exception
 %     pi = gamma./repmat(sum(gamma,2),1,K)
 % end

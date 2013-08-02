@@ -13,9 +13,9 @@ gamma = initializeGamma(N,K)
 % gamma(gamma<=0)=0.1;
 % gamma
 ll_iters = [];
-
+phi = ones(N,N,2,K)*1.0/K;
 for iter=1:maxit
-    [gamma,B,ll, alpha] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter);
+    [gamma,B,ll, alpha, phi] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter, phi);
     
     ll_iters = [ll_iters ll];
 end
@@ -34,10 +34,10 @@ for i=1:N
 end
 end
 
-function [gamma, B, ll, alpha] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter)
+function [gamma, B, ll, alpha, phi] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter, phi)
 N = size(Y,1);
 K = size(alpha,2);
-phi = ones(N,N,2,K)*1.0/K;
+
 
 ll=0;
 % ll = ll + N*(gammaln(sum(alpha)) - sum(gammaln(alpha)));                    % line 4
