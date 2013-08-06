@@ -1,0 +1,152 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ASM_SRCS	Debug/sources.mk	/^ASM_SRCS := $/;"	m
+B	src/ThreadStructuredMMSBforForums.cpp	/^	matrix<float>* B;$/;"	m	class:MMSB	file:
+CC_DEPS	Debug/sources.mk	/^CC_DEPS := $/;"	m
+CC_SRCS	Debug/sources.mk	/^CC_SRCS := $/;"	m
+CPP_DEPS	Debug/sources.mk	/^CPP_DEPS := $/;"	m
+CPP_SRCS	Debug/sources.mk	/^CPP_SRCS := $/;"	m
+CSV_PARSER_FREE_BUFFER_PTR	src/csv_parser.hpp	98;"	d
+CSV_PARSER_FREE_FILE_PTR	src/csv_parser.hpp	113;"	d
+CSV_PARSER_HPP_INCLUDED	src/csv_parser.hpp	31;"	d
+CXX_DEPS	Debug/sources.mk	/^CXX_DEPS := $/;"	m
+CXX_SRCS	Debug/sources.mk	/^CXX_SRCS := $/;"	m
+C_DEPS	Debug/sources.mk	/^C_DEPS := $/;"	m
+C_SRCS	Debug/sources.mk	/^C_SRCS := $/;"	m
+C_UPPER_DEPS	Debug/sources.mk	/^C_UPPER_DEPS := $/;"	m
+C_UPPER_SRCS	Debug/sources.mk	/^C_UPPER_SRCS := $/;"	m
+ENCLOSURE_NONE	src/csv_parser.hpp	/^	ENCLOSURE_NONE       = 1,$/;"	e	enum:__anon1
+ENCLOSURE_OPTIONAL	src/csv_parser.hpp	/^	ENCLOSURE_OPTIONAL   = 3,$/;"	e	enum:__anon1
+ENCLOSURE_REQUIRED	src/csv_parser.hpp	/^	ENCLOSURE_REQUIRED   = 2,$/;"	e	enum:__anon1
+ENCLOSURE_TYPE_BEGIN	src/csv_parser.hpp	/^	ENCLOSURE_TYPE_BEGIN = 0,$/;"	e	enum:__anon1
+ENCLOSURE_TYPE_END	src/csv_parser.hpp	/^	ENCLOSURE_TYPE_END$/;"	e	enum:__anon1
+EXECUTABLES	Debug/sources.mk	/^EXECUTABLES := $/;"	m
+K	src/ThreadStructuredMMSBforForums.cpp	/^	int K;$/;"	m	class:MMSB	file:
+LIBCSV_PARSER_MAJOR_VERSION	src/csv_parser.hpp	33;"	d
+LIBCSV_PARSER_MINOR_VERSION	src/csv_parser.hpp	35;"	d
+LIBCSV_PARSER_PATCH_VERSION	src/csv_parser.hpp	37;"	d
+LIBCSV_PARSER_VERSION_NUMBER	src/csv_parser.hpp	39;"	d
+LIBS	Debug/objects.mk	/^LIBS :=$/;"	m
+MMSB	src/ThreadStructuredMMSBforForums.cpp	/^MMSB::MMSB(Utils* utils){$/;"	f	class:MMSB
+MMSB	src/ThreadStructuredMMSBforForums.cpp	/^class MMSB{$/;"	c	file:
+MMSBStochasticStructuralMeanField	MMSBStochasticStructuralMeanField.m	/^function[pi,B,alpha] = MMSBStochasticStructuralMeanField(Y, K, maxit, inner_iter)$/;"	f
+MMSBStructuralMeanField	MMSBStructuralMeanField.m	/^function[pi,B,alpha] = MMSBStructuralMeanField(Y, K, maxit, inner_iter)$/;"	f
+MMSB_Learn_InnerLoop_Orig	MMSB_Learn_InnerLoop_Orig.m	/^function [gammahat, B, lastll] = MMSB_Learn_InnerLoop_Orig(y, alpha, B, gammahat, maxit)$/;"	f
+MMSB_Learn_Orig	MMSB_Learn_Orig.m	/^function [ralpha, rB, rll, rpi, gammahat] = MMSB_Learn_Orig(y, K, maxit)$/;"	f
+MMSBvariational	MMSBvariational.m	/^function[pi,B,alpha] = MMSBvariational(Y, K, maxit, inner_iter)$/;"	f
+OBJS	Debug/sources.mk	/^OBJS := $/;"	m
+OBJ_SRCS	Debug/sources.mk	/^OBJ_SRCS := $/;"	m
+O_SRCS	Debug/sources.mk	/^O_SRCS := $/;"	m
+RM	Debug/makefile	/^RM := rm -rf$/;"	m
+SUBDIRS	Debug/sources.mk	/^SUBDIRS := \\$/;"	m
+S_UPPER_SRCS	Debug/sources.mk	/^S_UPPER_SRCS := $/;"	m
+USER_OBJS	Debug/objects.mk	/^USER_OBJS :=$/;"	m
+UTILS_H_	src/Utils.h	9;"	d
+Utils	src/Utils.h	/^class Utils {$/;"	c
+_get_fields_with_enclosure	src/csv_parser.cpp	/^void csv_parser::_get_fields_with_enclosure(csv_row_ptr row, const char * line, const unsigned int * line_length)$/;"	f	class:csv_parser
+_get_fields_with_optional_enclosure	src/csv_parser.cpp	/^void csv_parser::_get_fields_with_optional_enclosure(csv_row_ptr row, const char * line, const unsigned int * line_length)$/;"	f	class:csv_parser
+_get_fields_without_enclosure	src/csv_parser.cpp	/^void csv_parser::_get_fields_without_enclosure(csv_row_ptr row, const char * line, const unsigned int * line_length)$/;"	f	class:csv_parser
+_read_single_line	src/csv_parser.cpp	/^void csv_parser::_read_single_line(char ** buffer, unsigned int * buffer_len)$/;"	f	class:csv_parser
+_skip_lines	src/csv_parser.cpp	/^void csv_parser::_skip_lines(void)$/;"	f	class:csv_parser
+alpha	src/ThreadStructuredMMSBforForums.cpp	/^	boost::numeric::ublas::vector<float>* alpha;$/;"	m	class:MMSB	file:
+alphaStepSize	src/ThreadStructuredMMSBforForums.cpp	/^	static const float alphaStepSize=1e-6;$/;"	m	class:MMSB	file:
+bDenomSum	src/ThreadStructuredMMSBforForums.cpp	/^	matrix<float>* bDenomSum;$/;"	m	class:MMSB	file:
+csv_parser	src/csv_parser.hpp	/^	csv_parser() : enclosed_char(0x00), 	escaped_char(0x5C),$/;"	f	class:csv_parser
+csv_parser	src/csv_parser.hpp	/^class csv_parser$/;"	c
+csv_row	src/csv_parser.hpp	/^typedef vector <string> csv_row;$/;"	t
+csv_row_ptr	src/csv_parser.hpp	/^typedef csv_row * csv_row_ptr;$/;"	t
+dataFunction	src/ThreadStructuredMMSBforForums.cpp	/^float MMSB::dataFunction(int p,int q,int g,int h){$/;"	f	class:MMSB
+enclosed_char	src/csv_parser.hpp	/^	char enclosed_char;$/;"	m	class:csv_parser
+enclosed_length	src/csv_parser.hpp	/^	unsigned int enclosed_length;$/;"	m	class:csv_parser
+enclosure_type	src/csv_parser.hpp	/^	enclosure_type_t enclosure_type;$/;"	m	class:csv_parser
+enclosure_type_t	src/csv_parser.hpp	/^} enclosure_type_t;$/;"	t	typeref:enum:__anon1
+escaped_char	src/csv_parser.hpp	/^	char escaped_char;$/;"	m	class:csv_parser
+escaped_length	src/csv_parser.hpp	/^	unsigned int escaped_length;$/;"	m	class:csv_parser
+field_term_char	src/csv_parser.hpp	/^	char field_term_char;$/;"	m	class:csv_parser
+field_term_length	src/csv_parser.hpp	/^	unsigned int field_term_length;$/;"	m	class:csv_parser
+gamma	src/ThreadStructuredMMSBforForums.cpp	/^	matrix<float>* gamma;$/;"	m	class:MMSB	file:
+getDigamaValue	src/ThreadStructuredMMSBforForums.cpp	/^float MMSB::getDigamaValue(float value){$/;"	f	class:MMSB
+getLogLikelihood	MMSBStochasticStructuralMeanField.m	/^function ll = getLogLikelihood(gamma,B,alpha,Y,phi)$/;"	f
+getLogLikelihood	MMSBStructuralMeanField.m	/^function ll = getLogLikelihood(gamma,B,alpha,Y,phi)$/;"	f
+getLogLikelihood	MMSBvariational.m	/^function ll = getLogLikelihood(gamma,B,alpha,Y,phi)$/;"	f
+getLogLikelihoodOld	MMSBStochasticStructuralMeanField.m	/^function ll = getLogLikelihoodOld(gamma,B,alpha,Y,phi)$/;"	f
+getMatrixRowSum	src/ThreadStructuredMMSBforForums.cpp	/^float MMSB::getMatrixRowSum(matrix<float>* mat, int row_id, int num_cols){$/;"	f	class:MMSB
+getParameters	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::getParameters(matrix<int>* inputMat, int num_users, int K, int iter_threshold, int inner_iter){ \/\/ TODO: change phi coz it is K*K*N*N $/;"	f	class:MMSB
+getPis	src/ThreadStructuredMMSBforForums.cpp	/^matrix<float>* MMSB::getPis(){$/;"	f	class:MMSB
+getStepSize	MMSBStochasticStructuralMeanField.m	/^function step_size = getStepSize(step_iter)$/;"	f
+getUniformRandom	src/ThreadStructuredMMSBforForums.cpp	/^float MMSB::getUniformRandom(){$/;"	f	class:MMSB
+getVariationalLogLikelihood	src/ThreadStructuredMMSBforForums.cpp	/^float MMSB::getVariationalLogLikelihood(){                \/\/ TODO: change phi coz it is K*K*N*N $/;"	f	class:MMSB
+getVecG	src/ThreadStructuredMMSBforForums.cpp	/^boost::numeric::ublas::vector<float>* MMSB::getVecG(){					\/\/ gradient of L w.r.t alpha$/;"	f	class:MMSB
+getVecH	src/ThreadStructuredMMSBforForums.cpp	/^boost::numeric::ublas::vector<float>* MMSB::getVecH(){					\/\/ hessian of L w.r.t alpha$/;"	f	class:MMSB
+get_record_count	src/csv_parser.hpp	/^	unsigned int get_record_count(void)$/;"	f	class:csv_parser
+get_row	src/csv_parser.cpp	/^csv_row csv_parser::get_row(void)$/;"	f	class:csv_parser
+globalThreshold	src/ThreadStructuredMMSBforForums.cpp	/^	static const float globalThreshold=1e-4;$/;"	m	class:MMSB	file:
+has_more_rows	src/csv_parser.hpp	/^	bool has_more_rows(void)$/;"	f	class:csv_parser
+ignore_num_lines	src/csv_parser.hpp	/^	unsigned int ignore_num_lines;$/;"	m	class:csv_parser
+init	src/csv_parser.cpp	/^bool csv_parser::init(FILE * input_file_pointer)$/;"	f	class:csv_parser
+init	src/csv_parser.cpp	/^bool csv_parser::init(const char * input_file)$/;"	f	class:csv_parser
+initGammaTrue	MMSBStochasticStructuralMeanField.m	/^function gamma = initGammaTrue()$/;"	f
+initGammaTrue	MMSBStructuralMeanField.m	/^function gamma = initGammaTrue()$/;"	f
+initialize	src/ThreadStructuredMMSBforForums.cpp	/^	void initialize(int num_users, int K, matrix<int>* inputMat){$/;"	f	class:MMSB	file:
+initializeAlpha	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::initializeAlpha(){$/;"	f	class:MMSB
+initializeB	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::initializeB(){$/;"	f	class:MMSB
+initializeGamma	MMSBStochasticStructuralMeanField.m	/^function gamma = initializeGamma(N,K)$/;"	f
+initializeGamma	MMSBStructuralMeanField.m	/^function gamma = initializeGamma(N,K)$/;"	f
+initializeGamma	MMSBvariational.m	/^function gamma = initializeGamma(N,K)$/;"	f
+initializeGamma	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::initializeGamma(){$/;"	f	class:MMSB
+inputMat	src/ThreadStructuredMMSBforForums.cpp	/^	matrix<int>* inputMat;$/;"	m	class:MMSB	file:
+input_filename	src/csv_parser.hpp	/^	char * input_filename;$/;"	m	class:csv_parser
+input_fp	src/csv_parser.hpp	/^	FILE * input_fp;$/;"	m	class:csv_parser
+line_term_char	src/csv_parser.hpp	/^	char line_term_char;$/;"	m	class:csv_parser
+line_term_length	src/csv_parser.hpp	/^	unsigned int line_term_length;$/;"	m	class:csv_parser
+main	src/ThreadStructuredMMSBforForums.cpp	/^int main(int argc, char** argv) {$/;"	f
+more_rows	src/csv_parser.hpp	/^	bool more_rows;$/;"	m	class:csv_parser
+multiplier	src/ThreadStructuredMMSBforForums.cpp	/^	float multiplier;$/;"	m	class:MMSB	file:
+num_users	src/ThreadStructuredMMSBforForums.cpp	/^	int num_users;$/;"	m	class:MMSB	file:
+phiPQ	src/ThreadStructuredMMSBforForums.cpp	/^	boost::multi_array<float,4>* phiPQ;$/;"	m	class:MMSB	file:
+plotSimplex	plotSimplex.m	/^function [] = plotSimplex(A,v)$/;"	f
+printMat	src/ThreadStructuredMMSBforForums.cpp	/^void printMat(matrix<T> *mat, int M, int N) {$/;"	f
+printMat3D	src/ThreadStructuredMMSBforForums.cpp	/^void printMat3D(boost::multi_array<float,3> *mat, int M, int N, int P) {$/;"	f
+printPhi	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::printPhi(int p, int q){$/;"	f	class:MMSB
+readCsvToMat	src/Utils.cpp	/^matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {$/;"	f	class:Utils
+record_count	src/csv_parser.hpp	/^	unsigned int record_count;$/;"	m	class:csv_parser
+reset_record_count	src/csv_parser.hpp	/^	void reset_record_count(void)$/;"	f	class:csv_parser
+set_enclosed_char	src/csv_parser.cpp	/^void csv_parser::set_enclosed_char(char fields_enclosed_by, enclosure_type_t enclosure_mode)$/;"	f	class:csv_parser
+set_field_term_char	src/csv_parser.cpp	/^void csv_parser::set_field_term_char(char fields_terminated_by)$/;"	f	class:csv_parser
+set_line_term_char	src/csv_parser.cpp	/^void csv_parser::set_line_term_char(char lines_terminated_by)$/;"	f	class:csv_parser
+set_skip_lines	src/csv_parser.hpp	/^	void set_skip_lines(unsigned int lines_to_skip)$/;"	f	class:csv_parser
+stepSizeMultiplier	src/ThreadStructuredMMSBforForums.cpp	/^	static const float stepSizeMultiplier=0.5;$/;"	m	class:MMSB	file:
+stochasticUpdateAlpha	MMSBStochasticStructuralMeanField.m	/^function alpha_new = stochasticUpdateAlpha(gamma,alpha,step_size)$/;"	f
+stochasticUpdateB	MMSBStochasticStructuralMeanField.m	/^function B_hat = stochasticUpdateB(phi_pq,Y_pq,K,B,step_size)$/;"	f
+stochasticUpdateGamma	MMSBStochasticStructuralMeanField.m	/^function [gamma_p,gamma_q] = stochasticUpdateGamma(phi,alpha,p,q,N,step_size, gamma_p, gamma_q)$/;"	f
+terlabel	terlabel.m	/^function handels=terlabel(label1,label2,label3)$/;"	f
+ternaryc	ternaryc.m	/^function [hd,hcb]=ternaryc(c1,c2,c3,d,symbol)$/;"	f
+terplot	terplot.m	/^function [h,hg,htick]=terplot(number)$/;"	f
+threshold	src/ThreadStructuredMMSBforForums.cpp	/^	static const float threshold=1e-5;$/;"	m	class:MMSB	file:
+trigamma	src/Utils.cpp	/^float Utils::trigamma(double x)$/;"	f	class:Utils
+updateAlpha	MMSBStochasticStructuralMeanField.m	/^function alpha_new = updateAlpha(gamma,alpha)$/;"	f
+updateAlpha	MMSBStructuralMeanField.m	/^function alpha_new = updateAlpha(gamma,alpha)$/;"	f
+updateAlpha	MMSBvariational.m	/^function alpha_new = updateAlpha(gamma,alpha)$/;"	f
+updateB	MMSBStochasticStructuralMeanField.m	/^function B = updateB(phi,Y,K)$/;"	f
+updateB	MMSBStructuralMeanField.m	/^function B = updateB(phi,Y,K)$/;"	f
+updateB	MMSBvariational.m	/^function B = updateB(phi,Y,K)$/;"	f
+updateB	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::updateB(){$/;"	f	class:MMSB
+updateGamma	MMSBStochasticStructuralMeanField.m	/^function gamma_p = updateGamma(phi,alpha,p,N)$/;"	f
+updateGamma	MMSBStructuralMeanField.m	/^function gamma_p = updateGamma(phi,alpha,p,N)$/;"	f
+updateGamma	MMSBvariational.m	/^function gamma_p = updateGamma(phi,alpha,p,N)$/;"	f
+updateGamma	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::updateGamma(int p){$/;"	f	class:MMSB
+updateGammasAndBlockMat	MMSBStochasticStructuralMeanField.m	/^function [gamma, B, ll, alpha, step_iter] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter,step_iter)$/;"	f
+updateGammasAndBlockMat	MMSBStructuralMeanField.m	/^function [gamma, B, ll] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter)$/;"	f
+updateGammasAndBlockMat	MMSBvariational.m	/^function [gamma, B, ll, alpha, phi] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter, phi)$/;"	f
+updateGammasAndBlockMat	src/ThreadStructuredMMSBforForums.cpp	/^float MMSB::updateGammasAndBlockMat(int inner_iter){\/\/(gamma,B,alpha,Y,inner_iter){$/;"	f	class:MMSB
+utils	src/ThreadStructuredMMSBforForums.cpp	/^	Utils* utils;$/;"	m	class:MMSB	file:
+variationalStepCount	src/ThreadStructuredMMSBforForums.cpp	/^	static const  int variationalStepCount=10;$/;"	m	class:MMSB	file:
+variationalUpdatesPhi	MMSBStochasticStructuralMeanField.m	/^function phi_new = variationalUpdatesPhi(Y_pq,phi_pq,B,gamma_p,gamma_q,alpha,inner_iter)$/;"	f
+variationalUpdatesPhi	MMSBStructuralMeanField.m	/^function phi_new = variationalUpdatesPhi(Y_pq,phi_pq,B,gamma_p,gamma_q,alpha,inner_iter)$/;"	f
+variationalUpdatesPhi	MMSBvariational.m	/^function phi_new = variationalUpdatesPhi(Y_pq,phi_pq,B,gamma_p,gamma_q,alpha,inner_iter)$/;"	f
+variationalUpdatesPhi	src/ThreadStructuredMMSBforForums.cpp	/^void MMSB::variationalUpdatesPhi(int p, int q){$/;"	f	class:MMSB
+~csv_parser	src/csv_parser.hpp	/^	~csv_parser()$/;"	f	class:csv_parser

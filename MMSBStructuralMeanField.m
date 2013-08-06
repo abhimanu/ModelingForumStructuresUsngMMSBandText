@@ -17,7 +17,7 @@ ll_iters = [];
 
 for iter=1:maxit
     [gamma,B,ll] = updateGammasAndBlockMat(gamma,B,alpha,Y,inner_iter);
-    alpha = updateAlpha(gamma,alpha);
+%     alpha = updateAlpha(gamma,alpha);
     ll_iters = [ll_iters ll];
 end
 
@@ -69,9 +69,9 @@ for p=1:N
     for q=1:N
         % get new phi_pq
 %        temp_phi1 = variationalUpdatesPhi(Y(p,q),phi(2,p,q),B,1);
-%         if p==q
-%             continue
-%         end
+         if p==q
+             continue
+         end
         temp_phi=variationalUpdatesPhi(Y(p,q),phi(:,:,p,q),B,gamma(p,:),gamma(q,:),alpha,inner_iter);
         phi(:,:,p,q) = temp_phi;
 
@@ -106,9 +106,9 @@ for p=1:N
     ll = ll - sum((gamma(p,:)-1).*deriv_phi_p);                             % line 5
 
     for q=1:N
-%         if p==q
-%             continue
-%         end
+         if p==q
+             continue
+         end
         % calculate log-likelihoods
         f_B = Y(p,q)*log(B) + (1-Y(p,q))*log(1-B);
         ll = ll + sum(sum(squeeze(phi(:,:,p,q)) .* f_B));                   % line 1
@@ -142,14 +142,14 @@ denBmat = zeros(K,K);
 
 for p=1:N
     for q=1:N
-%         if p==q
-%             continue
-%         end
+         if p==q
+             continue
+         end
         B = B + Y(p,q).*squeeze(phi(:,:,p,q));
         denBmat = denBmat + squeeze(phi(:,:,p,q));
     end
 end
-B = B./denBmat;
+B = (B+1e-10)./(denBmat+2e-10);
 end
 
 function gamma_p = updateGamma(phi,alpha,p,N)
@@ -158,9 +158,9 @@ gamma_p=alpha;
 % I am not sure how squeeze function works in case of 4D array
 
 for q=1:N
-%     if p==q
-%         continue
-%     end
+     if p==q
+         continue
+     end
     gamma_p = gamma_p + sum(squeeze(phi(:,:,p,q)),2)' + sum(squeeze(phi(:,:,q,p)),1);
 end
 

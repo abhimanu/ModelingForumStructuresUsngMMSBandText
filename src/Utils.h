@@ -9,7 +9,7 @@
 #define UTILS_H_
 
 #include <boost/numeric/ublas/matrix.hpp>
-#include <csv_parser/csv_parser.hpp>
+#include "csv_parser.hpp"
 
 class Utils {
 

@@ -6,7 +6,7 @@
  */
 
 #include <boost/numeric/ublas/matrix.hpp>
-#include <csv_parser/csv_parser.hpp>
+#include "csv_parser.hpp"
 #include "Utils.h"
 
 using namespace boost::numeric::ublas;
