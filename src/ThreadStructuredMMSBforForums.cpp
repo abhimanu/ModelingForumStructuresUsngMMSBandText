@@ -260,7 +260,11 @@ float MMSB::updateGammasAndBlockMat(int inner_iter){//(gamma,B,alpha,Y,inner_ite
 //			updateB();
 //			cout<<"updated both B and Gamma"<<endl;
 		}
+		cout<<"Gamma\n";
+		printMat(gamma, num_users, K);
+		cout<<"B\n";
 		updateB();
+		printMat(B,K,K);
 		ll = getVariationalLogLikelihood();
 		cout<<ll<<endl;
 		//       pi = gamma./repmat(sum(gamma,2),1,K)
@@ -434,6 +438,8 @@ void MMSB::updateB(){
 				}
 			}
 			(*B)(g,h) = (B_gh + 1e-10)/(den_gh + 2e-10);
+			if ((*B)(g,h) >= 1)								// throws up nan error otherwise
+				(*B)(g,h) = 1-1e-5;
 		}
 	}
 }
