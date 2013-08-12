@@ -11,7 +11,7 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-#include "csv_parser.hpp"
+//#include "csv_parser.hpp"
 #include <boost/multi_array.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/generator_iterator.hpp>
@@ -66,10 +66,10 @@ private:
 	matrix<int>* inputMat;
 	float multiplier;
 	static const  int variationalStepCount=10;
-	static const float threshold=1e-5;
-	static const float alphaStepSize=1e-6;
-	static const float stepSizeMultiplier=0.5;
-	static const float globalThreshold=1e-4;
+	static constexpr float threshold=1e-5;
+	static constexpr float alphaStepSize=1e-6;
+	static constexpr float stepSizeMultiplier=0.5;
+	static constexpr float globalThreshold=1e-4;
 
 	void initialize(int num_users, int K, matrix<int>* inputMat){
 		gamma = new matrix<float>(num_users,K);
@@ -655,14 +655,20 @@ int main(int argc, char** argv) {
 
 
 
-	Utils *utilsClass = new Utils();
+//	Utils *utilsClass = new Utils();
 
-	matrix<int>* matFile =  utilsClass->readCsvToMat((char *) ("18_simulatedMat.csv"), 18, 18);
+//	matrix<int>* matFile =  utilsClass->readCsvToMat((char *) ("18_simulatedMat.csv"), 18, 18);
 
 	//	cout<<matFile(0,0)<<matFile(0,2)<<endl;
+	
+//	std::vector<T>* userList;
+//	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>, class_hash<pair<int,int>>>* userAdjlist;
+//	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>, class_hash<pair<int,int>>>* userThreadPost;
 
-	MMSBpoisson* mmsb = new MMSBpoisson(utilsClass);
-	mmsb->getParameters(matFile, atoi(argv[3]), atoi(argv[4]), atoi(argv[1]), atoi(argv[2]));
+//	MMSBpoisson* mmsb = new MMSBpoisson(utilsClass);
+//	mmsb->getParameters(matFile, atoi(argv[3]), atoi(argv[4]), atoi(argv[1]), atoi(argv[2]));
+
+
 
 //	cout<<mmsb->getLnGamma(atoi(argv[1]));
 
