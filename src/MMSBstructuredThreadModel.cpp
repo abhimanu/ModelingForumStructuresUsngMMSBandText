@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <cstdlib>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -45,6 +46,18 @@ void printNanInMat(matrix<T> *mat, int M, int N) {
 	for (int k = 0; k < M; ++k) {
 		for (int j = 0; j < N; ++j) {
 			if(std::isnan((*mat)(k,j)))
+				cout << (*mat)(k,j) << ","<<k<<","<<j<<"||\t";
+		}
+	}
+	cout << endl;
+}
+
+template <class T>
+void printNegInMat(matrix<T> *mat, int M, int N) {
+	cout<<"In printNegInMat\t";
+	for (int k = 0; k < M; ++k) {
+		for (int j = 0; j < N; ++j) {
+			if(((*mat)(k,j))<=0)
 				cout << (*mat)(k,j) << ","<<k<<","<<j<<"||\t";
 		}
 	}
@@ -92,7 +105,7 @@ void testDataStructures(std::unordered_set<int>* userList,
 
 }
 
-void printMat3D(boost::multi_array<float,3> *mat, int M, int N, int P) {
+void printMat3D(boost::multi_array<double,3> *mat, int M, int N, int P) {
 	for (int k = 0; k < M; ++k) {
 		for (int j = 0; j < N; ++j) {
 			for (int i = 0; i < P; ++i) {
@@ -106,71 +119,73 @@ void printMat3D(boost::multi_array<float,3> *mat, int M, int N, int P) {
 
 class MMSBpoisson{
 private:
-	boost::numeric::ublas::vector<float>* alpha;
-	matrix<float>* gamma;
+	boost::numeric::ublas::vector<double>* alpha;
+	matrix<double>* gamma;
 	unordered_map<int,int>* userIndexMap;			// <index user> pair
     std::unordered_set<int>* threadList;                                                                           
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist;
     std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost;        
-//	boost::multi_array<float,4>* phiPQ;
-//	matrix<float>* B;
+//	boost::multi_array<double,4>* phiPQ;
+//	matrix<double>* B;
 
     //Phi terms
-	matrix<float>* phi_gh_sum;
-	matrix<float>* phi_y_gh_sum;
-	matrix<float>* phi_qh_sum;
-	matrix<float>* phi_pg_sum;
-	matrix<float>* phi_lgammaPhi;
-	float phi_logPhi;
+	matrix<double>* phi_gh_sum;
+	matrix<double>* phi_y_gh_sum;
+	matrix<double>* phi_qh_sum;
+	matrix<double>* phi_pg_sum;
+	matrix<double>* phi_lgammaPhi;
+	double phi_logPhi;
 	
 
-	matrix<float>* nu;
-	matrix<float>* lambda;
-	matrix<float>* kappa;
-	matrix<float>* theta;
+	matrix<double>* nu;
+	matrix<double>* lambda;
+	matrix<double>* kappa;
+	matrix<double>* theta;
 	int num_users;
 	int K;            
 	int nuIter;
+	double stepSizeNu=0;
 	Utils* utils;
-	matrix<float>* bDenomSum;
+	matrix<double>* bDenomSum;
 //	matrix<int>* inputMat;
-	float multiplier;
+	double multiplier;
 	static const  int variationalStepCount=10;
-	static constexpr float threshold=1e-5;
-	static constexpr float alphaStepSize=1e-6;
-	static constexpr float stepSizeMultiplier=0.5;
-	static constexpr float globalThreshold=1e-4;
+	static constexpr double threshold=1e-5;
+	static constexpr double alphaStepSize=1e-6;
+	static constexpr double stepSizeMultiplier=0.5;
+	static constexpr double globalThreshold=1e-4;
 
 public:
 	MMSBpoisson(Utils *);
 	void getParameters(int iter_threshold, int inner_iter,int nu_iter);
-	float getUniformRandom();
-//	matrix<float>* updatePhiVariational(int p, int q, float sumGamma_p, float sumGamma_q);
-	float getVariationalLogLikelihood();
-//	void updateB(int p, int q, matrix<float>* oldPhi_pq);
+	double getUniformRandom();
+//	matrix<double>* updatePhiVariational(int p, int q, double sumGamma_p, double sumGamma_q);
+	double getVariationalLogLikelihood();
+//	void updateB(int p, int q, matrix<double>* oldPhi_pq);
 	void updateB();
 	void updateGamma(int p);
 	void updateNu();
-	void updateNuFixedPoint(float stepSize);
+	void updateNuFixedPoint();
 	void updateLambda();
-	float dataFunction(int g, int h);
-	float dataFunctionPhiUpdates(int g, int h, int Y_pq);
-	float updateGlobalParams(int inner_iter);
+	double dataFunction(int g, int h);
+	double dataFunctionPhiUpdates(int g, int h, int Y_pq);
+	double updateGlobalParams(int inner_iter);
 	void variationalUpdatesPhi(int p, int q, int Y_pq, int thread_id);
-	float getMatrixRowSum(matrix<float>* mat, int row_id, int num_cols);
+	double getMatrixRowSum(matrix<double>* mat, int row_id, int num_cols);
 	void printPhi(int p, int q);
 	void printPhiFull();
-	float getLnGamma(float value);
+	double getLnGamma(double value);
 
-	float getDigamaValue(float value);
+	double getDigamaValue(double value);
 //	void normalizePhiK(int p, int q, bool debugPrint=false);
-//	void copyAlpha(boost::numeric::ublas::vector<float>* oldAlpha);
+//	void copyAlpha(boost::numeric::ublas::vector<double>* oldAlpha);
 //	void updateAlpha(bool flagLL);
 	void initializeGamma();
 	void initializeAlpha();
 	void initialize(int K, std::unordered_set<int>* userList, std::unordered_set<int>* threadList,                      
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,
-		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost);        
+		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
+		double stepSizeNu);        
 	void initializeB();
 
 	void initializeAllPhiMats();
@@ -181,9 +196,9 @@ public:
 	void initializeTheta();
 	void initializeKappa();
 	
-	matrix<float>* getPis();
-	boost::numeric::ublas::vector<float>* getVecH();
-	boost::numeric::ublas::vector<float>* getVecG();
+	matrix<double>* getPis();
+	boost::numeric::ublas::vector<double>* getVecH();
+	boost::numeric::ublas::vector<double>* getVecG();
 };
 
 MMSBpoisson::MMSBpoisson(Utils* utils){
@@ -199,28 +214,31 @@ void MMSBpoisson::initializeAlpha(){
 
 void MMSBpoisson::initialize(int K, std::unordered_set<int>* userList, std::unordered_set<int>* threadList,  
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,
-		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost){        
+		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
+		double stepSizeNu){        
 
 	this->num_users = userList->size();//num_users;
-	cout<<"num_users "<<num_users<<endl;
-	this->K=K;
-	gamma = new matrix<float>(num_users,K);
+	cout<<"num_users stepSizeNu "<<num_users<<" "<<stepSizeNu<<endl;
+	this->K=K;            
+	this->stepSizeNu=stepSizeNu;
+
+	gamma = new matrix<double>(num_users,K);
 
 	userIndexMap = new unordered_map<int,int>();
 
-	//		B = new matrix<float>(K,K);
-	nu = new matrix<float>(K,K);
-	lambda = new matrix<float>(K,K);
-	kappa = new matrix<float>(K,K);
-	theta = new matrix<float>(K,K);
-	alpha = new boost::numeric::ublas::vector<float>(K);
-	//		phiPQ = new boost::multi_array<float, 4>(boost::extents[K][K][num_users][num_users]);
+	//		B = new matrix<double>(K,K);
+	nu = new matrix<double>(K,K);
+	lambda = new matrix<double>(K,K);
+	kappa = new matrix<double>(K,K);
+	theta = new matrix<double>(K,K);
+	alpha = new boost::numeric::ublas::vector<double>(K);
+	//		phiPQ = new boost::multi_array<double, 4>(boost::extents[K][K][num_users][num_users]);
 
-	phi_gh_sum = new matrix<float>(K,K);
-	phi_y_gh_sum = new matrix<float>(K,K);
-	phi_qh_sum = new matrix<float>(num_users,K);
-	phi_pg_sum = new matrix<float>(num_users,K);
-	phi_lgammaPhi = new matrix<float>(K,K);
+	phi_gh_sum = new matrix<double>(K,K);
+	phi_y_gh_sum = new matrix<double>(K,K);
+	phi_qh_sum = new matrix<double>(num_users,K);
+	phi_pg_sum = new matrix<double>(num_users,K);
+	phi_lgammaPhi = new matrix<double>(K,K);
 	phi_logPhi = 0;
 
 	this->threadList = threadList;
@@ -244,31 +262,30 @@ void MMSBpoisson::initialize(int K, std::unordered_set<int>* userList, std::unor
 	initializeTheta();
 	initializeGamma();
 
-	cout<<"After intializeGamma\n";
+//	cout<<"After intializeGamma\n";
 	for(int k=0;k<K;k++)cout<<(*alpha)(k)<<" ";
 	cout<<endl;
-	//		printMat(B,K,K);
-	//		printMat(inputMat,num_users,num_users);
 //	printMat(gamma,num_users,K);
-	cout<<"Fag end of initialize()\n";
+//	cout<<"Fag end of initialize()\n";
 }
 
-float MMSBpoisson::dataFunction(int g,int h){
+double MMSBpoisson::dataFunction(int g,int h){
 //	return (*inputMat)(p,q)*log((*B)(g,h)) + (1-(*inputMat)(p,q))*log((1-(*B)(g,h)));
 	return (*phi_y_gh_sum)(g,h)*(log((*lambda)(g,h)) + getDigamaValue((*nu)(g,h))) 
 		-(*lambda)(g,h)*(*nu)(g,h)*(*phi_gh_sum)(g,h) - (*phi_lgammaPhi)(g,h);
 }
 
-float MMSBpoisson::dataFunctionPhiUpdates(int g , int h, int Y_pq){
+double MMSBpoisson::dataFunctionPhiUpdates(int g , int h, int Y_pq){
 	return Y_pq*(log((*lambda)(g,h)) + getDigamaValue((*nu)(g,h))) 
 		-(*lambda)(g,h)*(*nu)(g,h) - getLnGamma(Y_pq+1);
 }
 
-float MMSBpoisson::getVariationalLogLikelihood(){                // TODO: change phi coz it is K*K*N*N 
-	float ll=0;
-	cout<<"In log-likelihood calculation "<<ll<<endl;
+double MMSBpoisson::getVariationalLogLikelihood(){                // TODO: change phi coz it is K*K*N*N 
+	double ll=0;
+//	cout<<"In log-likelihood calculation "<<ll<<endl;
 	for(int g=0; g<K; g++){
 		for(int h=0; h<K; h++){
+//			cout<<"log((*lambda)(g,h))"<<log((*lambda)(g,h))<<" ((*lambda)(g,h))"<<((*lambda)(g,h));
 			ll += (((*kappa)(g,h)-1)*(log((*lambda)(g,h))+getDigamaValue((*nu)(g,h))) 
 					- (*nu)(g,h)*(*lambda)(g,h)/(*theta)(g,h) - (*kappa)(g,h)*log((*theta)(g,h)) 
 					- lgamma((*kappa)(g,h)));
@@ -282,10 +299,10 @@ float MMSBpoisson::getVariationalLogLikelihood(){                // TODO: change
 //			cout<<dataFunction(g,h)<<ll<<endl;
 		}
 	}
-	cout<<"after first for loop log-likelihood calculation "<<ll<<endl;
+//	cout<<"after first for loop log-likelihood calculation "<<ll<<endl;
 	for (int p = 0; p < num_users; ++p) {
-		float alphaSum = 0;
-		float gammaSum = 0;
+		double alphaSum = 0;
+		double gammaSum = 0;
 		for (int k = 0; k < K; ++k){
 			alphaSum+=alpha->operator ()(k);
 			gammaSum += gamma->operator ()(p,k);
@@ -294,7 +311,7 @@ float MMSBpoisson::getVariationalLogLikelihood(){                // TODO: change
 		ll-=lgamma(gammaSum);																	//line 5
 		for (int k = 0; k < K; ++k) {
 			ll-=lgamma(alpha->operator ()(k));													//line 4
-			float digammaTerm = (getDigamaValue(gamma->operator ()(p,k))-getDigamaValue(gammaSum));
+			double digammaTerm = (getDigamaValue(gamma->operator ()(p,k))-getDigamaValue(gammaSum));
 			ll+= ((alpha->operator ()(k)-1)*(digammaTerm));										//line 4
 
 			ll+=lgamma(gamma->operator ()(p,k));												//line 5
@@ -310,21 +327,21 @@ float MMSBpoisson::getVariationalLogLikelihood(){                // TODO: change
 	return ll;
 }
 
-float MMSBpoisson::getDigamaValue(float value){
+double MMSBpoisson::getDigamaValue(double value){
 	return boost::math::digamma(value);
 }
 
-float MMSBpoisson::getLnGamma(float value){
+double MMSBpoisson::getLnGamma(double value){
 	return boost::math::lgamma(value);
 }
 
 void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter){ // TODO: change phi coz it is K*K*N*N 
 //	initialize(num_users, K);//, inputMat);			// should be called from the main function
 	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
-//	boost::numeric::ublas::vector<float>* oldAlpha = new boost::numeric::ublas::vector<float>(K);
+//	boost::numeric::ublas::vector<double>* oldAlpha = new boost::numeric::ublas::vector<double>(K);
 //	copyAlpha(oldAlpha);
-	float newLL = 0;//getVariationalLogLikelihood();
-	float oldLL = 0;
+	double newLL = 0;//getVariationalLogLikelihood();
+	double oldLL = 0;
 	int iter=0;
 	this->nuIter = nu_iter;
 //	int iter_threshold = 30;
@@ -337,23 +354,22 @@ void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter)
 		if(iter>=iter_threshold)
 			break;
 	}while(1);//abs(oldLL-newLL)>globalThreshold);
-	matrix<float>* pi = getPis();
-//	cout<<"PI\n";
-//	printMat(pi,num_users,K);
-//	cout<<"Gamma\n";
-//	printMat(gamma,num_users,K);
-//	cout<<"Nu\n";
-//	printMat(nu,K,K);
-//	cout<<"Lambda\n";
-//	printMat(lambda,K,K);
+	matrix<double>* pi = getPis();
+	cout<<"PI\n";
+	printMat(pi,num_users,K);
+	cout<<"Gamma\n";
+	printMat(gamma,num_users,K);
+	cout<<"Nu\n";
+	printMat(nu,K,K);
+	cout<<"Lambda\n";
+	printMat(lambda,K,K);
 
 }
 
 
-float MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_iter){
-	float ll=0;
+double MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_iter){
+	double ll=0;
 //	int nuIters=3;
-	float nuStepSize=1e-5;
 	for(int i=1; i<=inner_iter;i++){
 		//		cout<<"i "<<i<<endl;
 		initializeAllPhiMats();							//this is very important if we are not storing giant Phi mat
@@ -381,11 +397,20 @@ float MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_i
 			}
 		}   
 //		cout<<"phi_lgammaPhi\n";
-//		printMat(phi_lgammaPhi,K,K);
-		cout<<"phi_pg_sum\n";
-		printNanInMat(phi_pg_sum,num_users,K);
+//		printNanInMat(phi_lgammaPhi,K,K);
+//		printNegInMat(phi_lgammaPhi,K,K);
+//		cout<<"phi_pg_sum\n";
+//		printNanInMat(phi_pg_sum,num_users,K);
+//		printNegInMat(phi_pg_sum,num_users,K);
 //		cout<<"phi_qh_sum\n";
-//		printMat(phi_qh_sum,num_users,K);
+//		printNanInMat(phi_qh_sum,num_users,K);
+//		printNegInMat(phi_qh_sum,num_users,K);
+//		cout<<"phi_gh_sum\n";
+//		printNanInMat(phi_gh_sum,K,K);
+//		printNegInMat(phi_gh_sum,K,K);
+//		cout<<"phi_y_gh_sum\n";
+//		printNanInMat(phi_y_gh_sum,K,K);
+//		printNegInMat(phi_y_gh_sum,K,K);
 		//        cout<<"update Gamma and B now"<<endl;
 		//		printPhiFull();
 //		cout<<"\tnum_nonzeros "<<num_nonzeros<<endl;
@@ -397,12 +422,18 @@ float MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_i
 		}
 		//		cout<<"Gamma\n";
 		//		printMat(gamma, num_users, K);
-		updateNuFixedPoint(nuStepSize);
-		//		cout<<"Nu\n";
-		//		printMat(nu,K,K);
+		updateNuFixedPoint();
 		updateLambda();
-		//		cout<<"Lambda\n";
-		//		printMat(lambda,K,K);
+//		cout<<"Ello\n";
+//		cout<<"gamma\n";
+//		printNanInMat(gamma,num_users,K);
+//		printNegInMat(gamma,num_users,K);
+//		cout<<"Nu\n";
+//		printNanInMat(nu,K,K);
+//		printNegInMat(nu,K,K);
+//		cout<<"Lambda\n";
+//		printNanInMat(lambda,K,K);
+//		printNegInMat(lambda,K,K);
 		ll = getVariationalLogLikelihood();
 		cout<<ll<<endl;
 		//       pi = gamma./repmat(sum(gamma,2),1,K)
@@ -434,20 +465,19 @@ void MMSBpoisson::initializeAllPhiMats(){
  *
  * */
 
-void MMSBpoisson::updateNuFixedPoint(float stepSize){
+void MMSBpoisson::updateNuFixedPoint(){
 	for(int it=0; it<nuIter; it++){
 		for(int g=0; g<K; g++){
 			for(int h=0; h<K; h++){
-				float phi_nu = 0;
-				float invTriGamma = 1/utils->trigamma((*nu)(g,h));
-				float trigamma_gh = utils->trigamma((*nu)(g,h));
-//				for(int p=0; p<K; p++){
-//					for(int q=0; q<K; q++){						// TODO put t structure here
+				double phi_nu = 0;
+				double invTriGamma = 1/utils->trigamma((*nu)(g,h));
+				double trigamma_gh = utils->trigamma((*nu)(g,h));
 				phi_nu+=((*phi_y_gh_sum)(g,h)*trigamma_gh - (*phi_gh_sum)(g,h)*(*lambda)(g,h));//newPhis
-//					}
-//				}
+//				cout<<"updateNuFixedPoint \n";
+//				cout<<"nu: "<<phi_nu<<" "<<(*phi_y_gh_sum)(g,h)<<" "<<(*phi_gh_sum)(g,h)<<" ";
 				phi_nu+=(((*kappa)(g,h) - (*nu)(g,h))*trigamma_gh + (1 - ((*lambda)(g,h)/(*theta)(g,h)))); 
-				(*nu)(g,h) = (*nu)(g,h) + stepSize*phi_nu;
+//				cout<<(((*kappa)(g,h) - (*nu)(g,h))*trigamma_gh + (1 - ((*lambda)(g,h)/(*theta)(g,h))))<<endl; 
+				(*nu)(g,h) = (*nu)(g,h) + stepSizeNu*phi_nu;
 			}
 		}
 	}
@@ -456,8 +486,8 @@ void MMSBpoisson::updateNuFixedPoint(float stepSize){
 //void MMSBpoisson::updateNu(){
 //   for(int g=0; g<K; g++){
 //	  for(int h=0; h<K; h++){
-//		  float phi_nu = 0;
-//		  float invTriGamma = 1/utils->trigamma((*nu)(g,h));
+//		  double phi_nu = 0;
+//		  double invTriGamma = 1/utils->trigamma((*nu)(g,h));
 //		  for(int p=0; p<K; p++){
 //			  for(int q=0; q<K; q++){						// TODO put t structure here
 //				phi_nu+=((*phiPQ)[g][h][p][q]* ((*inputMat)(g,h) - (*lambda)(g,h)*invTriGamma));//newPhis(same as above)
@@ -476,8 +506,8 @@ void MMSBpoisson::updateNuFixedPoint(float stepSize){
 void MMSBpoisson::updateLambda(){
 	for(int g=0; g<K; g++){
 		for(int h=0; h<K; h++){
-//			float phi_gh=0;
-//			float phi_y_gh=0;
+//			double phi_gh=0;
+//			double phi_y_gh=0;
 //			for(int p=0; p<num_users; p++){
 //				for(int q=0; q<num_users; q++){	//TODO: put a loop for thread t here as well
 //				   phi_gh+=((*phiPQ)[g][h][p][q]);
@@ -556,20 +586,20 @@ void MMSBpoisson::initializeKappa(){
 void MMSBpoisson::variationalUpdatesPhi(int p, int q, int Y_pq, int thread_id){
 	//N = size(Y,1);
 	//K = size(alpha,2);
-//	boost::numeric::ublas::vector<float>* deriv_phi_p = new boost::numeric::ublas::vector<float>(K);
-//	boost::numeric::ublas::vector<float>* deriv_phi_q = new boost::numeric::ublas::vector<float>(K);
+//	boost::numeric::ublas::vector<double>* deriv_phi_p = new boost::numeric::ublas::vector<double>(K);
+//	boost::numeric::ublas::vector<double>* deriv_phi_q = new boost::numeric::ublas::vector<double>(K);
 //	int Y_pq = (*inputMat)(p,q);
-	float digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
-	float digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
+	double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
+	double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
 	
 
-	matrix<float>* phi_gh_pq = new matrix<float>(K,K);
-	boost::numeric::ublas::vector<float>* phi_pg_update = new boost::numeric::ublas::vector<float>(K);
-	boost::numeric::ublas::vector<float>* phi_qh_update = new boost::numeric::ublas::vector<float>(K);
+	matrix<double>* phi_gh_pq = new matrix<double>(K,K);
+	boost::numeric::ublas::vector<double>* phi_pg_update = new boost::numeric::ublas::vector<double>(K);
+	boost::numeric::ublas::vector<double>* phi_qh_update = new boost::numeric::ublas::vector<double>(K);
 //	cout<<digamma_q_sum<<endl;
 //	cout<<digamma_p_sum<<endl;
 
-	float phi_sum = 0;
+	double phi_sum = 0;
 	for(int g=0;g<K;g++){
 		for(int h=0;h<K;h++){
 			(*phi_gh_pq)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
@@ -587,7 +617,7 @@ void MMSBpoisson::variationalUpdatesPhi(int p, int q, int Y_pq, int thread_id){
 
 //	cout<<"variationalUpdatesPhi"<<endl;
 	
-	float temp_phi_gh = 0;
+	double temp_phi_gh = 0;
 
 	for(int g=0;g<K;g++){
 		for(int h=0;h<K;h++){
@@ -598,8 +628,8 @@ void MMSBpoisson::variationalUpdatesPhi(int p, int q, int Y_pq, int thread_id){
 			(*phi_lgammaPhi)(g,h) += ((*phi_gh_pq)(g,h)*lgamma(Y_pq+1));//(*inputMat)(p,q)+1));
 			phi_logPhi += ((*phi_gh_pq)(g,h)*log((*phi_gh_pq)(g,h)));
 
-			if(std::isnan((*phi_gh_pq)(g,h)))
-				cout<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<temp_phi_gh<<" "<<dataFunctionPhiUpdates(g,h,Y_pq)<<" "<< exp(dataFunctionPhiUpdates(g,h,Y_pq))<<endl;
+			if(std::isnan((*phi_gh_pq)(g,h))||(*phi_gh_pq)(g,h)<=0)
+				cout<<"VariationalUpdate "<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<temp_phi_gh<<" "<<dataFunctionPhiUpdates(g,h,Y_pq)<<" "<< exp(dataFunctionPhiUpdates(g,h,Y_pq))<<endl;
 //			if(h==0){
 //				(*phi_pg_update)(g)=(*phi_gh_pq)(g,h);
 //			}else{
@@ -640,17 +670,17 @@ void MMSBpoisson::variationalUpdatesPhi(int p, int q, int Y_pq, int thread_id){
 }
 
 
-float MMSBpoisson::getMatrixRowSum(matrix<float>* mat, int row_id, int num_cols){
-	float row_sum = 0;
+double MMSBpoisson::getMatrixRowSum(matrix<double>* mat, int row_id, int num_cols){
+	double row_sum = 0;
 	for(int j=0; j<num_cols; j++)
 		row_sum+=(*mat)(row_id,j);
 	return row_sum;
 }
 
-matrix<float>* MMSBpoisson::getPis(){
-	matrix<float>* pi = new matrix<float>(num_users,K);
+matrix<double>* MMSBpoisson::getPis(){
+	matrix<double>* pi = new matrix<double>(num_users,K);
 	for (int p = 0; p < num_users; ++p) {
-		float sumPk = 0;		for (int k = 0; k < K; ++k) {
+		double sumPk = 0;		for (int k = 0; k < K; ++k) {
 			sumPk+=((*gamma)(p,k));
 		}
 		for (int k = 0; k < K; ++k) {
@@ -661,10 +691,10 @@ matrix<float>* MMSBpoisson::getPis(){
 }
 
 
-//boost::numeric::ublas::vector<float>* MMSBpoisson::getVecG(){					// gradient of L w.r.t alpha
-//	boost::numeric::ublas::vector<float>* vecG = new boost::numeric::ublas::vector<float>(K);
-//	boost::numeric::ublas::vector<float> vecSumGammaP(num_users);
-//	float sumAlpha = 0;
+//boost::numeric::ublas::vector<double>* MMSBpoisson::getVecG(){					// gradient of L w.r.t alpha
+//	boost::numeric::ublas::vector<double>* vecG = new boost::numeric::ublas::vector<double>(K);
+//	boost::numeric::ublas::vector<double> vecSumGammaP(num_users);
+//	double sumAlpha = 0;
 //	for (int k = 0; k < K; ++k) {
 //		sumAlpha+=alpha->operator ()(k);
 //	}
@@ -674,7 +704,7 @@ matrix<float>* MMSBpoisson::getPis(){
 //			vecSumGammaP(p)+=gamma->operator ()(p,k);
 //		}
 //	}
-//	float sumPgradient=0;
+//	double sumPgradient=0;
 //	for (int k = 0; k < K; ++k) {
 //		vecG->operator ()(k) = num_users*(getDigamaValue(sumAlpha)-getDigamaValue(alpha->operator ()(k)));
 //		sumPgradient = 0;
@@ -686,8 +716,8 @@ matrix<float>* MMSBpoisson::getPis(){
 //	return vecG;
 //}
 //
-//boost::numeric::ublas::vector<float>* MMSBpoisson::getVecH(){					// hessian of L w.r.t alpha
-//	boost::numeric::ublas::vector<float>* vecH = new boost::numeric::ublas::vector<float>(K);
+//boost::numeric::ublas::vector<double>* MMSBpoisson::getVecH(){					// hessian of L w.r.t alpha
+//	boost::numeric::ublas::vector<double>* vecH = new boost::numeric::ublas::vector<double>(K);
 //	for (int k = 0; k < K; ++k) {
 //		vecH->operator ()(k)= num_users*(utils->trigamma(alpha->operator ()(k)));
 //	}
@@ -704,7 +734,7 @@ void MMSBpoisson::initializeUserIndex(unordered_set<int>* userList){
 }
 
 void MMSBpoisson::initializeGamma(){
-	cout<<"In InitializeGamma\n";
+//	cout<<"In InitializeGamma\n";
 	for (int p = 0; p < num_users; ++p) {
 //		cout<<p<<" ";
 		for (int k = 0; k < K; ++k) {
@@ -718,7 +748,7 @@ void MMSBpoisson::initializeGamma(){
 
 
 void MMSBpoisson::updateGamma(int p){
-	float gamma_pk=0;
+	double gamma_pk=0;
 	for(int k=0; k<K; k++){
 		gamma_pk = (*alpha)(k);
 //		for(int q=0; q<num_users; q++){
@@ -739,7 +769,7 @@ void MMSBpoisson::updateGamma(int p){
 
 
 
-float MMSBpoisson::getUniformRandom(){
+double MMSBpoisson::getUniformRandom(){
 	boost::mt19937 rng;
 	rng.seed(static_cast<unsigned int>(std::time(0)));
 //	rng.distribution().reset();
@@ -784,8 +814,8 @@ int main(int argc, char** argv) {
 
 //	cout<<"after MMSB constructor call"<<endl;
 //	mmsb->getParameters(matFile, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
-
-	mmsb->initialize(K, userList, threadList, userAdjlist, userThreadPost);	
+	double stepSizeNu = atof(argv[6]);
+	mmsb->initialize(K, userList, threadList, userAdjlist, userThreadPost, stepSizeNu);	
 	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
 	delete userList;
 	delete userAdjlist;
