@@ -14,6 +14,9 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <boost/random/uniform_01.hpp>
+#include <boost/generator_iterator.hpp>
+#include <boost/random.hpp>
 
 using namespace std;
 using namespace boost::numeric::ublas;
@@ -65,6 +68,29 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 //	}
 //};
 
+void Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* completeUserAdjlist, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldoutUserAdjlist, double heldPercent){
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
+//		if(it1->second->size()<=1)
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+			if(getUniformRandom()<=heldPercent){
+				std::pair<int,int> user_thread = it1->first;
+				if(heldoutUserAdjlist->count(user_thread)>0){
+					heldoutUserAdjlist->at(user_thread)->insert({it2->first, it2->second});
+				}else{
+					heldoutUserAdjlist->insert({user_thread, new std::unordered_map<int,int>()});
+					heldoutUserAdjlist->at(user_thread)->insert({it2->first, it2->second});
+				}
+				//TODO for now I am not removing it form the completeList; we will just not update this edge
+//				completeUserAdjlist->
+			}
+//			cout<<it1->first.first<<" >< "<<it2->first<<" >< "<<it1->first.second<<" >< "<<
+//				it2->second<<":\t";
+//			num_nonzeros++;
+		}
+	}
+}
+
+
 /*
  * userList is a list of users
  * userAdjlist is a hasmap containing key as <user, thread> pair and value as hashmap of (users,counts) it talks to 
@@ -72,7 +98,7 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
  * */
 
 //template <class T>
-void Utils::readThreadStructureFile (std::string fileName, std::unordered_set<int>* userList, 
+void Utils::readThreadStructureFile (std::string fileName, std::unordered_map<int,int>* userList, 
 		std::unordered_set<int>* threadList,
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist, 
 		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost){
@@ -84,13 +110,21 @@ void Utils::readThreadStructureFile (std::string fileName, std::unordered_set<in
 	FILE* graph_file_pointer = fopen(fileName.c_str(), "r");
 	
 
+    int num_users=0;
+
     while(readFile(graph_file_pointer, &u1, &u2, &tid, s) != NULL) {
-		userList->insert(u1);
-		userList->insert(u2);
+		if(userList->count(u1)<=0){
+			userList->insert({u1,num_users});
+			num_users++;
+		}
+		if(userList->count(u2)<=0){
+			userList->insert({u2,num_users});
+			num_users++;
+		}
 		threadList->insert(tid);
 		pair<int, int> user_thread = std::make_pair(u1,tid);
 		// Read up network component data
-		cout<<"user thread "<<user_thread.first<<" "<<user_thread.second<<" "<<u1<<" "<<u2<<"\t::\t"<<s<<endl;
+//		cout<<"user thread "<<user_thread.first<<" "<<user_thread.second<<" "<<u1<<" "<<u2<<"\t::\t"<<s<<endl;
 		if(userAdjlist->count(user_thread)>0){
 //			cout<<"got the user tid pair for N/W "<< user_thread.first<<" "<<user_thread.second<<" "<<u1<<" "<<u2<<endl;
 			std::unordered_map<int, int>* adjacencyMap = userAdjlist->at(user_thread);
@@ -164,6 +198,14 @@ char* Utils::readFile(FILE* graph_file_pointer, int* u1, int* u2, int* tid, char
 */
 
 
+double Utils::getUniformRandom(){
+	boost::mt19937 rng;
+	rng.seed(static_cast<unsigned int>(std::time(0)));
+//	rng.distribution().reset();
+	static boost::uniform_01<boost::mt19937> zeroone(rng);
+	return zeroone();
+
+}
 
 
 float Utils::trigamma(double x)
