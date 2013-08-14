@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.23)  23 JUL 2013 05:17
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.23)  1 AUG 2013 13:02
 entering extended mode
 **ForumStructureWithTextAndMMSB.tex
 
@@ -355,21 +355,21 @@ LaTeX Font Info:    Overwriting symbol font `ugrf@m' in version `bold'
 )
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
 TextAndMMSB.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 41.
-LaTeX Font Info:    ... okay on input line 41.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 41.
-LaTeX Font Info:    ... okay on input line 41.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 41.
-LaTeX Font Info:    ... okay on input line 41.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 41.
-LaTeX Font Info:    ... okay on input line 41.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 41.
-LaTeX Font Info:    ... okay on input line 41.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 41.
-LaTeX Font Info:    ... okay on input line 41.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 41.
-LaTeX Font Info:    ... okay on input line 41.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 41.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 42.
  ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\ot1ptm.fd"
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
@@ -388,7 +388,7 @@ File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 \makeMPintoPDFobject=\count129
 \everyMPtoPDFconversion=\toks21
 )
-Package hyperref Info: Link coloring OFF on input line 41.
+Package hyperref Info: Link coloring OFF on input line 42.
  ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\nameref.sty"
 Package: nameref 2010/04/30 v2.40 Cross-referencing by name of section
 
@@ -397,9 +397,9 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count130
 )
-LaTeX Info: Redefining \ref on input line 41.
-LaTeX Info: Redefining \pageref on input line 41.
-LaTeX Info: Redefining \nameref on input line 41.
+LaTeX Info: Redefining \ref on input line 42.
+LaTeX Info: Redefining \pageref on input line 42.
+LaTeX Info: Redefining \nameref on input line 42.
 
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
 TextAndMMSB.out)
@@ -407,28 +407,28 @@ TextAndMMSB.out)
 TextAndMMSB.out)
 \@outlinefile=\write3
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
-LaTeX Font Info:    Try loading font information for U+msa on input line 43.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
+LaTeX Font Info:    Try loading font information for U+msa on input line 44.
  ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 43.
+LaTeX Font Info:    Try loading font information for U+msb on input line 44.
  ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 43.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 44.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\ot1pcr.fd"
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 43.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
 
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\intro.tex)
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\relatedWork.tex
-Underfull \vbox (badness 2326) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [1{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}
 
@@ -437,50 +437,52 @@ Underfull \vbox (badness 2326) has occurred while \output is active []
 Underfull \vbox (badness 1796) has occurred while \output is active []
 
  [2]
-<pgm_ThreadBased.png, id=92, 341.77687pt x 660.21657pt>
+<pgm_ThreadBased.png, id=104, 341.77687pt x 660.21657pt>
 File: pgm_ThreadBased.png Graphic file (type png)
 
 <use pgm_ThreadBased.png>
-Package pdftex.def Info: pgm_ThreadBased.png used on input line 46.
+Package pdftex.def Info: pgm_ThreadBased.png used on input line 47.
 (pdftex.def)             Requested size: 238.49341pt x 460.70786pt.
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 54.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 55.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\omsptm.fd"
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 54.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 55.
  [3 <D:/abhi-docs/abhi-eclipse-workspace/ModellingForumStructure/pgm_ThreadBase
 d.png (PNG copy)>]
-Overfull \hbox (60.87856pt too wide) in alignment at lines 135--170
+Overfull \hbox (60.87856pt too wide) in alignment at lines 136--171
  [][][] []
  []
 
 [4]) (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\dataset.tex
-[5]) (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\results.tex)
+[5])
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\experiments.tex)
+(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\results.tex)
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\conclusion.tex)
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
 TextAndMMSB.bbl
 Missing character: There is no é in font ptmr7t!
 Missing character: There is no é in font ptmr7t!
  [6])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 94.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 99.
  [7]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 94.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 99.
 
 (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
 TextAndMMSB.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 94.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 94.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 99.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 99.
 Package rerunfilecheck Info: File `ForumStructureWithTextAndMMSB.out' has not c
 hanged.
-(rerunfilecheck)             Checksum: 34C5947E0741EACBF9D92A4EB604479E;670.
+(rerunfilecheck)             Checksum: 15DED8B158D79394F148AFD69D8C08AD;861.
  ) 
 Here is how much of TeX's memory you used:
- 7151 strings out of 494045
- 104074 string characters out of 3145956
- 208537 words of memory out of 3000000
- 10272 multiletter control sequences out of 15000+200000
+ 7163 strings out of 494045
+ 104366 string characters out of 3145956
+ 209605 words of memory out of 3000000
+ 10277 multiletter control sequences out of 15000+200000
  17512 words of font info for 41 fonts, out of 3000000 for 9000
  715 hyphenation exceptions out of 8191
  37i,12n,39p,306b,475s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -501,9 +503,9 @@ onts/type1/urw/courier/ucrr8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type
 1/urw/helvetic/uhvb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/ti
 mes/utmb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.
 pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on ForumStructureWithTextAndMMSB.pdf (7 pages, 256038 bytes).
+Output written on ForumStructureWithTextAndMMSB.pdf (7 pages, 259849 bytes).
 PDF statistics:
- 202 PDF objects out of 1000 (max. 8388607)
- 39 named destinations out of 1000 (max. 500000)
- 94 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 218 PDF objects out of 1000 (max. 8388607)
+ 43 named destinations out of 1000 (max. 500000)
+ 118 words of extra memory for PDF output out of 10000 (max. 10000000)
 

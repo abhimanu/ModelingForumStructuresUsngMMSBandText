@@ -64,6 +64,14 @@ Wim~De Smet, Jie Tang, and Marie-Francine Moens.
   in knowledge discovery and data mining - Volume Part I}, PAKDD'11, pages
   549--560, Berlin, Heidelberg, 2011. Springer-Verlag.
 
+\bibitem{Wen:2013:Carolyn}
+Miaomiao Wen, Zeyu Zheng, Hyeju Jang, Guang Xiang, and Carolyn Rose.
+\newblock Extracting events with informal temporal references in personal
+  histories in online communities.
+\newblock In {\em Proceedings of the 51st Annual Meeting of the Association for
+  Computational Linguistics: Short Papers}, ACL '13, Stroudsburg, PA, USA,
+  2013. Association for Computational Linguistics.
+
 \bibitem{ICWSM124638}
 Arthur White, Jeffrey Chan, Conor Hayes, and Brendan Murphy.
 \newblock Mixed membership models for exploring user roles in online fora,
