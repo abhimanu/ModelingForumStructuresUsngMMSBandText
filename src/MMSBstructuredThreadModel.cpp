@@ -64,7 +64,7 @@ void printNegInMat(matrix<T> *mat, int M, int N) {
 	cout << endl;
 }
 
-void testDataStructures(std::unordered_set<int>* userList, 
+void testDataStructures(std::unordered_map<int,int>* userList, 
 		std::unordered_set<int>* threadList,
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist, 
 		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost){
@@ -72,16 +72,16 @@ void testDataStructures(std::unordered_set<int>* userList,
 	
     cout<< "num users "<<userList->size()<<"; "<<"num threads "<<threadList->size()<<endl;
 
-//	cout<< "Users discovered:\t";
-//	for(std::unordered_set<int>::iterator it=userList->begin(); it!=userList->end(); ++it)
-//		cout<<(*it)<<"\t";
-//	cout<<endl;
-//
-//	cout<< "Threads discovered:\t";
-//	for(std::unordered_set<int>::iterator it=threadList->begin(); it!=threadList->end(); ++it)
-//		cout<<(*it)<<"\t";
-//	cout<<endl;
-//
+	cout<< "Users discovered:\t";
+	for(std::unordered_map<int,int>::iterator it=userList->begin(); it!=userList->end(); ++it)
+		cout<<(it->first)<<" : "<<it->second<<"\t";
+	cout<<endl;
+
+	cout<< "Threads discovered:\t";
+	for(std::unordered_set<int>::iterator it=threadList->begin(); it!=threadList->end(); ++it)
+		cout<<(*it)<<"\t";
+	cout<<endl;
+
 	
 	int num_nonzeros=0;
 	cout<<"User >< User >< Thread >< Count:\t";
@@ -123,12 +123,20 @@ private:
 	matrix<double>* gamma;
 	unordered_map<int,int>* userIndexMap;			// <index user> pair
     std::unordered_set<int>* threadList;                                                                           
+    std::unordered_map<int,int>* userList;                                                                           
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist;
     std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost;        
+	
+	// heldout set
+	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist;
 //	boost::multi_array<double,4>* phiPQ;
 //	matrix<double>* B;
 
-    //Phi terms
+	matrix<double>* held_phi_gh_sum;
+	matrix<double>* held_phi_y_gh_sum;
+	matrix<double>* held_phi_lgammaPhi;
+    
+	//Phi terms
 	matrix<double>* phi_gh_sum;
 	matrix<double>* phi_y_gh_sum;
 	matrix<double>* phi_qh_sum;
@@ -182,19 +190,22 @@ public:
 //	void updateAlpha(bool flagLL);
 	void initializeGamma();
 	void initializeAlpha();
-	void initialize(int K, std::unordered_set<int>* userList, std::unordered_set<int>* threadList,                      
+	void initialize(int K, std::unordered_map<int,int>* userList, std::unordered_set<int>* threadList,                      
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist,
 		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
 		double stepSizeNu);        
 	void initializeB();
 
 	void initializeAllPhiMats();
-	void initializeUserIndex(std::unordered_set<int>* userList);
+	void initializeUserIndex(std::unordered_map<int,int>* userList);
 	
 	void initializeNu();
 	void initializeLambda();
 	void initializeTheta();
 	void initializeKappa();
+	
+	double getHeldoutLogLikelihood();
 	
 	matrix<double>* getPis();
 	boost::numeric::ublas::vector<double>* getVecH();
@@ -212,12 +223,14 @@ void MMSBpoisson::initializeAlpha(){
 	}
 }
 
-void MMSBpoisson::initialize(int K, std::unordered_set<int>* userList, std::unordered_set<int>* threadList,  
+void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList, std::unordered_set<int>* threadList,  
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist,
 		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
 		double stepSizeNu){        
 
-	this->num_users = userList->size();//num_users;
+    this->userList = userList;
+	this->num_users = userList->size();	// this stays the same even with heldout as we donot delete from original
 	cout<<"num_users stepSizeNu "<<num_users<<" "<<stepSizeNu<<endl;
 	this->K=K;            
 	this->stepSizeNu=stepSizeNu;
@@ -233,6 +246,9 @@ void MMSBpoisson::initialize(int K, std::unordered_set<int>* userList, std::unor
 	theta = new matrix<double>(K,K);
 	alpha = new boost::numeric::ublas::vector<double>(K);
 	//		phiPQ = new boost::multi_array<double, 4>(boost::extents[K][K][num_users][num_users]);
+	held_phi_gh_sum = new matrix<double>(K,K);
+	held_phi_y_gh_sum = new matrix<double>(K,K);
+	held_phi_lgammaPhi = new matrix<double>(K,K);
 
 	phi_gh_sum = new matrix<double>(K,K);
 	phi_y_gh_sum = new matrix<double>(K,K);
@@ -243,6 +259,7 @@ void MMSBpoisson::initialize(int K, std::unordered_set<int>* userList, std::unor
 
 	this->threadList = threadList;
 	this->userAdjlist = userAdjlist;
+	this->heldUserAdjlist = heldUserAdjlist;
 	this->userThreadPost = userThreadPost;
 	initializeUserIndex(userList);
 
@@ -268,6 +285,65 @@ void MMSBpoisson::initialize(int K, std::unordered_set<int>* userList, std::unor
 //	printMat(gamma,num_users,K);
 //	cout<<"Fag end of initialize()\n";
 }
+
+double MMSBpoisson::getHeldoutLogLikelihood(){
+	double ll=0;
+	double phi_sum = 0;
+	for(int g=0; g<K; g++){
+		for(int h=0; h<K; h++){
+			(*held_phi_y_gh_sum)(g,h)=0;
+			(*held_phi_gh_sum)(g,h)=0;
+			(*held_phi_lgammaPhi)(g,h) =0;
+		}
+	}
+	
+	matrix<double>* phi_gh_pq = new matrix<double>(K,K);
+	
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=heldUserAdjlist->begin(); it1!=heldUserAdjlist->end(); ++it1){
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+//			cout<< "In heldoutLog-Likeli\n";
+			int p = userList->at(it1->first.first);
+			int q = userList->at(it2->first);
+//			cout<< "In heldoutLog-Likelii after p,q index access\n";
+			double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
+			double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
+			int Y_pq = it2->second;
+			double ph_sum=0;
+			for(int g=0;g<K;g++){
+				for(int h=0;h<K;h++){
+					(*phi_gh_pq)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
+							+ (getDigamaValue((*gamma)(p,g)) - digamma_p_sum)
+							+ (getDigamaValue((*gamma)(q,h)) - digamma_q_sum));
+					phi_sum += (*phi_gh_pq)(g,h);
+
+//					ll+=(Y_pq*log((*lambda)(g,h)) - (*lambda)(g,h)-lgamma(Y_pq+1));
+				}
+			}
+			for(int g=0;g<K;g++){
+				for(int h=0;h<K;h++){
+					(*phi_gh_pq)(g,h) = (*phi_gh_pq)(g,h)/phi_sum;          
+					(*held_phi_gh_sum)(g,h)+=(*phi_gh_pq)(g,h);
+					(*held_phi_y_gh_sum)(g,h)+=((*phi_gh_pq)(g,h)*Y_pq);
+					(*held_phi_lgammaPhi)(g,h) += ((*phi_gh_pq)(g,h)*lgamma(Y_pq+1));//(*inputMat)(p,q)+1));
+				}
+			}
+		}
+	}
+
+
+	for(int g=0; g<K; g++){
+		for(int h=0; h<K; h++){
+			ll+=((*held_phi_y_gh_sum)(g,h)*(log((*lambda)(g,h)) + getDigamaValue((*nu)(g,h))) 
+				-(*lambda)(g,h)*(*nu)(g,h)*(*held_phi_gh_sum)(g,h) - (*held_phi_lgammaPhi)(g,h));
+		}
+	}
+
+    delete phi_gh_pq;
+
+	return ll;
+}
+
+
 
 double MMSBpoisson::dataFunction(int g,int h){
 //	return (*inputMat)(p,q)*log((*B)(g,h)) + (1-(*inputMat)(p,q))*log((1-(*B)(g,h)));
@@ -371,19 +447,24 @@ double MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_
 	double ll=0;
 //	int nuIters=3;
 	for(int i=1; i<=inner_iter;i++){
-		//		cout<<"i "<<i<<endl;
+//		cout<<"i "<<i<<endl;
 		initializeAllPhiMats();							//this is very important if we are not storing giant Phi mat
 		int num_nonzeros =0;
 		for(int p=0; p<num_users; p++){
 			for(unordered_set<int>::iterator it=threadList->begin(); it!=threadList->end(); it++){
 				for(int q=0; q<num_users; q++){
-					if(p==q)
+//					cout<<"userid_p "<<p<<"\n";
+					pair<int,int> user_thread = std::make_pair(userIndexMap->at(p),*it);
+//					cout<<"userid_q "<<q<<"\n";
+					int userid_q = userIndexMap->at(q);
+//					cout<<"userid_q "<<userid_q<<"\n";
+					//TODO also check whether it is in heldout
+					if(p==q || (heldUserAdjlist->count(user_thread)>0 
+								&& heldUserAdjlist->at(user_thread)->count(userid_q)==0) )
 						continue;
 					int Y_pq=0;
-					pair<int,int> user_thread = std::make_pair(userIndexMap->at(p),*it);
 					if(userAdjlist->count(user_thread)>0){
-						int userid_q = userIndexMap->at(q);
-						if(userAdjlist->at(user_thread)->count(userid_q)>0){
+						if(userAdjlist->at(user_thread)->count(userid_q)>0){ 
 							Y_pq=userAdjlist->at(user_thread)->at(userid_q);
 							//cout<<"Y_pq "<<Y_pq<<"("<<user_thread.first<<","<<userid_q<<","<<user_thread.second<<")"<<"; ";
 //							num_nonzeros++;
@@ -435,6 +516,7 @@ double MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_
 //		printNanInMat(lambda,K,K);
 //		printNegInMat(lambda,K,K);
 		ll = getVariationalLogLikelihood();
+        cout<<"held-ll "<<getHeldoutLogLikelihood()<<"\t ll ";
 		cout<<ll<<endl;
 		//       pi = gamma./repmat(sum(gamma,2),1,K)
 	}
@@ -725,11 +807,9 @@ matrix<double>* MMSBpoisson::getPis(){
 //}
 
 
-void MMSBpoisson::initializeUserIndex(unordered_set<int>* userList){  
-	int index=0;
-	for(std::unordered_set<int>::iterator it=userList->begin(); it!=userList->end(); it++){
-		userIndexMap->insert({index, (*it)});
-		index++;
+void MMSBpoisson::initializeUserIndex(unordered_map<int,int>* userList){  
+	for(std::unordered_map<int,int>::iterator it=userList->begin(); it!=userList->end(); it++){
+		userIndexMap->insert({it->second, it->first});
 	}	
 }
 
@@ -794,7 +874,7 @@ int main(int argc, char** argv) {
 	cout<<(*matFile)(0,0)<<(*matFile)(0,2)<<endl;
 	
 
-	std::unordered_set<int>* userList = new std::unordered_set<int>();
+	std::unordered_map<int,int>* userList = new std::unordered_map<int,int>();
 	std::unordered_set<int>* threadList = new std::unordered_set<int>();
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* userAdjlist = 
 		new std::unordered_map<std::pair<int,int>,std::unordered_map<int,int>*, class_hash<pair<int,int>>>();
@@ -804,6 +884,11 @@ int main(int argc, char** argv) {
 //	username_mention_graph.txt
 
 	utilsClass->readThreadStructureFile(argv[1], userList, threadList, userAdjlist, userThreadPost);
+
+	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* heldUserAdjlist = 
+		new std::unordered_map<std::pair<int,int>,std::unordered_map<int,int>*, class_hash<pair<int,int>>>();
+
+	utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.10);
 
 //	testDataStructures(userList,threadList, userAdjlist,userThreadPost);
 
@@ -815,7 +900,7 @@ int main(int argc, char** argv) {
 //	cout<<"after MMSB constructor call"<<endl;
 //	mmsb->getParameters(matFile, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
 	double stepSizeNu = atof(argv[6]);
-	mmsb->initialize(K, userList, threadList, userAdjlist, userThreadPost, stepSizeNu);	
+	mmsb->initialize(K, userList, threadList, userAdjlist, heldUserAdjlist, userThreadPost, stepSizeNu);	
 	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
 	delete userList;
 	delete userAdjlist;

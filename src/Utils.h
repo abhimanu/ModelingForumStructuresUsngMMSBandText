@@ -42,13 +42,20 @@ public:
 	//Utils();
 	//virtual ~Utils();
 	float trigamma(double x);
+	
 	void addWords(std::vector<int>* wordList, std::vector<std::string>* newWords);
+
 //	template <class T>
-	void readThreadStructureFile (std::string fileName, std::unordered_set<int>* userList, 
+	void readThreadStructureFile (std::string fileName, std::unordered_map<int,int>* userList, 
 			std::unordered_set<int>* threadList,
 			std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<std::pair<int,int>>>* userAdjlist ,
 			std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<std::pair<int,int>>>* userThreadPost);
+
+	void getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* completeUserAdjlist, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldoutUserAdjlist, double heldPercent);
+	
 	char* readFile(FILE* graph_file_pointer, int* u1, int* u2, int* tid, char* s);
+
+	double getUniformRandom();
 };
 
 #endif /* UTILS_H_ */
