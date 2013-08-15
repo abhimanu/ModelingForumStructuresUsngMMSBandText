@@ -460,7 +460,7 @@ double MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_
 //					cout<<"userid_q "<<userid_q<<"\n";
 					//TODO also check whether it is in heldout
 					if(p==q || (heldUserAdjlist->count(user_thread)>0 
-								&& heldUserAdjlist->at(user_thread)->count(userid_q)==0) )
+								&& heldUserAdjlist->at(user_thread)->count(userid_q)>0) )
 						continue;
 					int Y_pq=0;
 					if(userAdjlist->count(user_thread)>0){

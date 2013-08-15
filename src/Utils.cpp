@@ -68,7 +68,8 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 //	}
 //};
 
-void Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* completeUserAdjlist, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldoutUserAdjlist, double heldPercent){
+int Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* completeUserAdjlist, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldoutUserAdjlist, double heldPercent){
+	int numHeldoutEdges = 0;
 	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
 //		if(it1->second->size()<=1)
 		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
@@ -80,6 +81,7 @@ void Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unorde
 					heldoutUserAdjlist->insert({user_thread, new std::unordered_map<int,int>()});
 					heldoutUserAdjlist->at(user_thread)->insert({it2->first, it2->second});
 				}
+				numHeldoutEdges++;
 				//TODO for now I am not removing it form the completeList; we will just not update this edge
 //				completeUserAdjlist->
 			}
