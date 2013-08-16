@@ -929,6 +929,7 @@ void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int th
 		(*phi_qh_sum)(p,k) += ((*phi_qh_update_q)(k));
 	}
 	delete phi_gh_pq;
+	delete phi_gh_qp;
 	delete phi_pg_update;
 	delete phi_qh_update;
 	delete phi_pg_update_q;
