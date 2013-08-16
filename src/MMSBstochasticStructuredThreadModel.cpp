@@ -172,7 +172,9 @@ private:
 	static constexpr double globalThreshold=1e-4;
 
 	static constexpr double stochastic_step_tau=1;
-	static constexpr double stochastic_step_kappa=0.5;
+	double stochastic_step_kappa=2;//0.5;
+
+    double samplingThreshold=0.5;
 
 public:
 	MMSBpoisson(Utils *);
@@ -189,8 +191,8 @@ public:
 
     matrix<double>* stochasticUpdateLambda();
 	matrix<double>* stochasticUpdateNuFixedPoint();
-	boost::numeric::ublas::vector<double>* stochasticUpdateGamma(int p);
-	void stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id);
+	matrix<double>* stochasticUpdateGamma(int p, int q);
+	void stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id, int Y_qp);
 	double stochasticUpdateGlobalParams(int inner_iter, int* num_iters);
 
 	double getStochasticStepSize(int iter_no);
@@ -210,11 +212,11 @@ public:
 //	void updateAlpha(bool flagLL);
 	void initializeGamma();
 	void initializeAlpha();
-	void initialize(int K, std::unordered_map<int,int>* userList, std::unordered_set<int>* threadList,                      
-		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,
-		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist,
-		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
-		double stepSizeNu, int numHeldoutEdges);        
+	void initialize(int K, std::unordered_map<int,int>* userList, std::unordered_set<int>* threadList,              
+	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,
+	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist,
+	std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
+	double stepSizeNu, int numHeldoutEdges, double stochastic_step_kappa, double samplingThreshold);        
 	void initializeB();
 
 	void initializeAllPhiMats();
@@ -247,7 +249,7 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList, std::
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist,
 	std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
-	double stepSizeNu, int numHeldoutEdges){        
+	double stepSizeNu, int numHeldoutEdges, double stochastic_step_kappa, double samplingThreshold){        
 
 	this->threadList = threadList;
 	this->userAdjlist = userAdjlist;
@@ -260,9 +262,11 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList, std::
 	this->K=K;            
 	this->stepSizeNu=stepSizeNu;
 	this->numHeldoutEdges = numHeldoutEdges;
-
-	stochasticSampleNodeMultiplier = num_threads*num_users;
-	stochasticSamplePairMultiplier = num_threads*num_users*num_users - numHeldoutEdges;
+	this->stochastic_step_kappa = stochastic_step_kappa;
+	this->samplingThreshold = samplingThreshold;
+	stochasticSampleNodeMultiplier = (num_threads*num_users*num_users-numHeldoutEdges)/(2.0*samplingThreshold);
+	stochasticSamplePairMultiplier = (num_threads*num_users*num_users - numHeldoutEdges)/(2.0*samplingThreshold); 
+	//div by 2 coz we update P-> and q<-p edges simultaneously; this is still slightly wrong because heldout just considers either p->q or q<-p which we have to rectify
 	
 	gamma = new matrix<double>(num_users,K);
 
@@ -429,6 +433,16 @@ double MMSBpoisson::getVariationalLogLikelihood(){                // TODO: chang
 }
 
 double MMSBpoisson::getDigamaValue(double value){
+//	cout<< "digamma value "<<value<<endl;
+//	try{
+//    boost::math::digamma(value);
+//	}catch(...){
+//	cout<< "digamma for value "<<value<<endl;
+
+//	}
+//	cout<<"after digamma value" << endl;
+	if(value<DBL_MIN)
+		value=DBL_MIN;
 	return boost::math::digamma(value);
 }
 
@@ -452,8 +466,8 @@ void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter)
         iter++;
 		cout<<"iter "<<iter<<endl;
 		oldLL=newLL;
-		newLL=updateGlobalParams(inner_iter);
-//		newLL=stochasticUpdateGlobalParams(inner_iter, &num_iters);
+//		newLL=updateGlobalParams(inner_iter);
+		newLL=stochasticUpdateGlobalParams(inner_iter, &num_iters);
 		if(iter>=iter_threshold)
 			break;
 	}while(1);//abs(oldLL-newLL)>globalThreshold);
@@ -472,7 +486,9 @@ void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter)
 double MMSBpoisson::getStochasticStepSize(int iter_no){
 //double stochastic_step_tau=1;
 //double stochastic_step_kappa=0.5;
-return 1/pow(iter_no+stochastic_step_tau,stochastic_step_kappa);
+double iter_step_size =  1.0/pow(iter_no+stochastic_step_tau,stochastic_step_kappa);
+//cout<<"iter_step_size "<<iter_step_size<<endl;
+return iter_step_size;
 }
 
 double MMSBpoisson::stochasticUpdateGlobalParams(int inner_iter, int* num_iters){//(gamma,B,alpha,Y,inner_iter){
@@ -486,7 +502,12 @@ double MMSBpoisson::stochasticUpdateGlobalParams(int inner_iter, int* num_iters)
 		int num_nonzeros =0;
 		for(int p=0; p<num_users; p++){
 			for(unordered_set<int>::iterator it=threadList->begin(); it!=threadList->end(); it++){
-				for(int q=0; q<num_users; q++){
+				for(int q=p+1; q<num_users; q++){
+					double randomNum = getUniformRandom();
+//					cout<<"randomNum "<<randomNum<<endl;
+					if(randomNum>samplingThreshold)
+						continue;
+					int userid_p = userIndexMap->at(p);
 //					cout<<"userid_p "<<p<<"\n";
 					pair<int,int> user_thread = std::make_pair(userIndexMap->at(p),*it);
 //					cout<<"userid_q "<<q<<"\n";
@@ -494,38 +515,53 @@ double MMSBpoisson::stochasticUpdateGlobalParams(int inner_iter, int* num_iters)
 //					cout<<"userid_q "<<userid_q<<"\n";
 					//TODO also check whether it is in heldout
 					if(p==q || (heldUserAdjlist->count(user_thread)>0 
-								&& heldUserAdjlist->at(user_thread)->count(userid_q)>=0) )
+								&& heldUserAdjlist->at(user_thread)->count(userid_q)>0) )
 						continue;
-					int Y_pq=0;
+					int Y_pq=0, Y_qp=0;
 					if(userAdjlist->count(user_thread)>0){
 						if(userAdjlist->at(user_thread)->count(userid_q)>0){ 
 							Y_pq=userAdjlist->at(user_thread)->at(userid_q);
+							pair<int,int> user_thread_q = std::make_pair(userid_q,*it);
+
+							if(userAdjlist->count(user_thread_q)>0)
+								if(userAdjlist->at(user_thread_q)->count(userid_p)>0)
+									Y_qp = userAdjlist->at(user_thread_q)->at(userid_p);
 							//cout<<"Y_pq "<<Y_pq<<"("<<user_thread.first<<","<<userid_q<<","<<user_thread.second<<")"<<"; ";
 //							num_nonzeros++;
 						}
 					}
-					stochasticVariationalUpdatesPhi(p,q,Y_pq,*it);//
-					boost::numeric::ublas::vector<double>* gamma_p=stochasticUpdateGamma(p);
-					for(int k=0; k<K; k++)
-						(*gamma)(p,k)=((1-stochastic_step_size)*(*gamma)(p,k) + stochastic_step_size*(*gamma_p)(k));
-                    delete gamma_p;
+					try{
+					stochasticVariationalUpdatesPhi(p,q,Y_pq,*it,Y_qp);//
+					}catch(...){
+						cout<<"Exception in StochasticVariationUpdatePhi "<<endl;
+					}
+					matrix<double>* gamma_pq=stochasticUpdateGamma(p,q);
+					for(int k=0; k<K; k++){
+						(*gamma)(p,k)=((1-stochastic_step_size)*(*gamma)(p,k) + stochastic_step_size*(*gamma_pq)(0,k));
+						(*gamma)(q,k)=((1-stochastic_step_size)*(*gamma)(q,k) + stochastic_step_size*(*gamma_pq)(1,k));
+					}
+                    delete gamma_pq;
 
-//					matrix<double>* nu_p = stochasticUpdateNuFixedPoint();
-//					for(int l=0; l<K; l++)
-//						for(int m=0; m<K; m++)
-//                            (*nu)(l,m) = ((1-stochastic_step_size)*(*nu)(l,m) + stochastic_step_size*(*nu_p)(l,m));
-//                  delete nu_p;
+					matrix<double>* nu_p = stochasticUpdateNuFixedPoint();
+					for(int l=0; l<K; l++)
+						for(int m=0; m<K; m++)
+                            (*nu)(l,m) = ((1-stochastic_step_size)*(*nu)(l,m) + stochastic_step_size*(*nu_p)(l,m));
+					delete nu_p;
 					matrix<double>* lambda_p = stochasticUpdateLambda();
 					for(int l=0; l<K; l++)
 						for(int m=0; m<K; m++)
                             (*lambda)(l,m) = ((1-stochastic_step_size)*(*lambda)(l,m) + stochastic_step_size*(*lambda_p)(l,m));
 					delete lambda_p;
 
+//					ll = getHeldoutLogLikelihood();
+//					cout<<"held-ll "<<ll<<endl;//<<"\t ll ";
 
 					//				cout<<"p,q "<<p<<" "<<q<<"||";
 					//				printPhi(p,q);
 				}
 			}
+//		ll = getHeldoutLogLikelihood();
+//        cout<<"held-ll "<<ll<<endl;//<<"\t ll ";
 		}   
 //		cout<<"phi_lgammaPhi\n";
 //		printNanInMat(phi_lgammaPhi,K,K);
@@ -801,7 +837,7 @@ void MMSBpoisson::initializeKappa(){
 
 
 
-void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id){
+void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id, int Y_qp){
 	//N = size(Y,1);
 	//K = size(alpha,2);
 //	boost::numeric::ublas::vector<double>* deriv_phi_p = new boost::numeric::ublas::vector<double>(K);
@@ -812,12 +848,16 @@ void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int th
 	
 
 	matrix<double>* phi_gh_pq = new matrix<double>(K,K);
+	matrix<double>* phi_gh_qp = new matrix<double>(K,K);
 	boost::numeric::ublas::vector<double>* phi_pg_update = new boost::numeric::ublas::vector<double>(K);
 	boost::numeric::ublas::vector<double>* phi_qh_update = new boost::numeric::ublas::vector<double>(K);
+	boost::numeric::ublas::vector<double>* phi_pg_update_q = new boost::numeric::ublas::vector<double>(K);
+	boost::numeric::ublas::vector<double>* phi_qh_update_q = new boost::numeric::ublas::vector<double>(K);
 //	cout<<digamma_q_sum<<endl;
 //	cout<<digamma_p_sum<<endl;
 
 	double phi_sum = 0;
+	double phi_sum_q = 0;
 	for(int g=0;g<K;g++){
 		for(int h=0;h<K;h++){
 			(*phi_gh_pq)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
@@ -825,51 +865,74 @@ void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int th
 				+ (getDigamaValue((*gamma)(q,h)) - digamma_q_sum));
 			phi_sum+=(*phi_gh_pq)(g,h);
 
+			(*phi_gh_qp)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_qp) 
+				+ (getDigamaValue((*gamma)(q,g)) - digamma_q_sum)
+				+ (getDigamaValue((*gamma)(p,h)) - digamma_p_sum));
+			phi_sum_q += (*phi_gh_qp)(g,h);
 //			if(std::isnan((*phi_gh_pq)(g,h))){
 //				cout<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<endl;
 //			}
 		}
 		(*phi_qh_update)(g) = 0;
 		(*phi_pg_update)(g) = 0;
+		(*phi_qh_update_q)(g) = 0;
+		(*phi_pg_update_q)(g) = 0;
 	}
 
 //	cout<<"variationalUpdatesPhi"<<endl;
 	
 	double temp_phi_gh = 0;
+	double temp_phi_gh_q = 0;
 
 	for(int g=0;g<K;g++){
 		for(int h=0;h<K;h++){
 			temp_phi_gh=(*phi_gh_pq)(g,h);
-			if(phi_sum<DBL_MIN)
-				(*phi_gh_pq)(g,h) = 1/(K*K);
-			else
-				(*phi_gh_pq)(g,h) = ((*phi_gh_pq)(g,h))/phi_sum ;
-			(*phi_gh_sum)(g,h) = ((*phi_gh_pq)(g,h));
-			(*phi_y_gh_sum)(g,h) = ((*phi_gh_pq)(g,h)*Y_pq);//((*inputMat)(p,q)));
+			temp_phi_gh_q = (*phi_gh_qp)(g,h);
 
-			if(std::isnan((*phi_gh_pq)(g,h))||(*phi_gh_pq)(g,h)<=0)
-				cout<<"VariationalUpdate "<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<temp_phi_gh<<" "<<dataFunctionPhiUpdates(g,h,Y_pq)<<" "<< exp(dataFunctionPhiUpdates(g,h,Y_pq))<<endl;
+			if(phi_sum<DBL_MIN){
+//				cout<<"In DBL_MIN "<<DBL_MIN<<endl;
+				(*phi_gh_pq)(g,h) = 1.0/(K*K);
+			}else
+				(*phi_gh_pq)(g,h) = ((*phi_gh_pq)(g,h))/phi_sum ;
+
+			if(phi_sum_q<DBL_MIN){
+//				cout<<"In DBL_MIN "<<DBL_MIN<<endl;
+				(*phi_gh_qp)(g,h) = 1.0/(K*K);
+			}else
+				(*phi_gh_qp)(g,h) = ((*phi_gh_qp)(g,h))/phi_sum_q ;
+
+			(*phi_gh_sum)(g,h) = ((*phi_gh_pq)(g,h) + (*phi_gh_qp)(g,h));
+			(*phi_y_gh_sum)(g,h) = ((*phi_gh_pq)(g,h)*Y_pq + (*phi_gh_qp)(g,h)*Y_qp);//((*inputMat)(p,q)));
+
+			if(std::isnan((*phi_gh_pq)(g,h))||(*phi_gh_pq)(g,h)<0)
+				cout<<"VariationalUpdate "<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<temp_phi_gh<<" "<<dataFunctionPhiUpdates(g,h,Y_pq)<<" "<< exp(dataFunctionPhiUpdates(g,h,Y_pq))<<" DBL_MIN "<<DBL_MIN<<endl;
 		}
 	}
 	for(int h=0; h<K; h++){
 		for(int g=0; g<K; g++){
-			(*phi_qh_update)(h) += (*phi_gh_pq)(g,h);
+			(*phi_qh_update)(h) += ((*phi_gh_pq)(g,h));
+			(*phi_qh_update_q)(h) += (*phi_gh_qp)(g,h);
 		}
 	}
 
 	for(int g=0; g<K; g++){
 		for(int h=0; h<K; h++){
 			(*phi_pg_update)(g) += (*phi_gh_pq)(g,h);
+			(*phi_pg_update_q)(g) += (*phi_gh_qp)(g,h);
 		}
 	}
 
 	for(int k=0; k<K; k++){
 		(*phi_pg_sum)(p,k) = ((*phi_pg_update)(k));
 		(*phi_qh_sum)(q,k) = ((*phi_qh_update)(k));
+		(*phi_pg_sum)(q,k) += ((*phi_pg_update_q)(k));
+		(*phi_qh_sum)(p,k) += ((*phi_qh_update_q)(k));
 	}
 	delete phi_gh_pq;
 	delete phi_pg_update;
 	delete phi_qh_update;
+	delete phi_pg_update_q;
+	delete phi_qh_update_q;
 }
 
 void MMSBpoisson::variationalUpdatesPhi(int p, int q, int Y_pq, int thread_id){
@@ -912,7 +975,7 @@ void MMSBpoisson::variationalUpdatesPhi(int p, int q, int Y_pq, int thread_id){
 		for(int h=0;h<K;h++){
 			temp_phi_gh=(*phi_gh_pq)(g,h);
 			if(phi_sum<DBL_MIN)
-				(*phi_gh_pq)(g,h) = 1/(K*K);
+				(*phi_gh_pq)(g,h) = 1.0/(K*K*1.0);
 			else
 				(*phi_gh_pq)(g,h) = ((*phi_gh_pq)(g,h))/phi_sum ;
 			(*phi_gh_sum)(g,h) += ((*phi_gh_pq)(g,h));
@@ -1004,16 +1067,21 @@ void MMSBpoisson::initializeGamma(){
 	}
 }
 
-boost::numeric::ublas::vector<double>* MMSBpoisson::stochasticUpdateGamma(int p){
-	boost::numeric::ublas::vector<double>* gamma_p = new boost::numeric::ublas::vector<double>(K);
+matrix<double>* MMSBpoisson::stochasticUpdateGamma(int p, int q){
+//	boost::numeric::ublas::vector<double>* gamma_p = new boost::numeric::ublas::vector<double>(K);
+	matrix<double>* gamma_pq = new matrix<double>(2,K);
 	for(int k=0; k<K; k++){
-		(*gamma_p)(k) = (*alpha)(k);
-		(*gamma_p)(k) = (stochasticSampleNodeMultiplier*(*phi_pg_sum)(p,k) + 
+		(*gamma_pq)(0,k) = (*alpha)(k);
+		(*gamma_pq)(0,k) = (stochasticSampleNodeMultiplier*(*phi_pg_sum)(p,k) + 
 				stochasticSampleNodeMultiplier*(*phi_qh_sum)(p,k));	// new Phis
+		
+		(*gamma_pq)(1,k) = (*alpha)(k);
+		(*gamma_pq)(1,k) = (stochasticSampleNodeMultiplier*(*phi_pg_sum)(q,k) + 
+				stochasticSampleNodeMultiplier*(*phi_qh_sum)(q,k));	// new Phis
 //		cout<<"gamma_pk "<<p<<","<<k<<","<<gamma_pk<<";";
 	}
 //	cout<<endl;
-	return gamma_p;
+	return gamma_pq;
 }
 
 void MMSBpoisson::updateGamma(int p){
@@ -1090,7 +1158,7 @@ int main(int argc, char** argv) {
 //	mmsb->getParameters(matFile, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
 	double stepSizeNu = atof(argv[6]);
 	mmsb->initialize(K, userList, threadList, userAdjlist, heldUserAdjlist, 
-			userThreadPost, stepSizeNu, numHeldoutEdges);	
+			userThreadPost, stepSizeNu, numHeldoutEdges, atof(argv[7]), atof(argv[8]));
 	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
 	delete userList;
 	delete userAdjlist;
