@@ -90,6 +90,7 @@ int Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unorder
 //			num_nonzeros++;
 		}
 	}
+	return numHeldoutEdges;
 }
 
 
@@ -110,7 +111,6 @@ void Utils::readThreadStructureFile (std::string fileName, std::unordered_map<in
 	char s[20000];
 
 	FILE* graph_file_pointer = fopen(fileName.c_str(), "r");
-	
 
     int num_users=0;
 
