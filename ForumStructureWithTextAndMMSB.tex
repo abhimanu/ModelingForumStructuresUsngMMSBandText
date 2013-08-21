@@ -17,7 +17,8 @@
 % Interactions on Online Forums}
 % \title{Modeling Structured Interaction in Big Online User Forums }
 % \title{Modeling Structured Interaction in \\ Large Online User Forums }
-\title{Capturing Participation Profile in Large Online User Forums}
+\title{A probabilistic approach for modeling user interactions in thread-based 
+online discussion forums}
 
 % \author{
 % Abhimanu Kumar \\
@@ -42,25 +43,34 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-We present here an approach to model large online social forums that respects
-the structure of the discussion and provides a participation profile for
-various users in present in the discussion. We bring together the structure of 
-the forum as well as texts posted there
-in a model that captures the user-participation dynamics in the forum. 
-% The
-% model incorporates strength of interaction among user as well, as compared
-% to binary case that cares just for presence or absence of interaction. 
-The work also has a scalability focus and provides an efficient approximate
-estimation technique based off stochastic variational methods and can
-model very large forums with upto half a million users.
-%~(\comment{I am thinking of using stochastic variational for
-%scalability if time permits.}).
-Modelling cancer patients, Reddit and Stackoverflow online user discussions 
-using this technique provides us with valuable insights into these
-communities. The model also performs well on link prediciotn and other
-prediction task further validating our claims.
-\comment{We should make it more strongly worded in our favor if the cancer
-forum task works well}
+
+Thread-based online discussion forums contain rich information of user 
+interactions and can potentially be used as important tools to improve 
+inter-user communications. However, this information is usually encapsulated 
+in the large amount of threads due to the user-specific replying structures 
+and associated posts. To unravel this, we develop a probabilistic approach 
+to accurately model user interactions in thread-based online forums. Our 
+model integrates the merits from mixed-membership stochastic block models 
+(MMSB) and probabilistic topic models. Our model enforces a one-to-one 
+mapping from the community to the topic which allows easy interpretations 
+of different communities using the textual information from posts.
+
+To deal with large-scale datasets from online forums, we develop a scalable 
+algorithm based on stochastic variational inference.  We evaluate our model 
+on two large-scale datasets, Cancer (30K users and 200K threads) and 
+StackOverFlow (xx users and xx threads). Quantitatively, we show our 
+model does better than MMSB in predicting user replies. On another task 
+of user survival prediction (Would the users post again?), our model 
+outperforms the results from the published work [x]. In addition, we 
+demonstrate that our model can provide useful explanations of user 
+interactions in different communities using the topics discovered from posts.
+
+
+
+
+
+
+
 \end{abstract}
 
 \section{Introduction}

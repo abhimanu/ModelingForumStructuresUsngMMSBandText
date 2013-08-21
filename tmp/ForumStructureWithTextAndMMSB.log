@@ -1,23 +1,15 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.23)  1 AUG 2013 13:02
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.11.3)  21 AUG 2013 15:22
 entering extended mode
+ Source specials enabled.
+ %&-line parsing enabled.
 **ForumStructureWithTextAndMMSB.tex
-
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
-TextAndMMSB.tex
-LaTeX2e <2011/06/27>
-Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, ar
-abic, armenian, assamese, basque, bengali, bokmal, bulgarian, catalan, coptic, 
-croatian, czech, danish, dutch, esperanto, estonian, farsi, finnish, french, ga
-lician, german, german-x-2009-06-19, greek, gujarati, hindi, hungarian, iceland
-ic, indonesian, interlingua, irish, italian, kannada, kurmanji, lao, latin, lat
-vian, lithuanian, malayalam, marathi, mongolian, mongolianlmc, monogreek, ngerm
-an, ngerman-x-2009-06-19, nynorsk, oriya, panjabi, pinyin, polish, portuguese, 
-romanian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, swis
-sgerman, tamil, telugu, turkish, turkmen, ukenglish, ukrainian, uppersorbian, u
-senglishmax, welsh, loaded.
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\article.cls"
+(./ForumStructureWithTextAndMMSB.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+(/usr/share/texmf-texlive/tex/latex/base/article.cls
 Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\size10.clo"
+(/usr/share/texmf-texlive/tex/latex/base/size10.clo
 File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
@@ -31,91 +23,58 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
-)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\nips12submit_e.sty
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\eso-pic\eso-pic.sty"
-Package: eso-pic 2010/10/06 v2.0c eso-pic (RN)
+) (./nips12submit_e.sty
+(/usr/share/texmf-texlive/tex/latex/eso-pic/eso-pic.sty
+Package: eso-pic 2006/07/14 v1.1d eso-pic (RN)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\atbegshi.sty"
-Package: atbegshi 2011/01/30 v1.15 At begin shipout hook (HO)
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
-Package: infwarerr 2010/04/08 v1.3 Providing info/warning/message (HO)
+(/usr/share/texmf-texlive/tex/latex/ms/everyshi.sty
+Package: everyshi 2001/05/15 v3.00 EveryShipout Package (MS)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
-Package: ltxcmds 2011/04/18 v1.20 LaTeX kernel commands for general use (HO)
-)
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\ifpdf.sty"
-Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
-Package ifpdf Info: pdfTeX in PDF mode is detected.
-))
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks14
-)
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\xcolor\xcolor.sty"
-Package: xcolor 2007/01/21 v2.11 LaTeX color extensions (UK)
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\color.cfg"
-File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
-)
-Package xcolor Info: Driver file: pdftex.def on input line 225.
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
-File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
-\Gread@gobject=\count87
-)
-Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1337.
-Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1341.
-Package xcolor Info: Model `RGB' extended on input line 1353.
-Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1355.
-Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1356.
-Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1357.
-Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1358.
-Package xcolor Info: Model `Gray' substituted by `gray' on input line 1359.
-Package xcolor Info: Model `wave' substituted by `hsb' on input line 1360.
 ))
 \nipsrulerbox=\box26
-\nipsrulercount=\count88
+\nipsrulercount=\count87
 \nipsruleroffset=\dimen103
 \cv@lineheight=\dimen104
 \cv@boxheight=\dimen105
 \cv@tmpbox=\box27
-\cv@refno=\count89
-\cv@tot=\count90
-\cv@tmpc@=\count91
-\cv@tmpc=\count92
+\cv@refno=\count88
+\cv@tot=\count89
+\cv@tmpc@=\count90
+\cv@tmpc=\count91
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\times.sty"
+(/usr/share/texmf-texlive/tex/latex/psnfss/times.sty
 Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\ams\math\amsmath.sty"
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2000/07/18 v2.13 AMS math features
 \@mathmargin=\skip43
 
 For additional information on amsmath, use the `?' option.
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\ams\math\amstext.sty"
+(/usr/share/texmf-texlive/tex/latex/amsmath/amstext.sty
 Package: amstext 2000/06/29 v2.01
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\ams\math\amsgen.sty"
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0
 \@emptytoks=\toks15
 \ex@=\dimen106
 ))
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\ams\math\amsbsy.sty"
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d
 \pmbraise@=\dimen107
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\ams\math\amsopn.sty"
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsopn.sty
 Package: amsopn 1999/12/14 v2.01 operator names
 )
-\inf@bad=\count93
+\inf@bad=\count92
 LaTeX Info: Redefining \frac on input line 211.
-\uproot@=\count94
-\leftroot@=\count95
+\uproot@=\count93
+\leftroot@=\count94
 LaTeX Info: Redefining \overline on input line 307.
-\classnum@=\count96
-\DOTSCASE@=\count97
+\classnum@=\count95
+\DOTSCASE@=\count96
 LaTeX Info: Redefining \ldots on input line 379.
 LaTeX Info: Redefining \dots on input line 382.
 LaTeX Info: Redefining \cdots on input line 467.
@@ -124,15 +83,15 @@ LaTeX Info: Redefining \cdots on input line 467.
 \big@size=\dimen108
 LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
-\macc@depth=\count98
-\c@MaxMatrixCols=\count99
+\macc@depth=\count97
+\c@MaxMatrixCols=\count98
 \dotsspace@=\muskip10
-\c@parentequation=\count100
-\dspbrk@lvl=\count101
+\c@parentequation=\count99
+\dspbrk@lvl=\count100
 \tag@help=\toks16
-\row@=\count102
-\column@=\count103
-\maxfields@=\count104
+\row@=\count101
+\column@=\count102
+\maxfields@=\count103
 \andhelp@=\toks17
 \eqnshift@=\dimen109
 \alignsep@=\dimen110
@@ -147,37 +106,40 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
 LaTeX Info: Redefining \[ on input line 2666.
 LaTeX Info: Redefining \] on input line 2667.
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\amsfonts.sty"
+(/usr/share/texmf-texlive/tex/latex/amsfonts/amsfonts.sty
 Package: amsfonts 2009/06/22 v3.00 Basic AMSFonts support
 \symAMSa=\mathgroup4
 \symAMSb=\mathgroup5
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 96.
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\amssymb.sty"
+(/usr/share/texmf-texlive/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2009/06/22 v3.00
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
+(/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
 Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\trig.sty"
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
-File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+(/etc/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
 )
 Package graphics Info: Driver file: pdftex.def on input line 91.
-)
+
+(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2009/08/25 v0.04m Graphics/color for pdfTeX
+\Gread@gobject=\count104
+))
 \Gin@req@height=\dimen115
 \Gin@req@width=\dimen116
-)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\subfigure.sty
+) (./subfigure.sty
 \c@subfigure=\count105
 )
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\fink.sty
+(./fink.sty
 Package: fink 2011/10/19 v2.2.1 Keep track of the current filename
 
 
@@ -186,19 +148,18 @@ Package FiNK Warning: as of version 2.2.1, FiNK has been deprecated and is not
 (FiNK)                functionality are invited to use a package named
 (FiNK)                "currfile" instead, on input line 47.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\oberdiek\kvoptions.sty"
-Package: kvoptions 2010/12/23 v3.10 Keyval support for LaTeX options (HO)
+(/usr/share/texmf-texlive/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2009/08/13 v3.4 Keyval support for LaTeX options (HO)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\kvsetkeys.sty"
-Package: kvsetkeys 2011/04/07 v1.13 Key value parser (HO)
+(/usr/share/texmf-texlive/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2009/07/30 v1.5 Key value parser with default handler suppor
+t (HO)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\etexcmds.sty"
-Package: etexcmds 2011/02/16 v1.5 Prefix for e-TeX command names (HO)
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\ifluatex.sty"
-Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
-Package ifluatex Info: LuaTeX not detected.
+(/usr/share/texmf-texlive/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2007/09/09 v1.2 Providing info/warning/message (HO)
 )
+(/usr/share/texmf-texlive/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2007/12/12 v1.2 Prefix for e-TeX command names (HO)
 Package etexcmds Info: Could not find \expanded.
 (etexcmds)             That can mean that you are not using pdfTeX 1.50 or
 (etexcmds)             that some package has redefined \expanded.
@@ -207,303 +168,271 @@ Package etexcmds Info: Could not find \expanded.
 Package FiNK Info: main file set to "./ForumStructureWithTextAndMMSB.tex" on in
 put line 82.
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\oberdiek\grffile.sty"
-Package: grffile 2010/12/09 v1.13 Extended file name support for graphics (HO)
+(/usr/share/texmf-texlive/tex/latex/oberdiek/grffile.sty
+Package: grffile 2009/09/25 v1.10 Extended file name support for graphics (HO)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\ifxetex\ifxetex.sty"
-Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+(/usr/share/texmf-texlive/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2009/04/10 v2.0 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in pdf mode detected.
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\pdftexcmds.sty"
-Package: pdftexcmds 2011/04/22 v0.16 Utilities of pdfTeX for LuaTeX (HO)
+(/usr/share/texmf-texlive/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2009/09/23 v0.6 LuaTeX support for pdfTeX utility functions
+ (HO)
+
+(/usr/share/texmf-texlive/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2009/04/17 v1.2 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+(/usr/share/texmf-texlive/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2009/08/05 v1.0 Some LaTeX kernel commands for general use (HO
+)
+)
 Package pdftexcmds Info: LuaTeX not detected.
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
-Package pdftexcmds Info: \pdfdraftmode found.
 )
 Package grffile Info: Option `multidot' is set to `true'.
 Package grffile Info: Option `extendedchars' is set to `false'.
 Package grffile Info: Option `space' is set to `true'.
-Package grffile Info: \Gin@ii of package `graphicx' fixed on input line 453.
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\placeins\placeins.sty"
+(/usr/share/texmf-texlive/tex/latex/placeins/placeins.sty
 Package: placeins 2005/04/18  v 2.2
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\hyperref.sty"
-Package: hyperref 2011/08/19 v6.82h Hypertext links for LaTeX
+(/usr/share/texmf-texlive/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2009/10/09 v6.79a Hypertext links for LaTeX
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\hobsub-hyperref.sty"
-Package: hobsub-hyperref 2011/04/23 v1.4 Bundle oberdiek, subset hyperref (HO)
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\hobsub-generic.sty"
-Package: hobsub-generic 2011/04/23 v1.4 Bundle oberdiek, subset generic (HO)
-Package: hobsub 2011/04/23 v1.4 Subsetting bundle oberdiek (HO)
-Package hobsub Info: Skipping package `infwarerr' (already loaded).
-Package hobsub Info: Skipping package `ltxcmds' (already loaded).
-Package hobsub Info: Skipping package `ifluatex' (already loaded).
-Package: ifvtex 2010/03/01 v1.5 Switches for detecting VTeX and its modes (HO)
+(/usr/share/texmf-texlive/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2008/11/04 v1.4 Switches for detecting VTeX and its modes (HO)
 Package ifvtex Info: VTeX not detected.
-Package: intcalc 2007/09/27 v1.1 Expandable integer calculations (HO)
-Package hobsub Info: Skipping package `ifpdf' (already loaded).
-Package hobsub Info: Skipping package `etexcmds' (already loaded).
-Package hobsub Info: Skipping package `kvsetkeys' (already loaded).
-Package: kvdefinekeys 2011/04/07 v1.3 Defining keys (HO)
-Package hobsub Info: Skipping package `pdftexcmds' (already loaded).
-Package: pdfescape 2011/04/04 v1.12 Provides string conversions (HO)
-Package: bigintcalc 2011/01/30 v1.2 Expandable big integer calculations (HO)
-Package: bitset 2011/01/30 v1.1 Data type bit set (HO)
-Package: uniquecounter 2011/01/30 v1.2 Provides unlimited unique counter (HO)
 )
-Package hobsub Info: Skipping package `hobsub' (already loaded).
-Package: letltxmacro 2010/09/02 v1.4 Let assignment for LaTeX macros (HO)
-Package: hopatch 2011/01/30 v1.0 Wrapper for package hooks (HO)
-Package: xcolor-patch 2011/01/30 xcolor patch
-Package: atveryend 2011/04/23 v1.7 Hooks at very end of document (HO)
-Package hobsub Info: Skipping package `atbegshi' (already loaded).
-Package: refcount 2010/12/01 v3.2 Data extraction from references (HO)
-Package: hycolor 2011/01/30 v1.7 Color options of hyperref/bookmark (HO)
+(/usr/share/texmf-texlive/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2009/01/23 v0.5 Provides ifxetex conditional
 )
+(/usr/share/texmf-texlive/tex/latex/oberdiek/hycolor.sty
+Package: hycolor 2009/10/02 v1.5 Code for color options of hyperref/bookmark (H
+O)
+
+(/usr/share/texmf-texlive/tex/latex/oberdiek/xcolor-patch.sty
+Package: xcolor-patch 2009/10/02 xcolor patch
+))
 \@linkdim=\dimen117
 \Hy@linkcounter=\count106
 \Hy@pagecounter=\count107
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\pd1enc.def"
-File: pd1enc.def 2011/08/19 v6.82h Hyperref: PDFDocEncoding definition (HO)
+(/usr/share/texmf-texlive/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2009/10/09 v6.79a Hyperref: PDFDocEncoding definition (HO)
 )
-\Hy@SavedSpaceFactor=\count108
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\hyperref.cfg"
+(/usr/share/texmf-texlive/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
-Package hyperref Info: Hyper figures OFF on input line 4053.
-Package hyperref Info: Link nesting OFF on input line 4058.
-Package hyperref Info: Hyper index ON on input line 4061.
-Package hyperref Info: Plain pages OFF on input line 4068.
-Package hyperref Info: Backreferencing OFF on input line 4073.
-Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
-Package hyperref Info: Bookmarks ON on input line 4291.
-\c@Hy@tempcnt=\count109
+Package hyperref Info: Hyper figures OFF on input line 2975.
+Package hyperref Info: Link nesting OFF on input line 2980.
+Package hyperref Info: Hyper index ON on input line 2983.
+Package hyperref Info: Plain pages OFF on input line 2990.
+Package hyperref Info: Backreferencing OFF on input line 2995.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\ltxmisc\url.sty"
+Implicit mode ON; LaTeX internals redefined
+Package hyperref Info: Bookmarks ON on input line 3191.
+(/usr/share/texmf-texlive/tex/latex/ltxmisc/url.sty
 \Urlmuskip=\muskip11
 Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
 )
-LaTeX Info: Redefining \url on input line 4644.
-\Fld@menulength=\count110
+LaTeX Info: Redefining \url on input line 3428.
+
+(/usr/share/texmf-texlive/tex/generic/oberdiek/bitset.sty
+Package: bitset 2007/09/28 v1.0 Data type bit set (HO)
+
+(/usr/share/texmf-texlive/tex/generic/oberdiek/intcalc.sty
+Package: intcalc 2007/09/27 v1.1 Expandable integer calculations (HO)
+)
+(/usr/share/texmf-texlive/tex/generic/oberdiek/bigintcalc.sty
+Package: bigintcalc 2007/11/11 v1.1 Expandable big integer calculations (HO)
+))
+\Fld@menulength=\count108
 \Field@Width=\dimen118
 \Fld@charsize=\dimen119
-Package hyperref Info: Hyper figures OFF on input line 5730.
-Package hyperref Info: Link nesting OFF on input line 5735.
-Package hyperref Info: Hyper index ON on input line 5738.
-Package hyperref Info: backreferencing OFF on input line 5745.
-Package hyperref Info: Link coloring OFF on input line 5750.
-Package hyperref Info: Link coloring with OCG OFF on input line 5755.
-Package hyperref Info: PDF/A mode OFF on input line 5760.
-LaTeX Info: Redefining \ref on input line 5800.
-LaTeX Info: Redefining \pageref on input line 5804.
-\Hy@abspage=\count111
-\c@Item=\count112
-\c@Hfootnote=\count113
-)
+\Field@toks=\toks20
+Package hyperref Info: Hyper figures OFF on input line 4377.
+Package hyperref Info: Link nesting OFF on input line 4382.
+Package hyperref Info: Hyper index ON on input line 4385.
+Package hyperref Info: backreferencing OFF on input line 4392.
+Package hyperref Info: Link coloring OFF on input line 4397.
+Package hyperref Info: Link coloring with OCG OFF on input line 4402.
+Package hyperref Info: PDF/A mode OFF on input line 4407.
 
-Package hyperref Message: Driver (autodetected): hpdftex.
+(/usr/share/texmf-texlive/tex/generic/oberdiek/atbegshi.sty
+Package: atbegshi 2008/07/31 v1.9 At begin shipout hook (HO)
+)
+\Hy@abspage=\count109
+\c@Item=\count110
+\c@Hfootnote=\count111
+)
+*hyperref using default driver hpdftex*
+(/usr/share/texmf-texlive/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2009/10/09 v6.79a Hyperref driver for pdfTeX
+\Fld@listcount=\count112
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/color.sty
+Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\hpdftex.def"
-File: hpdftex.def 2011/08/19 v6.82h Hyperref driver for pdfTeX
-\Fld@listcount=\count114
-\c@bookmark@seq@number=\count115
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\oberdiek\rerunfilecheck.sty"
-Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
-Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
-82.
+(/etc/texmf/tex/latex/config/color.cfg
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
-\Hy@SectionHShift=\skip46
-)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\algorithm.sty
-\c@algorithm=\count116
-\Blockindent=\skip47
-\algorithmindent=\skip48
-)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\algpseudocode.sty
+Package color Info: Driver file: pdftex.def on input line 130.
+) (./algorithm.sty
+\c@algorithm=\count113
+\Blockindent=\skip46
+\algorithmindent=\skip47
+) (./algpseudocode.sty
 Package: algpseudocode 
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\ifthen.sty"
+(/usr/share/texmf-texlive/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
-)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\algorithmicx.sty
+) (./algorithmicx.sty
 Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
 
 Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
-\c@ALG@line=\count117
-\c@ALG@rem=\count118
-\c@ALG@nested=\count119
-\ALG@tlm=\skip49
-\ALG@thistlm=\skip50
-\c@ALG@Lnr=\count120
-\c@ALG@blocknr=\count121
-\c@ALG@storecount=\count122
-\c@ALG@tmpcounter=\count123
-\ALG@tmplength=\skip51
+\c@ALG@line=\count114
+\c@ALG@rem=\count115
+\c@ALG@nested=\count116
+\ALG@tlm=\skip48
+\ALG@thistlm=\skip49
+\c@ALG@Lnr=\count117
+\c@ALG@blocknr=\count118
+\c@ALG@storecount=\count119
+\c@ALG@tmpcounter=\count120
+\ALG@tmplength=\skip50
 )
 Document Style - pseudocode environments for use with the `algorithmicx' style
-) (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\upgreek.sty
+) (./upgreek.sty
 Package: upgreek 2003/02/12 v2.0 (WaS)
 Package upgreek Info: Using Euler Roman for upright Greek on input line 31.
 \symugrf@m=\mathgroup6
 LaTeX Font Info:    Overwriting symbol font `ugrf@m' in version `bold'
 (Font)                  U/eur/m/n --> U/eur/b/n on input line 38.
-)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
-TextAndMMSB.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 42.
- ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\ot1ptm.fd"
+) (./ForumStructureWithTextAndMMSB.aux)
+\openout1 = `ForumStructureWithTextAndMMSB.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 43.
+LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 43.
+LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 43.
+LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 43.
+LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 43.
+LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 43.
+LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 43.
+LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 43.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
-\AtBeginShipoutBox=\box30
- ("C:\Program Files (x86)\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
+ABD: EveryShipout initializing macros
+(/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count124
+\scratchcounter=\count121
 \scratchdimen=\dimen120
-\scratchbox=\box31
-\nofMPsegments=\count125
-\nofMParguments=\count126
-\everyMPshowfont=\toks20
-\MPscratchCnt=\count127
+\scratchbox=\box30
+\nofMPsegments=\count122
+\nofMParguments=\count123
+\everyMPshowfont=\toks21
+\MPscratchCnt=\count124
 \MPscratchDim=\dimen121
-\MPnumerator=\count128
-\makeMPintoPDFobject=\count129
-\everyMPtoPDFconversion=\toks21
+\MPnumerator=\count125
+\everyMPtoPDFconversion=\toks22
 )
-Package hyperref Info: Link coloring OFF on input line 42.
- ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\hyperref\nameref.sty"
-Package: nameref 2010/04/30 v2.40 Cross-referencing by name of section
+Package hyperref Info: Link coloring OFF on input line 43.
+ (/usr/share/texmf-texlive/tex/latex/hyperref/nameref.sty
+Package: nameref 2007/05/29 v2.31 Cross-referencing by name of section
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\gettitlestring.sty"
-Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
+(/usr/share/texmf-texlive/tex/latex/oberdiek/refcount.sty
+Package: refcount 2008/08/11 v3.1 Data extraction from references (HO)
 )
-\c@section@level=\count130
+\c@section@level=\count126
 )
-LaTeX Info: Redefining \ref on input line 42.
-LaTeX Info: Redefining \pageref on input line 42.
-LaTeX Info: Redefining \nameref on input line 42.
+LaTeX Info: Redefining \ref on input line 43.
+LaTeX Info: Redefining \pageref on input line 43.
 
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
-TextAndMMSB.out)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
-TextAndMMSB.out)
+(./ForumStructureWithTextAndMMSB.out) (./ForumStructureWithTextAndMMSB.out)
 \@outlinefile=\write3
+\openout3 = `ForumStructureWithTextAndMMSB.out'.
+
+\AtBeginShipoutBox=\box31
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
-LaTeX Font Info:    Try loading font information for U+msa on input line 44.
- ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 45.
+LaTeX Font Info:    Try loading font information for U+msa on input line 45.
+
+(/usr/share/texmf-texlive/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 44.
- ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
+LaTeX Font Info:    Try loading font information for U+msb on input line 45.
+
+(/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 44.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 45.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 45.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\ot1pcr.fd"
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 45.
+ (./intro.tex) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\intro.tex)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\relatedWork.tex
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [1{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}
-
-])
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\approach.tex
-Underfull \vbox (badness 1796) has occurred while \output is active []
-
- [2]
-<pgm_ThreadBased.png, id=104, 341.77687pt x 660.21657pt>
+] (./relatedWork.tex) (./approach.tex [2] <pgm_ThreadBased.png, id=104, 341.776
+87pt x 660.21657pt>
 File: pgm_ThreadBased.png Graphic file (type png)
 
-<use pgm_ThreadBased.png>
-Package pdftex.def Info: pgm_ThreadBased.png used on input line 47.
-(pdftex.def)             Requested size: 238.49341pt x 460.70786pt.
+<use pgm_ThreadBased.png> [3 <./pgm_ThreadBased.png (PNG copy)>]
 LaTeX Font Info:    Try loading font information for OMS+ptm on input line 55.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\psnfss\omsptm.fd"
+(/usr/share/texmf-texlive/tex/latex/psnfss/omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 55.
- [3 <D:/abhi-docs/abhi-eclipse-workspace/ModellingForumStructure/pgm_ThreadBase
-d.png (PNG copy)>]
+
 Overfull \hbox (60.87856pt too wide) in alignment at lines 136--171
  [][][] []
  []
 
-[4]) (D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\dataset.tex
-[5])
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\experiments.tex)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\results.tex)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\conclusion.tex)
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
-TextAndMMSB.bbl
+[4]) (./dataset.tex [5]) (./experiments.tex) (./results.tex) (./conclusion.tex)
+(./ForumStructureWithTextAndMMSB.bbl
 Missing character: There is no é in font ptmr7t!
 Missing character: There is no é in font ptmr7t!
- [6])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 99.
- [7]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 99.
-
-(D:\abhi-docs\abhi-eclipse-workspace\ModellingForumStructure\ForumStructureWith
-TextAndMMSB.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 99.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 99.
-Package rerunfilecheck Info: File `ForumStructureWithTextAndMMSB.out' has not c
-hanged.
-(rerunfilecheck)             Checksum: 15DED8B158D79394F148AFD69D8C08AD;861.
- ) 
+ [6]) [7]
+(./ForumStructureWithTextAndMMSB.aux) ) 
 Here is how much of TeX's memory you used:
- 7163 strings out of 494045
- 104366 string characters out of 3145956
- 209605 words of memory out of 3000000
- 10277 multiletter control sequences out of 15000+200000
+ 6063 strings out of 495061
+ 85363 string characters out of 1182621
+ 174557 words of memory out of 3000000
+ 9051 multiletter control sequences out of 15000+50000
  17512 words of font info for 41 fonts, out of 3000000 for 9000
- 715 hyphenation exceptions out of 8191
- 37i,12n,39p,306b,475s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Program Files (x86)/MiKTeX 2.9/fonts/enc/dvips/fontname/8r.enc}<C:/Progra
-m Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Program 
-Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cmextra/cmex7.pfb><C:/Progra
-m Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Program 
-Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Program Fil
-es (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Program Files 
-(x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files (x8
-6)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Program Files (x86)/M
-iKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Program Files (x86)/MiKTe
-X 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files (x86)/MiKTeX 
-2.9/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Program Files (x86)/MiKTeX 2.9
-/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Program Files (x86)/MiKTeX 2.9/fo
-nts/type1/public/amsfonts/euler/eurm10.pfb><C:/Program Files (x86)/MiKTeX 2.9/f
-onts/type1/urw/courier/ucrr8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type
-1/urw/helvetic/uhvb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/ti
-mes/utmb8a.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.
-pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on ForumStructureWithTextAndMMSB.pdf (7 pages, 259849 bytes).
+ 28 hyphenation exceptions out of 8191
+ 36i,12n,37p,295b,384s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/share/texmf-texlive/fonts/enc/dvip
+s/base/8r.enc}</usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmex10.p
+fb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cmextra/cmex7.pfb></us
+r/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/tex
+mf-texlive/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-texlive/f
+onts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-texlive/fonts/type1/p
+ublic/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfon
+ts/cm/cmr5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr7.pf
+b></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/sha
+re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-tex
+live/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/t
+ype1/public/amsfonts/euler/eurm10.pfb></usr/share/texmf-texlive/fonts/type1/urw
+/courier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvb8a.p
+fb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf
+-texlive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1
+/urw/times/utmri8a.pfb>
+Output written on ForumStructureWithTextAndMMSB.pdf (7 pages, 259865 bytes).
 PDF statistics:
  218 PDF objects out of 1000 (max. 8388607)
  43 named destinations out of 1000 (max. 500000)
