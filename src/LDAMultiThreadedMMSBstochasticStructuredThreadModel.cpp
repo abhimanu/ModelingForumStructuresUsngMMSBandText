@@ -211,6 +211,7 @@ private:
 
 	int inputCountOffset=0;
 	double chi_epsilon = 1e-7;
+	double link_epsilon = 1e-1;
 
 	int numParallelThreads;
 	std::vector<std::thread>* parallelThreadList;
@@ -251,6 +252,7 @@ private:
 	int vocab_size;
 	int numHeldoutEdges;
 	int numHeldoutPosts;
+	int numTotalLinks;
 	int K;            
 	int nuIter;
 	double stepSizeNu=0;
@@ -344,7 +346,8 @@ public:
 	double getHeldoutLogLikelihood();
 	
 	void getParametersInParallel(int iter_threshold, int inner_iter, int nu_iter, int stochastic_tau, 
-			char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet);// 
+			char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet,
+			int numTotalLinks);// 
 	bool areThreadsComputing();
 	void sendThreadKillSignal();
 	void tellThreadsToCompute();
@@ -667,16 +670,19 @@ void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter)
 }
 
 void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, int nu_iter, 
-		int stochastic_tau, char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet){ 
+		int stochastic_tau, char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet,
+		int numTotalLinks){ 
+	this->numTotalLinks = numTotalLinks;
 	// TODO: change phi coz it is K*K*N*N 
 //	initialize(num_users, K);//, inputMat);			// should be called from the main function
 	cout<<"iter_threshold: "<<iter_threshold<<"; inner_iter: "<<inner_iter<<"; nu_iter: "<<nu_iter
 		<<"; stochastic_tau: "<<stochastic_tau<<"; outputFile: "<<outputFile<<"; perThreadUserSet "<<
-		perThreadUserSet->size()<<endl;
+		perThreadUserSet->size()<<"; numTotalLinks "<<numTotalLinks<<endl;
 	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
 //	boost::numeric::ublas::vector<double>* oldAlpha = new boost::numeric::ublas::vector<double>(K);
 //	copyAlpha(oldAlpha);
 	double newLL = 0;//getVariationalLogLikelihood();
+	this->numTotalLinks = numTotalLinks;
 	double oldLL = 0;
 	int iter=0;
 	this->nuIter = nu_iter;
@@ -989,6 +995,7 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 //	cout<<"localThreadNum: "<<localThreadNum<<"\t";
 	int constantThreads=1000;									// TODO:  change this
 	int constantUsers=1000;
+	int zeroEdgesTimes = 5;
 	std::unordered_set<int>* tempThreadSet = new std::unordered_set<int>();
 	constantThreads = (constantThreads>localThreadNum)? localThreadNum:constantThreads;
 	for(int thr=0; thr<constantThreads; thr++){
@@ -1031,7 +1038,9 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 					userAdjlist->at(user_thread_q)->count(userid_p):0;
 				pNeighborsYpq->insert({userid_q, std::make_pair(Y_pq,Y_qp)});
 
-				while(1){
+				int zeroIter = 0;
+
+				while(zeroIter<zeroEdgesTimes){
 					int randomIndex = rand()%num_users;
 				   	int randomUserId = userIndexMap->at(randomIndex);
 					std::pair<int,int> rand_thread = std::make_pair(randomUserId, curr_thread_id);
@@ -1043,19 +1052,8 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 						continue;
 					if(heldUserAdjlist->count(user_thread)>0 && heldUserAdjlist->at(user_thread)->count(randomUserId)>0)
 						continue;
-//					if(userAdjlist->at(user_thread)->count(randomUserId)<=0 && 
-//							perThreadUserSet->at(curr_thread_id)->count(randomUserId)<=0 &&
-//            (heldUserAdjlist->count(user_thread)>0 && heldUserAdjlist->at(user_thread)->count(randomUserId)<=0) &&
-//			(heldUserAdjlist->count(rand_thread)<=0||(heldUserAdjlist->count(rand_thread)>0 && heldUserAdjlist->at(rand_thread)->count(userid_p)<=0))
-//							){
-//						pNeighbors->insert(randomUserId);
-//					cout<<"randomUserId "<<randomUserId<<endl;
-						pNeighborsYpq->insert({randomUserId, std::make_pair(0,0)});
-
-//						heldoutUserAdjlist->at(user_thread)->insert({randomUserId, 0});
-//						numHeldoutEdges++;
-						break;
-//					}
+					pNeighborsYpq->insert({randomUserId, std::make_pair(0,0)});
+					zeroIter++;
 				}
 
 			}
@@ -1065,48 +1063,13 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 				int userid_q = it->first;
 
 				pair<int,int> user_thread_q = std::make_pair(userid_q,curr_thread_id);
-//				modify the below 2 if statements to include delta requirements for chi
-//				if(heldUserAdjlist->count(user_thread)>0 && heldUserAdjlist->at(user_thread)->count(userid_q)>0)
-//					continue;
-//				if (heldUserAdjlist->count(user_thread_q)>0 && heldUserAdjlist->at(user_thread_q)->count(userid_p)>0)
-//					continue;                                      // We dont even include th pair
-
-//				pNeighbors->insert(userList->at(userid_q));
-
-//			}
-
-//			if(perUserThreadPhiStats4Chi->count(user_thread)) //{this is wrong}
-				
-//			for(int k=0; k<K; k++)
 
 
-//			cout<<"hello marshmellow\t";
-			// TODO: insert some random zero edges as well;
-			
-//			for(std::unordered_set<int>::iterator it = pNeighbors->begin(); it!=pNeighbors->end(); ++it){
-//				int q = (*it);
 				int q = userList->at(userid_q);
-//				pair<int,int> user_thread = std::make_pair(userid_p,*it);
-				//					cout<<"userid_q "<<q<<"\n";
-//				int userid_q = userIndexMap->at(q);
-				//					cout<<"userid_q "<<userid_q<<"\n";
-				//TODO also check whether it is in heldout
 				if(p==q)
 					continue;
 //				pair<int,int> user_thread_q = std::make_pair(userid_q,curr_thread_id);
 				int Y_pq = it->second.first, Y_qp=it->second.second;
-//				int Y_pq=0, Y_qp=0;
-//				if(userAdjlist->count(user_thread)>0){
-//					if(userAdjlist->at(user_thread)->count(userid_q)>0){ 
-//						Y_pq=userAdjlist->at(user_thread)->at(userid_q) + inputCountOffset;
-
-//				if(userAdjlist->count(user_thread_q)>0)
-//					if(userAdjlist->at(user_thread_q)->count(userid_p)>0)
-//						Y_qp = userAdjlist->at(user_thread_q)->at(userid_p) + inputCountOffset;
-//						//cout<<"Y_pq "<<Y_pq<<"("<<user_thread.first<<","<<userid_q<<","<<user_thread.second<<")"<<"; ";
-						//							num_nonzeros++;
-//					}
-//				}
 				try{
 					multiThreadedStochasticVariationalUpdatesPhi(p,q,Y_pq,curr_thread_id,Y_qp,threadID, 
 							user_thread, user_thread_q);
@@ -2127,6 +2090,7 @@ int main(int argc, char** argv) {
 	delete userIndexMap;
 
 	int numHeldoutEdges = numHeldAndTotalEdges.first;
+	int numTotalLinks = numHeldAndTotalEdges.second;
 
 //	testDataStructures(userList,threadList, userAdjlist,userThreadPost);
 
@@ -2142,7 +2106,7 @@ int main(int argc, char** argv) {
 	mmsb->initialize(K, userList, threadList, vocabList, userAdjlist, heldUserAdjlist, 
 			userThreadPost, stepSizeNu, numHeldoutEdges, atof(argv[7]), atof(argv[8]), atoi(argv[10]));
 //	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
-	mmsb->getParametersInParallel(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[9]), argv[11], perThreadUserSet);
+	mmsb->getParametersInParallel(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[9]), argv[11], perThreadUserSet, numTotalLinks);
 
 	delete userList;
 	delete userAdjlist;

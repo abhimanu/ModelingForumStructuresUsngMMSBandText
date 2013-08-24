@@ -54,7 +54,7 @@ public:
 std::pair<int,int> getTheHeldoutSet(
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
-double heldPercent, std::unordered_map<int,std::vector<int>*>* perThreadUserList, int num_users,
+double heldPercent, std::unordered_map<int,std::unordered_set<int>*>* perThreadUserList, int num_users,
 std::unordered_map<int,int>* userIndexMap);
 	
 	char* readFile(FILE* graph_file_pointer, int* u1, int* u2, int* tid, char* s);

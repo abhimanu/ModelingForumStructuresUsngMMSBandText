@@ -71,7 +71,7 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 std::pair<int,int> Utils::getTheHeldoutSet(
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
-double heldPercent, std::unordered_map<int,std::vector<int>*>* perThreadUserList, int num_users,
+double heldPercent, std::unordered_map<int,std::unordered_set<int>*>* perThreadUserSet, int num_users,
 std::unordered_map<int,int>* userIndexMap){
 
 	int numHeldoutEdges = 0;
@@ -93,15 +93,15 @@ std::unordered_map<int,int>* userIndexMap){
 				}
 				numHeldoutEdges++;
 
-//				while(1){
-//					int randomIndex = rand()%num_users;
-//				   	int randomUserId = userIndexMap->at(randomIndex);
-//					if(it1->second->count(randomUserId)<=0 && perThreadUserList->at(threadId)->count(randomUserId)<=0){
-//						heldoutUserAdjlist->at(user_thread)->insert({randomUserId, 0});
-//						numHeldoutEdges++;
-//						break;
-//					}
-//				}
+				while(1){
+					int randomIndex = rand()%num_users;
+				   	int randomUserId = userIndexMap->at(randomIndex);
+					if(it1->second->count(randomUserId)<=0 && perThreadUserSet->at(threadId)->count(randomUserId)<=0){
+						heldoutUserAdjlist->at(user_thread)->insert({randomUserId, 0});
+						numHeldoutEdges++;
+						break;
+					}
+				}
 
 				//TODO for now I am not removing it form the completeList; we will just not update this edge
 //				completeUserAdjlist->
