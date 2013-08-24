@@ -38,6 +38,23 @@ using namespace boost::numeric::ublas;
 //error: ‘sleep_for’ is not a member of ‘std::this_thread’ is solved via including -D_GLIBCXX_USE_NANOSLEEP
 //#define _GLIBCXX_USE_NANOSLEEP
 
+std::unordered_map<int,std::vector<int>*>* getPerThreadUserList(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* userAdjlist){
+	std::unordered_map<int,std::vector<int>*>* perThreadUserList  = new std::unordered_map<int,std::vector<int>*>();
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>::iterator it1= userAdjlist->begin(); it1!=userAdjlist->end(); ++it1){
+		if(perThreadUserList->count(it1->first.second)<=0)
+			perThreadUserList->insert({it1->first.second, new std::vector<int>()});
+		perThreadUserList->at(it1->first.second)->push_back(it1->first.first);
+	}
+	return perThreadUserList;
+}
+
+std::unordered_map<int,int>* initializeUserIndex(unordered_map<int,int>* userList){ 
+	std::unordered_map<int,int>* userIndexMap = new unordered_map<int,int>();
+	for(std::unordered_map<int,int>::iterator it=userList->begin(); it!=userList->end(); it++){
+		userIndexMap->insert({it->second, it->first});
+	}	
+	return userIndexMap;
+}
 
 template <class T>
 void printMat(matrix<T> *mat, int M, int N) {
@@ -2032,7 +2049,12 @@ int main(int argc, char** argv) {
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* heldUserAdjlist = 
 		new std::unordered_map<std::pair<int,int>,std::unordered_map<int,int>*, class_hash<pair<int,int>>>();
 
-	int numHeldoutEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.10);
+	std::unordered_map<int, int>* userIndexMap = initializeUserIndex(userList);
+	std::unordered_map<int, std::vector<int>*>* perThreadUserList = getPerThreadUserList(userAdjlist);
+
+	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.10, perThreadUserList, userList->size(), userIndexMap);
+
+	int numHeldoutEdges = numHeldAndTotalEdges.first;
 
 //	testDataStructures(userList,threadList, userAdjlist,userThreadPost);
 

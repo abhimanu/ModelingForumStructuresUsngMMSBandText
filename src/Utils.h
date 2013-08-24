@@ -43,15 +43,19 @@ public:
 	//virtual ~Utils();
 	float trigamma(double x);
 	
-	void addWords(std::vector<int>* wordList, std::vector<std::string>* newWords);
+	void addWords(std::vector<int>* wordList, std::vector<std::string>* newWords, std::unordered_set<int>* vocabList);
 
 //	template <class T>
 	void readThreadStructureFile (std::string fileName, std::unordered_map<int,int>* userList, 
-			std::unordered_set<int>* threadList,
+			std::unordered_set<int>* threadList, std::unordered_set<int>* vocabList,
 			std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<std::pair<int,int>>>* userAdjlist ,
 			std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<std::pair<int,int>>>* userThreadPost);
 
-	int getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* completeUserAdjlist, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldoutUserAdjlist, double heldPercent);
+std::pair<int,int> getTheHeldoutSet(
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+double heldPercent, std::unordered_map<int,std::vector<int>*>* perThreadUserList, int num_users,
+std::unordered_map<int,int>* userIndexMap);
 	
 	char* readFile(FILE* graph_file_pointer, int* u1, int* u2, int* tid, char* s);
 

@@ -68,13 +68,23 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 //	}
 //};
 
-int Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* completeUserAdjlist, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldoutUserAdjlist, double heldPercent){
+std::pair<int,int> Utils::getTheHeldoutSet(
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+double heldPercent, std::unordered_map<int,std::vector<int>*>* perThreadUserList, int num_users,
+std::unordered_map<int,int>* userIndexMap){
+
 	int numHeldoutEdges = 0;
+	int totalLinkEdges = 0;
 	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
 //		if(it1->second->size()<=1)
 		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+
+			totalLinkEdges++;
+
 			if(getUniformRandom()<=heldPercent){
 				std::pair<int,int> user_thread = it1->first;
+				int threadId = it1->first.second;
 				if(heldoutUserAdjlist->count(user_thread)>0){
 					heldoutUserAdjlist->at(user_thread)->insert({it2->first, it2->second});
 				}else{
@@ -82,6 +92,17 @@ int Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unorder
 					heldoutUserAdjlist->at(user_thread)->insert({it2->first, it2->second});
 				}
 				numHeldoutEdges++;
+
+//				while(1){
+//					int randomIndex = rand()%num_users;
+//				   	int randomUserId = userIndexMap->at(randomIndex);
+//					if(it1->second->count(randomUserId)<=0 && perThreadUserList->at(threadId)->count(randomUserId)<=0){
+//						heldoutUserAdjlist->at(user_thread)->insert({randomUserId, 0});
+//						numHeldoutEdges++;
+//						break;
+//					}
+//				}
+
 				//TODO for now I am not removing it form the completeList; we will just not update this edge
 //				completeUserAdjlist->
 			}
@@ -90,7 +111,7 @@ int Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unorder
 //			num_nonzeros++;
 		}
 	}
-	return numHeldoutEdges;
+	return make_pair(numHeldoutEdges,totalLinkEdges);
 }
 
 
@@ -102,7 +123,7 @@ int Utils::getTheHeldoutSet(std::unordered_map< std::pair<int,int>, std::unorder
 
 //template <class T>
 void Utils::readThreadStructureFile (std::string fileName, std::unordered_map<int,int>* userList, 
-		std::unordered_set<int>* threadList,
+		std::unordered_set<int>* threadList, std::unordered_set<int>* vocabList, 
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist, 
 		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost){
 	int u1;
@@ -146,23 +167,25 @@ void Utils::readThreadStructureFile (std::string fileName, std::unordered_map<in
 		if(userThreadPost->count(user_thread)>0){
 //			cout<<"got the user tid pair for LDA"<< user_thread.first<<" "<<user_thread.second<<" "<<u1<<" "<<u2<<endl;
 			std::vector<int>* wordList = userThreadPost->at(user_thread);
-            addWords(wordList, &newWords);
+            addWords(wordList, &newWords, vocabList);
 		}else{
 //			cout<<"getting the pair for the FIRST time for LDA"<<endl;
 			std::vector<int>* wordList = new std::vector<int>();
-            addWords(wordList, &newWords);
+            addWords(wordList, &newWords, vocabList);
 			userThreadPost->insert({user_thread,wordList});
 		}
 	}
 }
 
 
-void Utils::addWords(std::vector<int>* wordList, std::vector<std::string>* newWords){
+void Utils::addWords(std::vector<int>* wordList, std::vector<std::string>* newWords, 
+		std::unordered_set<int>* vocabList){
 	for(std::vector<std::string>::iterator it=newWords->begin(); it!=newWords->end(); ++it){
 		std::string word = *it; boost::algorithm::trim(word);
 		if(strcmp(word.c_str(),"")){
-		int wordId = atoi(word.c_str());
-		wordList->push_back(wordId);
+			int wordId = atoi(word.c_str());
+			wordList->push_back(wordId);
+			vocabList->insert(wordId);		// Every word String is a indexId itself
 		}
 	}
 }
