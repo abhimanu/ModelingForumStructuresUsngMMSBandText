@@ -66,6 +66,13 @@ void printMat(matrix<T> *mat, int M, int N) {
 	}
 }
 
+void printLogLLtoFile(std::vector<double>* heldLogLikelihood, char* logLLfile){
+
+	ofstream outfile(logLLfile);
+	for(std::vector<double>::iterator it = heldLogLikelihood->begin(); it!=heldLogLikelihood->end(); ++it){
+		outfile<<(*it)<<endl;
+	}
+}
 
 template <class T>
 void printPiToFile(matrix<T> *mat, int M, int N, char* fileName, unordered_map<int,int>* userIndexMap){
@@ -140,7 +147,7 @@ void testDataStructures(std::unordered_map<int,int>* userList,
 		std::unordered_set<int>* threadList,
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist, 
 		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost){
-	int u1;
+//	int u1;
 	
     cout<< "num users "<<userList->size()<<"; "<<"num threads "<<threadList->size()<<endl;
 
@@ -211,6 +218,7 @@ private:
 
 	int inputCountOffset=0;
 	double chi_epsilon = 1e-7;
+	double link_epsilon = 1e-1;
 
 	int numParallelThreads;
 	std::vector<std::thread>* parallelThreadList;
@@ -218,13 +226,25 @@ private:
 	std::vector<bool>* threadKillFlagList;
 	// heldout set
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist;
+	std::vector<std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>*>* heldUserAdjlist_thread_list;
 //	boost::multi_array<double,4>* phiPQ;
 //	matrix<double>* B;
 
-	matrix<double>* held_phi_gh_sum;
-	matrix<double>* held_phi_y_gh_sum;
-	matrix<double>* held_phi_lgammaPhi;
+//	matrix<double>* held_phi_gh_sum;
+//	matrix<double>* held_phi_y_gh_sum;
+//	matrix<double>* held_phi_lgammaPhi;
     
+	std::vector< matrix<double>*>* held_phi_gh_sum_thread_list;
+	std::vector< matrix<double>*>* held_phi_pg_sum_thread_list;
+	std::vector<matrix<double>*>* held_phi_qh_sum_thread_list;
+	std::vector<matrix<double>*>* held_phi_y_gh_sum_thread_list;
+	std::vector<matrix<double>*>* held_phi_lgammaPhi_thread_list;
+	std::vector<matrix<double>*>* held_phi_gh_pq_thread_list;
+
+	std::vector<double>* heldLLcomputation_thread_list;
+
+	std::string seedIndexFileName;
+
 	//Phi terms
 	matrix<double>* phi_gh_sum;
 	matrix<double>* phi_y_gh_sum;
@@ -251,6 +271,7 @@ private:
 	int vocab_size;
 	int numHeldoutEdges;
 	int numHeldoutPosts;
+	int numTotalLinks;
 	int K;            
 	int nuIter;
 	double stepSizeNu=0;
@@ -280,6 +301,10 @@ private:
 
     double samplingThreshold=0.5;
 	double samplingThreadThreshold=0.2;
+
+    std::unordered_map<int,std::vector<int>*>* seedSetMap;
+
+	char* outputFile;
 
 public:
 	MMSBpoisson(Utils *);
@@ -328,7 +353,7 @@ public:
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist,
 	std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
 	double stepSizeNu, int numHeldoutEdges, double stochastic_step_kappa, double samplingThreshold, 
-	int numParallelThreads);        
+	int numParallelThreads, std::unordered_map<int,std::vector<int>*>* seedSetMap, std::string seedIndexFileName);        
 	void initializeB();
 
 	void initializeAllPhiMats();
@@ -342,19 +367,21 @@ public:
 	void initializeKappa();
 	
 	double getHeldoutLogLikelihood();
+	double getParallelHeldoutLL(int threadID);
 	
 	void getParametersInParallel(int iter_threshold, int inner_iter, int nu_iter, int stochastic_tau, 
-			char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet);// 
+			char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet,
+			int numTotalLinks, char* logLLfile);// 
 	bool areThreadsComputing();
 	void sendThreadKillSignal();
 	void tellThreadsToCompute();
-	void syncAndGlobalUpdate(int iter);
+	double syncAndGlobalUpdate(int iter);
 	void threadEntryFunction(std::vector<int>* threadList_thread, int threadID);
 
 	boost::numeric::ublas::vector<double>* multiThreadStochasticUpdateGamma(int p);
 	void multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id, int Y_qp,
 			int threadID, pair<int,int> user_thread_p, pair<int,int> user_thread_q);
-	void multiThreadGlobalMatsFromLocal();
+	double multiThreadGlobalMatsFromLocal();
 	void multiThreadStochasticUpdateGlobalParams(int iter);
 	void initializeMultiThreadMats(std::vector<int>* threadList_thread, int threadID);
 	void multiThreadParallelUpdate(std::vector<int>* threadList_thread, int threadID);
@@ -390,7 +417,7 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist,
 	std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
 	double stepSizeNu, int numHeldoutEdges, double stochastic_step_kappa, double samplingThreshold, 
-	int numParallelThreads){        
+	int numParallelThreads, std::unordered_map<int,std::vector<int>*>* seedSetMap, std::string seedIndexFileName){        
 
 	this->threadList = threadList;
 	this->vocabList = vocabList;
@@ -398,6 +425,10 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	this->heldUserAdjlist = heldUserAdjlist;
 	this->userThreadPost = userThreadPost;
     this->userList = userList;
+
+	this->seedIndexFileName = seedIndexFileName;
+
+	this->seedSetMap = seedSetMap;
 
 	this->num_users = userList->size();	// this stays the same even with heldout as we donot delete from original
 	this->num_threads = threadList->size();
@@ -443,10 +474,10 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	alpha = new boost::numeric::ublas::vector<double>(K);
 	eta = new boost::numeric::ublas::vector<double>(vocab_size);
 
-//	phiPQ = new boost::multi_array<double, 4>(boost::extents[K][K][num_users][num_users]);
-	held_phi_gh_sum = new matrix<double>(K,K);
-	held_phi_y_gh_sum = new matrix<double>(K,K);
-	held_phi_lgammaPhi = new matrix<double>(K,K);
+
+//	held_phi_gh_sum = new matrix<double>(K,K);
+//	held_phi_y_gh_sum = new matrix<double>(K,K);
+//	held_phi_lgammaPhi = new matrix<double>(K,K);
 
 	phi_gh_sum = new matrix<double>(K,K);
 	phi_y_gh_sum = new matrix<double>(K,K);
@@ -461,7 +492,7 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 
 	getPerThreadUserList();
 
-//  cout<< "Hello there!"<<endl;
+	cout<< "Hello there!"<<endl;
 
 	multiplier = alphaStepSize;
 	//		this->inputMat = inputMat;
@@ -471,16 +502,20 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	initializeAlpha();					// dirichlet prior for MMSB
 	initializeEta();					//dirichlet prior for LDA
 	//		initializeB();
+	
+    cout<<"Before Nu intializatio!!"<< endl;
 
 	initializeNu();
 	initializeLambda();
 	initializeKappa();
 	initializeTheta();
+    
+	cout<<"Before Gamma intializatio!!!"<< endl;
 	
 	initializeGamma();
 	initializeTau();
 
-//	cout<<"After intializeGamma\n";
+	cout<<"After intializeGamma\n";
 	for(int k=0;k<K;k++)cout<<(*alpha)(k)<<" ";
 	cout<<endl;
 //	printMat(gamma,num_users,K);
@@ -496,9 +531,127 @@ void MMSBpoisson::getPerThreadUserList(){
 	}
 }
 
+
+double MMSBpoisson::getParallelHeldoutLL(int threadID){
+
+	double ll=0;
+	double phi_sum = 0;
+	clock_t begin = clock();
+	for(int g=0; g<K; g++){
+		for(int h=0; h<K; h++){
+			(*held_phi_y_gh_sum_thread_list->at(threadID))(g,h)=0;
+			(*held_phi_gh_sum_thread_list->at(threadID))(g,h)=0;
+			(*held_phi_lgammaPhi_thread_list->at(threadID))(g,h) =0;
+		}
+		for(int u=0; u<num_users; ++u){
+			(*held_phi_pg_sum_thread_list->at(threadID))(u,g)=0;
+			(*held_phi_qh_sum_thread_list->at(threadID))(u,g)=0;
+		}
+	}
+	double held_phi_logPhi = 0;
+	
+	clock_t end = clock();
+//	if((end-begin)/CLOCKS_PER_SEC > 0)
+//		cout<<"LL first K^2 loop: "<< (end-begin)/CLOCKS_PER_SEC<<";\n";
+
+//	matrix<double> phi_gh_pq(K,K);// = new matrix<double>(K,K);
+	int totalEdges = 0;
+
+//	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* adjList;
+//	std::vector<int>* threadDebugList = new std::vector<int>(); 
+
+//	if(threadID==numParallelThreads){
+//		for(int i=0; i<numParallelThreads; ++i)
+//			threadDebugList->push_back(i);
+////		adjList = heldUserAdjlist;
+//	}
+//	else
+//		threadDebugList->push_back(threadID);
+////		adjList = heldUserAdjlist_thread_list->at(threadID);
+
+//	int originalThreadID = threadID;
+
+	begin = clock();
+
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=heldUserAdjlist_thread_list->at(threadID)->begin(); it1!=heldUserAdjlist_thread_list->at(threadID)->end(); ++it1){
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+//			cout<< "In heldoutLog-Likeli\n";
+			int p = userList->at(it1->first.first);
+			int q = userList->at(it2->first);
+//			cout<< "In heldoutLog-Likelii after p,q index access\n";
+			double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
+			double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
+			int Y_pq = it2->second + inputCountOffset;
+			totalEdges++;
+			phi_sum=0;
+			for(int g=0;g<K;g++){
+				for(int h=0;h<K;h++){
+					(*held_phi_gh_pq_thread_list->at(threadID))(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
+							+ (getDigamaValue((*gamma)(p,g)) - digamma_p_sum)
+							+ (getDigamaValue((*gamma)(q,h)) - digamma_q_sum));
+					phi_sum += (*held_phi_gh_pq_thread_list->at(threadID))(g,h);
+					if(std::isnan((*held_phi_gh_pq_thread_list->at(threadID))(g,h))){
+						cout<<"dataFunc "<<dataFunctionPhiUpdates(g,h,Y_pq)<<"; gamma_pg, gamma_ph "<<
+							(*gamma)(p,g)<<","<<(*gamma)(q,h)<<"; digamma_p, digamma_q "<<digamma_p_sum
+							<<","<<digamma_q_sum<<endl;
+						exit(0);
+					}
+//					ll+=(Y_pq*log((*lambda)(g,h)) - (*lambda)(g,h)-lgamma(Y_pq+1));
+				}
+			}
+			for(int g=0;g<K;g++){
+				for(int h=0;h<K;h++){
+					if(phi_sum==0){
+                        (*held_phi_gh_pq_thread_list->at(threadID))(g,h)=1.0/(K*K*1.0);
+//						cout<<" HARD BUG TO CATCH\n";
+					}else
+						(*held_phi_gh_pq_thread_list->at(threadID))(g,h) = (*held_phi_gh_pq_thread_list->at(threadID))(g,h)/phi_sum;          
+					if((*held_phi_gh_pq_thread_list->at(threadID))(g,h)!=0)
+						held_phi_logPhi += ((*held_phi_gh_pq_thread_list->at(threadID))(g,h)*log((*held_phi_gh_pq_thread_list->at(threadID))(g,h)));
+					(*held_phi_gh_sum_thread_list->at(threadID))(g,h)+=(*held_phi_gh_pq_thread_list->at(threadID))(g,h);
+					(*held_phi_y_gh_sum_thread_list->at(threadID))(g,h)+=((*held_phi_gh_pq_thread_list->at(threadID))(g,h)*Y_pq);
+					(*held_phi_lgammaPhi_thread_list->at(threadID))(g,h) += ((*held_phi_gh_pq_thread_list->at(threadID))(g,h)*lgamma(Y_pq+1));//(*inputMat)(p,q)+1));
+
+					(*held_phi_pg_sum_thread_list->at(threadID))(p,g) += (*held_phi_gh_pq_thread_list->at(threadID))(g,h);
+					(*held_phi_qh_sum_thread_list->at(threadID))(q,h) += (*held_phi_gh_pq_thread_list->at(threadID))(g,h);
+				}
+			}
+		}
+	}
+
+
+	for(int g=0; g<K; g++){
+		for(int h=0; h<K; h++){
+			ll+=((*held_phi_y_gh_sum_thread_list->at(threadID))(g,h)*(log((*lambda)(g,h)) + getDigamaValue((*nu)(g,h))) 
+				-(*lambda)(g,h)*(*nu)(g,h)*(*held_phi_gh_sum_thread_list->at(threadID))(g,h) - (*held_phi_lgammaPhi_thread_list->at(threadID))(g,h));
+		}
+	}
+	for(int u=0; u<num_users; u++){
+		double held_digamma_sum = 0;
+		for(int g=0; g<K; g++)
+			held_digamma_sum += (*gamma)(u,g);
+		held_digamma_sum = getDigamaValue(held_digamma_sum);
+		for(int g=0; g<K; g++){
+			ll+=((*held_phi_pg_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
+			ll+=((*held_phi_qh_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
+		}
+	}
+	ll-=held_phi_logPhi;
+		
+	end = clock();
+//	if((end-begin)/CLOCKS_PER_SEC > 0)
+//		cout<<"LL: "<<ll<<" bigger loop: "<< (end-begin)/CLOCKS_PER_SEC<<"; totalEdges "<<totalEdges<<" in THREAD "<<threadID<<"\n";
+
+
+	return ll;
+}
+
 double MMSBpoisson::getHeldoutLogLikelihood(){
 	double ll=0;
 	double phi_sum = 0;
+	matrix<double>* held_phi_gh_sum = new matrix<double>(K,K);
+	matrix<double>* held_phi_y_gh_sum = new matrix<double>(K,K);
+	matrix<double>* held_phi_lgammaPhi = new matrix<double>(K,K);
 	for(int g=0; g<K; g++){
 		for(int h=0; h<K; h++){
 			(*held_phi_y_gh_sum)(g,h)=0;
@@ -518,7 +671,7 @@ double MMSBpoisson::getHeldoutLogLikelihood(){
 			double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
 			double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
 			int Y_pq = it2->second + inputCountOffset;
-			double ph_sum=0;
+			phi_sum=0;
 			for(int g=0;g<K;g++){
 				for(int h=0;h<K;h++){
 					(*phi_gh_pq)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
@@ -667,16 +820,18 @@ void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter)
 }
 
 void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, int nu_iter, 
-		int stochastic_tau, char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet){ 
+		int stochastic_tau, char* outputFile, std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet, int numTotalLinks, char* logLLfile){ 
+	this->numTotalLinks = numTotalLinks;
 	// TODO: change phi coz it is K*K*N*N 
 //	initialize(num_users, K);//, inputMat);			// should be called from the main function
 	cout<<"iter_threshold: "<<iter_threshold<<"; inner_iter: "<<inner_iter<<"; nu_iter: "<<nu_iter
 		<<"; stochastic_tau: "<<stochastic_tau<<"; outputFile: "<<outputFile<<"; perThreadUserSet "<<
-		perThreadUserSet->size()<<endl;
-	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
+		perThreadUserSet->size()<<"; numTotalLinks "<<numTotalLinks<<endl;
+//	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
 //	boost::numeric::ublas::vector<double>* oldAlpha = new boost::numeric::ublas::vector<double>(K);
 //	copyAlpha(oldAlpha);
 	double newLL = 0;//getVariationalLogLikelihood();
+	this->numTotalLinks = numTotalLinks;
 	double oldLL = 0;
 	int iter=0;
 	this->nuIter = nu_iter;
@@ -685,6 +840,10 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
     this->perThreadUserSet = perThreadUserSet;
 
 	this->stochastic_step_tau = stochastic_tau;
+	this->outputFile = outputFile;
+
+	std::vector<double>* heldLogLikelihood = new std::vector<double>();
+
 
 //	matrix<double>* phi_gh_sum;
 //	matrix<double>* phi_y_gh_sum;
@@ -699,7 +858,17 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	phi_y_gh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
 	phi_qh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
 	phi_pg_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
-	
+
+	held_phi_gh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
+	held_phi_pg_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
+	held_phi_qh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads); ;
+	held_phi_y_gh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads); ;
+	held_phi_lgammaPhi_thread_list = new std::vector<matrix<double>*>(numParallelThreads); ;
+	held_phi_gh_pq_thread_list = new std::vector<matrix<double>*>(numParallelThreads); 
+
+	heldUserAdjlist_thread_list = new std::vector<std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>*>(numParallelThreads);
+	heldLLcomputation_thread_list = new std::vector<double>(numParallelThreads);
+
 	chi_kv_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
 
 	multiThreadNetworkSampleSizeList = new std::vector<double>(numParallelThreads);
@@ -707,8 +876,25 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	multiThreadPostsSampleSizeList = new std::vector<double>(numParallelThreads);
 
 	int perThread_threadNum = num_threads*1.0/numParallelThreads;
-	int perThreadindex = 0;
+//	int perThreadindex = 0;
 	std::unordered_set<int>::iterator it = threadList->begin();
+
+	for(int i_threads=0; i_threads<numParallelThreads; ++i_threads){
+		heldUserAdjlist_thread_list->at(i_threads) = new std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>();
+	}
+
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>::iterator it=heldUserAdjlist->begin(); it!=heldUserAdjlist->end(); ){
+		for(int i_threads=0; i_threads<numParallelThreads; i_threads++){
+			heldUserAdjlist_thread_list->at(i_threads)->insert({it->first,it->second});
+			++it;
+			if(it==heldUserAdjlist->end())
+				break;
+		}
+
+		if(it==heldUserAdjlist->end())
+			break;
+	
+	}
 
 	for(int i_threads=0; i_threads<numParallelThreads; i_threads++){
 		std::vector<int>* threadList_thread = new std::vector<int>();
@@ -735,6 +921,13 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 		
 		chi_kv_sum_thread_list->at(i_threads) = new matrix<double>(K, vocab_size);
 
+		held_phi_gh_sum_thread_list->at(i_threads) = new matrix<double>(K,K);  
+		held_phi_pg_sum_thread_list->at(i_threads) = new matrix<double>(num_users,K);  
+		held_phi_qh_sum_thread_list->at(i_threads) = new matrix<double>(num_users,K); 
+		held_phi_y_gh_sum_thread_list->at(i_threads) = new matrix<double>(K,K); 
+		held_phi_lgammaPhi_thread_list->at(i_threads) = new matrix<double>(K,K); 
+		held_phi_gh_pq_thread_list->at(i_threads) = new matrix<double>(K,K);  
+
 
 		parallelThreadList->at(i_threads) = std::thread(&MMSBpoisson::threadEntryFunction, this, threadList_thread, i_threads); 
 	}
@@ -743,12 +936,13 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	std::chrono::seconds main_second(1);
 
     int stabilityNum=0;
-	double floatThreshold = 1e-3;
+	double floatThreshold = 1;//1e-3;
 
 
 	//start main computation in an inf loop.
 	
 	int consec_dec_ll = 0;
+	int iterThreshLL = 1;
 
 	do{
 
@@ -756,26 +950,30 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 			oldLL=newLL;
 //		newLL=updateGlobalParams(inner_iter);
 			clock_t begin = clock();
-			syncAndGlobalUpdate(iter);					//main computation
+			newLL = syncAndGlobalUpdate(iter);					//main computation
+			heldLogLikelihood->push_back(newLL);
+//			cout<< "THREAD LL "<<newLL<<endl;
 			clock_t end = clock();
 			if((end-begin)/CLOCKS_PER_SEC > 0)
 				cout<<"syncAndGlobalUpdate: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
+//			if(iter%iterThreshLL == 0){
 			begin = clock();
-			newLL = getHeldoutLogLikelihood();
+//			newLL = getHeldoutLogLikelihood();
 			if (newLL<oldLL)
 				consec_dec_ll++;
 //				stochastic_step_alpha*=1.5;
 			else if(newLL>oldLL)
 				consec_dec_ll=0;
 //				stochastic_step_alpha/=1.5;
-			if(consec_dec_ll==3){
-				stochastic_step_alpha*=2;
+			if(consec_dec_ll>=4/iterThreshLL){
+				stochastic_step_alpha*=(2*iterThreshLL);
 				consec_dec_ll=0;
 			}
 			end = clock();
+//			}
 			if((end-begin)/CLOCKS_PER_SEC > 0)
-				cout<<"LogLikelihood calculation: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
-			cout<<"iter "<<iter<<" held-LL"<<newLL<<";\t"<<flush;
+				cout<<"LogLikelihood calculation Clock: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
+			cout<<"iter "<<iter<<" held-LL"<<newLL<<";\n"<<flush;
 			if(abs(newLL-oldLL)<floatThreshold)
 				stabilityNum++;
 			else
@@ -810,16 +1008,16 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 
 	matrix<double>* pi = getPis();
 	cout<<"Gamma\n";
-	printMat(gamma,num_users,K);
+//	printMat(gamma,num_users,K);
 	cout<<"Nu\n";
-	printMat(nu,K,K);
+//	printMat(nu,K,K);
 	cout<<"Lambda\n";
-	printMat(lambda,K,K);
+//	printMat(lambda,K,K);
 	cout<<"PI\n";
-	printMat(pi,num_users,K);
+//	printMat(pi,num_users,K);
 	
 	printPiToFile(pi,num_users,K,outputFile,userIndexMap);	
-
+	printLogLLtoFile(heldLogLikelihood, logLLfile);
 
 }
 
@@ -847,16 +1045,18 @@ bool MMSBpoisson::areThreadsComputing(){
 	return flag;
 }
 
-void MMSBpoisson::syncAndGlobalUpdate(int iter){
-    multiThreadGlobalMatsFromLocal();
-	multiThreadStochasticUpdateGlobalParams(iter);	
+double MMSBpoisson::syncAndGlobalUpdate(int iter){
+    double ll = multiThreadGlobalMatsFromLocal();
+	multiThreadStochasticUpdateGlobalParams(iter);
+	return ll;	
 }
 
-void MMSBpoisson::multiThreadGlobalMatsFromLocal(){
+double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 	initializeAllPhiMats();			// this sets all the global phi_mats to 0
 	initializeChiMats();
 	multiThreadGlobalNetworkSampleSize = 0;
 	multiThreadGlobalPostsSampleSize = 0;
+	double ll=0;
 	for(int thr=0; thr<numParallelThreads; thr++){
 		for(int j=0; j<K; j++){
 			for(int i=0; i<num_users; i++){
@@ -873,7 +1073,9 @@ void MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 		}
 		multiThreadGlobalNetworkSampleSize += multiThreadNetworkSampleSizeList->at(thr);
 		multiThreadGlobalPostsSampleSize += multiThreadPostsSampleSizeList->at(thr);
+		ll+=heldLLcomputation_thread_list->at(thr);
 	}
+	return ll;
 //	cout<<"multiThreadGlobalNetworkSampleSize "<<multiThreadGlobalNetworkSampleSize<<";\t";
 }
 
@@ -912,7 +1114,7 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 			(*nu)(l,m) = ((1-stochastic_step_size)*(*nu)(l,m) + stochastic_step_size*(*nu_p)(l,m));
 	delete nu_p;
 	printNegOrNanInMat(nu,K,K);
-	printMat(nu,K,K);
+//	printMat(nu,K,K);
 
 	matrix<double>* lambda_p = multiThreadStochasticUpdateLambda();
 	for(int l=0; l<K; l++)
@@ -946,6 +1148,12 @@ void MMSBpoisson::threadEntryFunction(std::vector<int>* threadList_thread, int t
 		if(threadKillFlagList->at(threadID))
 			break;							//kill yourself i.e. just exit the loop and join main
 
+        double ll = getParallelHeldoutLL(threadID);
+		
+		heldLLcomputation_thread_list->at(threadID) = ll;
+
+//		cout<<"computed held-ll "<<ll<<" thread-"<<threadID;
+
 		clock_t begin = clock();
 		initializeMultiThreadMats(threadList_thread, threadID);
 		clock_t end = clock();
@@ -975,9 +1183,9 @@ void MMSBpoisson::initializeMultiThreadMats(std::vector<int>* threadList_thread,
 			(*phi_pg_sum_thread_list->at(threadID))(p,g) = 0;
 			(*phi_qh_sum_thread_list->at(threadID))(p,g) = 0;
 		}
-        for(int v=0; v<vocab_size; ++v){
-			(*chi_kv_sum_thread_list->at(threadID))(g,v) = 0;
-		}
+//        for(int v=0; v<vocab_size; ++v){
+//			(*chi_kv_sum_thread_list->at(threadID))(g,v) = 0;
+//		}
 
 	}
 }
@@ -987,9 +1195,10 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 	multiThreadPostsSampleSizeList->at(threadID) = 0;
 	int localThreadNum = threadList_thread->size();
 //	cout<<"localThreadNum: "<<localThreadNum<<"\t";
-	int constantThreads=1000;									// TODO:  change this
-	int constantUsers=1000;
-	std::unordered_set<int>* tempThreadSet = new std::unordered_set<int>();
+	int constantThreads=100;//1000;									// TODO:  change this
+	int constantUsers=100;//1000;
+	int zeroEdgesTimes = 0;
+//	std::unordered_set<int>* tempThreadSet = new std::unordered_set<int>();
 	constantThreads = (constantThreads>localThreadNum)? localThreadNum:constantThreads;
 	for(int thr=0; thr<constantThreads; thr++){
 		int i_thr = rand()%localThreadNum;
@@ -1031,7 +1240,9 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 					userAdjlist->at(user_thread_q)->count(userid_p):0;
 				pNeighborsYpq->insert({userid_q, std::make_pair(Y_pq,Y_qp)});
 
-				while(1){
+				int zeroIter = 0;
+
+				while(zeroIter<zeroEdgesTimes){
 					int randomIndex = rand()%num_users;
 				   	int randomUserId = userIndexMap->at(randomIndex);
 					std::pair<int,int> rand_thread = std::make_pair(randomUserId, curr_thread_id);
@@ -1043,19 +1254,8 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 						continue;
 					if(heldUserAdjlist->count(user_thread)>0 && heldUserAdjlist->at(user_thread)->count(randomUserId)>0)
 						continue;
-//					if(userAdjlist->at(user_thread)->count(randomUserId)<=0 && 
-//							perThreadUserSet->at(curr_thread_id)->count(randomUserId)<=0 &&
-//            (heldUserAdjlist->count(user_thread)>0 && heldUserAdjlist->at(user_thread)->count(randomUserId)<=0) &&
-//			(heldUserAdjlist->count(rand_thread)<=0||(heldUserAdjlist->count(rand_thread)>0 && heldUserAdjlist->at(rand_thread)->count(userid_p)<=0))
-//							){
-//						pNeighbors->insert(randomUserId);
-//					cout<<"randomUserId "<<randomUserId<<endl;
-						pNeighborsYpq->insert({randomUserId, std::make_pair(0,0)});
-
-//						heldoutUserAdjlist->at(user_thread)->insert({randomUserId, 0});
-//						numHeldoutEdges++;
-						break;
-//					}
+					pNeighborsYpq->insert({randomUserId, std::make_pair(0,0)});
+					zeroIter++;
 				}
 
 			}
@@ -1065,48 +1265,13 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 				int userid_q = it->first;
 
 				pair<int,int> user_thread_q = std::make_pair(userid_q,curr_thread_id);
-//				modify the below 2 if statements to include delta requirements for chi
-//				if(heldUserAdjlist->count(user_thread)>0 && heldUserAdjlist->at(user_thread)->count(userid_q)>0)
-//					continue;
-//				if (heldUserAdjlist->count(user_thread_q)>0 && heldUserAdjlist->at(user_thread_q)->count(userid_p)>0)
-//					continue;                                      // We dont even include th pair
-
-//				pNeighbors->insert(userList->at(userid_q));
-
-//			}
-
-//			if(perUserThreadPhiStats4Chi->count(user_thread)) //{this is wrong}
-				
-//			for(int k=0; k<K; k++)
 
 
-//			cout<<"hello marshmellow\t";
-			// TODO: insert some random zero edges as well;
-			
-//			for(std::unordered_set<int>::iterator it = pNeighbors->begin(); it!=pNeighbors->end(); ++it){
-//				int q = (*it);
 				int q = userList->at(userid_q);
-//				pair<int,int> user_thread = std::make_pair(userid_p,*it);
-				//					cout<<"userid_q "<<q<<"\n";
-//				int userid_q = userIndexMap->at(q);
-				//					cout<<"userid_q "<<userid_q<<"\n";
-				//TODO also check whether it is in heldout
 				if(p==q)
 					continue;
 //				pair<int,int> user_thread_q = std::make_pair(userid_q,curr_thread_id);
 				int Y_pq = it->second.first, Y_qp=it->second.second;
-//				int Y_pq=0, Y_qp=0;
-//				if(userAdjlist->count(user_thread)>0){
-//					if(userAdjlist->at(user_thread)->count(userid_q)>0){ 
-//						Y_pq=userAdjlist->at(user_thread)->at(userid_q) + inputCountOffset;
-
-//				if(userAdjlist->count(user_thread_q)>0)
-//					if(userAdjlist->at(user_thread_q)->count(userid_p)>0)
-//						Y_qp = userAdjlist->at(user_thread_q)->at(userid_p) + inputCountOffset;
-//						//cout<<"Y_pq "<<Y_pq<<"("<<user_thread.first<<","<<userid_q<<","<<user_thread.second<<")"<<"; ";
-						//							num_nonzeros++;
-//					}
-//				}
 				try{
 					multiThreadedStochasticVariationalUpdatesPhi(p,q,Y_pq,curr_thread_id,Y_qp,threadID, 
 							user_thread, user_thread_q);
@@ -1129,7 +1294,7 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 		}
 		//		delete tempThreadUsers;
 }
-	cout<<"threadID: "<<threadID<<"; localThreadNum: "<<localThreadNum<<"; multiThreadNetworkSampleSizeList: "<<multiThreadNetworkSampleSizeList->at(threadID)<<";\t";
+//	cout<<"threadID: "<<threadID<<"; localThreadNum: "<<localThreadNum<<"; multiThreadNetworkSampleSizeList: "<<multiThreadNetworkSampleSizeList->at(threadID)<<";\t";
 //delete tempThreadSet;
 }
 
@@ -1558,32 +1723,40 @@ matrix<double>* MMSBpoisson::stochasticUpdateLambda(){
  * */
 
 
-void MMSBpoisson::initializeNu(){
+void MMSBpoisson::initializeNu(){          // shape parameter
 	int nuThresh=10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*nu)(g,h)= rand()%nuThresh + 2;// 1;
+		for(int h=0; h<K; h++){
+			(*nu)(g,h)= 0.5;//1;//rand()%nuThresh + 2;// 1;
+			if(g==h) (*nu)(g,h)= 1;//rand()%nuThresh + 2;// 1;
+		}
 }
 
 void MMSBpoisson::initializeLambda(){
 	int lambdaThresh = 10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*lambda)(g,h) = rand()%lambdaThresh + 3;//1;
+		for(int h=0; h<K; h++){
+			(*lambda)(g,h) = 0.5;//rand()%lambdaThresh + 3;//1;
+			if(g==h) (*lambda)(g,h)=1;
+		}
 }
 
 void MMSBpoisson::initializeTheta(){
 	int thetaThresh=10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*theta)(g,h)=3;//rand()%thetaThresh + 1;
+		for(int h=0; h<K; h++){
+			(*theta)(g,h)=0.5;//rand()%thetaThresh + 1;
+			if(g==h) (*theta)(g,h)=1;   
+		}
 }
 
-void MMSBpoisson::initializeKappa(){
+void MMSBpoisson::initializeKappa(){     // shape parameters
 	int kappaThresh=10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*kappa)(g,h)=2;//rand()%kappaThresh + 1;
+		for(int h=0; h<K; h++){
+			(*kappa)(g,h)=0.5;
+			if(g==h) (*kappa)(g,h)=1;//2;//rand()%kappaThresh + 1;
+		}
 }
 
 
@@ -1608,64 +1781,64 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 	double phi_sum = 0;
 	double phi_sum_q = 0;
 	
-	double chiStats_p =0, chiStats_q=0, delta_tp=0, delta_tq=0;
-	std::vector<double>* chi_vec_p, *chi_vec_q;
-	if(perUserThreadDelta->count(user_thread_p)>0)
-		delta_tp = perUserThreadDelta->at(user_thread_p);
-	if(perUserThreadDelta->count(user_thread_q)>0)
-		delta_tq = perUserThreadDelta->at(user_thread_q);
-	if(delta_tp>0){
-		chiStats_p = (-1.0*log(chi_epsilon/delta_tp)*(1.0/delta_tp) + log(1 + chi_epsilon/delta_tp)*(1.0/delta_tp));
-        chi_vec_p = perUserThreadChiStats4Phi->at(user_thread_p);
-	}
-	if(delta_tq>0){
-		chiStats_q = (-1.0*log(chi_epsilon/delta_tq)*(1.0/delta_tq) + log(1 + chi_epsilon/delta_tq)*(1.0/delta_tq));
-		chi_vec_q = perUserThreadChiStats4Phi->at(user_thread_q);
-	}
+//	double chiStats_p =0, chiStats_q=0, delta_tp=0, delta_tq=0;
+//	std::vector<double>* chi_vec_p, *chi_vec_q;
+//	if(perUserThreadDelta->count(user_thread_p)>0)
+//		delta_tp = perUserThreadDelta->at(user_thread_p);
+//	if(perUserThreadDelta->count(user_thread_q)>0)
+//		delta_tq = perUserThreadDelta->at(user_thread_q);
+//	if(delta_tp>0){
+//		chiStats_p = (-1.0*log(chi_epsilon/delta_tp)*(1.0/delta_tp) + log(1 + chi_epsilon/delta_tp)*(1.0/delta_tp));
+//        chi_vec_p = perUserThreadChiStats4Phi->at(user_thread_p);
+//	}
+//	if(delta_tq>0){
+//		chiStats_q = (-1.0*log(chi_epsilon/delta_tq)*(1.0/delta_tq) + log(1 + chi_epsilon/delta_tq)*(1.0/delta_tq));
+//		chi_vec_q = perUserThreadChiStats4Phi->at(user_thread_q);
+//	}
 
 	for(int g=0;g<K;g++){
-//		int h=g;
-//		int rand_indx = rand()%(K-1);
-//		if(rand_indx==g)
-//			rand_indx++;
+		int h=g;
+		int rand_indx = rand()%(K-1);
+		if(rand_indx==g)
+			rand_indx++;
 //		cout<<"\tasdf: "<<rand_indx<<"\t"<<endl;
-//		randomNonDiags->at(g) = rand_indx;
-//			(*phi_gh_pq)(g,rand_indx) = exp(dataFunctionPhiUpdates(g,rand_indx,Y_pq) 
-//				+ (getDigamaValue((*gamma)(p,g)) - digamma_p_sum)
-//				+ (getDigamaValue((*gamma)(q,rand_indx)) - digamma_q_sum));
-//			phi_sum+=(*phi_gh_pq)(g,rand_indx);
-		double chi_p=0, chi_q=0;
-		if(delta_tp>0)
-			chi_p = chiStats_p*chi_vec_p->at(g);
-		if(delta_tq>0)
-			chi_q = chiStats_q*chi_vec_q->at(g);
+		randomNonDiags->at(g) = rand_indx;
+			(*phi_gh_pq)(g,rand_indx) = exp(dataFunctionPhiUpdates(g,rand_indx,Y_pq) 
+				+ (getDigamaValue((*gamma)(p,g)) - digamma_p_sum)
+				+ (getDigamaValue((*gamma)(q,rand_indx)) - digamma_q_sum));
+			phi_sum+=(*phi_gh_pq)(g,rand_indx);
+//		double chi_p=0, chi_q=0;
+//		if(delta_tp>0)
+//			chi_p = chiStats_p*chi_vec_p->at(g);
+//		if(delta_tq>0)
+//			chi_q = chiStats_q*chi_vec_q->at(g);
 
-		for(int h=0;h<K;h++){
+//		for(int h=0;h<K;h++){
 			(*phi_gh_pq)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
 				+ (getDigamaValue((*gamma)(p,g)) - digamma_p_sum)
-				+ (getDigamaValue((*gamma)(q,h)) - digamma_q_sum) + chi_p);
+				+ (getDigamaValue((*gamma)(q,h)) - digamma_q_sum));
 			phi_sum+=(*phi_gh_pq)(g,h);
 
 			(*phi_gh_qp)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_qp) 
 				+ (getDigamaValue((*gamma)(q,g)) - digamma_q_sum)
-				+ (getDigamaValue((*gamma)(p,h)) - digamma_p_sum) + chi_q);
+				+ (getDigamaValue((*gamma)(p,h)) - digamma_p_sum));
 			phi_sum_q += (*phi_gh_qp)(g,h);
 			if(std::isnan((*phi_gh_pq)(g,h))){ //|| (*phi_gh_pq)(g,h)<=0 || (*phi_gh_qp)(g,h) <=0){
 				cout<<"In variational Phi updates "<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<(*phi_gh_qp)(g,h)<<endl;
 				exit(0);
 			}
-		}
-//		rand_indx = rand()%(K-1);
-//		if(rand_indx==g)
-//			rand_indx++;
-//		randomNonDiags_q->at(g) = rand_indx;
+//		}
+		rand_indx = rand()%(K-1);
+		if(rand_indx==g)
+			rand_indx++;
+		randomNonDiags_q->at(g) = rand_indx;
 
 		//		cout<<"\tasdf: "<<rand_indx<<"\t"<<endl;
 		
-//			(*phi_gh_qp)(g,rand_indx) = exp(dataFunctionPhiUpdates(g,rand_indx,Y_qp) 
-//				+ (getDigamaValue((*gamma)(q,g)) - digamma_q_sum)
-//				+ (getDigamaValue((*gamma)(p,rand_indx)) - digamma_p_sum));
-//			phi_sum_q += (*phi_gh_qp)(g,rand_indx);
+			(*phi_gh_qp)(g,rand_indx) = exp(dataFunctionPhiUpdates(g,rand_indx,Y_qp) 
+				+ (getDigamaValue((*gamma)(q,g)) - digamma_q_sum)
+				+ (getDigamaValue((*gamma)(p,rand_indx)) - digamma_p_sum));
+			phi_sum_q += (*phi_gh_qp)(g,rand_indx);
 
 //			if(std::isnan((*phi_gh_pq)(g,h))){
 //				cout<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<endl;
@@ -1683,39 +1856,39 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 	double temp_phi_gh_q = 0;
 
 	for(int g=0;g<K;g++){
-//		int h=g;
-		for(int h=0;h<K;h++){
+		int h=g;
+//		for(int h=0;h<K;h++){
 			temp_phi_gh=(*phi_gh_pq)(g,h);
 			temp_phi_gh_q = (*phi_gh_qp)(g,h);
 
-//			int rand_indx = randomNonDiags->at(g);
+			int rand_indx = randomNonDiags->at(g);
 			if(phi_sum<=DBL_MIN){
 //				cout<<"In DBL_MIN "<<DBL_MIN<<endl;
-				(*phi_gh_pq)(g,h) = 1.0/(K*K);//(2*K);	// NOTE: not K*K
-//				(*phi_gh_pq)(g,rand_indx) = 1.0/(2*K);	// NOTE: not K*K
+				(*phi_gh_pq)(g,h) = 1.0/(2.0*K);//(K*K);//(2*K);	// NOTE: not K*K
+				(*phi_gh_pq)(g,rand_indx) = 1.0/(2.0*K);//(2*K);	// NOTE: not K*K
 				phi_sum=1;
 			}else{
   			(*phi_gh_pq)(g,h) = ((*phi_gh_pq)(g,h))/phi_sum ;
-//  			(*phi_gh_pq)(g,rand_indx) = ((*phi_gh_pq)(g,rand_indx))/phi_sum ;
+  			(*phi_gh_pq)(g,rand_indx) = ((*phi_gh_pq)(g,rand_indx))/phi_sum ;
 			}
 
 			int rand_indx_q = randomNonDiags_q->at(g);
 			if(phi_sum_q<=DBL_MIN){
 //				cout<<"In DBL_MIN "<<DBL_MIN<<endl;
-				(*phi_gh_qp)(g,h) = 1.0/(K*K);//(2*K);
-//				(*phi_gh_qp)(g,rand_indx_q) = 1.0/(2*K);
+				(*phi_gh_qp)(g,h) = 1.0/(2.0*K);//(K*K);//(2*K);
+				(*phi_gh_qp)(g,rand_indx_q) = 1.0/(2.0*K);
 				phi_sum_q=1;
 			}else{
 				(*phi_gh_qp)(g,h) = ((*phi_gh_qp)(g,h))/phi_sum_q ;
-//				(*phi_gh_qp)(g,rand_indx_q) = ((*phi_gh_qp)(g,rand_indx_q))/phi_sum_q ;
+				(*phi_gh_qp)(g,rand_indx_q) = ((*phi_gh_qp)(g,rand_indx_q))/phi_sum_q ;
 			}
 
 			(*phi_gh_sum_thread_list->at(threadID))(g,h) += ((*phi_gh_pq)(g,h) + (*phi_gh_qp)(g,h));
 			(*phi_y_gh_sum_thread_list->at(threadID))(g,h) += ((*phi_gh_pq)(g,h)*Y_pq + (*phi_gh_qp)(g,h)*Y_qp);
-//			(*phi_gh_sum_thread_list->at(threadID))(g,rand_indx) += ((*phi_gh_pq)(g,rand_indx)); //dont add rand_indx_q
-//			(*phi_y_gh_sum_thread_list->at(threadID))(g,rand_indx) += ((*phi_gh_pq)(g,rand_indx)*Y_pq);
-//			(*phi_gh_sum_thread_list->at(threadID))(g,rand_indx_q) += ((*phi_gh_qp)(g,rand_indx_q));
-//			(*phi_y_gh_sum_thread_list->at(threadID))(g,rand_indx_q) += ((*phi_gh_qp)(g,rand_indx_q)*Y_qp);
+			(*phi_gh_sum_thread_list->at(threadID))(g,rand_indx) += ((*phi_gh_pq)(g,rand_indx)); //dont add rand_indx_q
+			(*phi_y_gh_sum_thread_list->at(threadID))(g,rand_indx) += ((*phi_gh_pq)(g,rand_indx)*Y_pq);
+			(*phi_gh_sum_thread_list->at(threadID))(g,rand_indx_q) += ((*phi_gh_qp)(g,rand_indx_q));
+			(*phi_y_gh_sum_thread_list->at(threadID))(g,rand_indx_q) += ((*phi_gh_qp)(g,rand_indx_q)*Y_qp);
 
 //			if(std::isnan((*phi_gh_pq)(g,h))||(*phi_gh_pq)(g,h)<0)
 			if(std::isnan(phi_sum)||phi_sum<=DBL_MIN||std::isnan(phi_sum_q)||phi_sum_q<=DBL_MIN){
@@ -1724,14 +1897,14 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 			}
 			(*phi_qh_update)(h) += ((*phi_gh_pq)(g,h));
 			(*phi_qh_update_q)(h) += (*phi_gh_qp)(g,h);
-//			(*phi_qh_update)(rand_indx) += ((*phi_gh_pq)(g,rand_indx));
-//			(*phi_qh_update_q)(rand_indx_q) += (*phi_gh_qp)(g,rand_indx_q);
+			(*phi_qh_update)(rand_indx) += ((*phi_gh_pq)(g,rand_indx));
+			(*phi_qh_update_q)(rand_indx_q) += (*phi_gh_qp)(g,rand_indx_q);
 
 			(*phi_pg_update)(g) += (*phi_gh_pq)(g,h);
 			(*phi_pg_update_q)(g) += (*phi_gh_qp)(g,h);
-//			(*phi_pg_update)(rand_indx) += (*phi_gh_pq)(g,rand_indx);
-//			(*phi_pg_update_q)(rand_indx_q) += (*phi_gh_qp)(g,rand_indx_q);
-		}
+			(*phi_pg_update)(rand_indx) += (*phi_gh_pq)(g,rand_indx);
+			(*phi_pg_update_q)(rand_indx_q) += (*phi_gh_qp)(g,rand_indx_q);
+//		}
 	}
 
 //	for(int h=0; h<K; h++){
@@ -1985,17 +2158,49 @@ void MMSBpoisson::initializeUserIndex(unordered_map<int,int>* userList){
 
 void MMSBpoisson::initializeGamma(){
 //	cout<<"In InitializeGamma\n";
+//	std::unordered_map<int,std::vector<int>*>* intialClustersFile = Utils.getSeedClusters()
 	for (int p = 0; p < num_users; ++p) {
 //		cout<<p<<" ";
 		int rand_indx = rand()%K;
 		for (int k = 0; k < K; ++k) {
-			(*gamma)(p,k)=(*alpha)(k)+(getUniformRandom()-0.5)*0.1;
+//			(*gamma)(p,k)=(*alpha)(k)+(getUniformRandom()-0.5)*0.1;
+			(*gamma)(p,k) = (getUniformRandom()/(K*K*1.0));
+
 //			cout<<(*alpha)(k)<<" "<<(*gamma)(p,k)<<" ";
 
 		}
-		(*gamma)(p,rand_indx) += (*gamma)(p,rand_indx) + 5;
+//		(*gamma)(p,rand_indx) += (*gamma)(p,rand_indx) + 5;
+
 //		cout<<endl;
 	}
+	if(strcmp(seedIndexFileName.c_str(),"null"))
+		utils->intializePiFromIndexFile(gamma, seedIndexFileName, userList);
+	
+    matrix<double>* init_pis = getPis();
+//	std::string str(outputFile);
+//	std:string init("_init");
+//	std::string outputFileStr = outputFile + init;
+//	char outputFileStr[100];
+	char temp_str[] = "init_graclus_Pi";
+//	temp_str.append("_init");
+//	cout<<"\n"<<temp_str<<endl;
+//	strcpy(outputFileStr, outputFile);
+//	strcat(outputFileStr,temp_str);
+	cout<<temp_str<<endl;
+	printPiToFile(init_pis, num_users, K, temp_str, userIndexMap);
+	delete init_pis;
+
+//	for(std::unordered_map<int, std::vector<int>*>::iterator it1 = seedSetMap->begin(); it1!=seedSetMap->end(); 
+//			++it1){                
+//		int clusterIndex = it1->first;
+//		for(std::vector<int>::iterator it2 = it1->second->begin(); it2 != it1->second->end(); ++it2){
+////			cout<<" cluste and user index "<<clusterIndex<<" "<<(*it2)<<";\t";
+////			cout<<"available"<<userList->count(*it2)<<endl;
+//			int userIndex = userList->at(*it2);
+////			cout<<" cluste and user index "<<clusterIndex<<" "<<userIndex<<";\t";
+//			(*gamma)(userIndex, clusterIndex) = (*gamma)(userIndex, clusterIndex) + 5;
+//		}
+//	}
 }
 
 void MMSBpoisson::initializeTau(){
@@ -2122,11 +2327,19 @@ int main(int argc, char** argv) {
 	std::unordered_map<int, int>* userIndexMap = initializeUserIndex(userList);
 	std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet = getPerThreadUserSet(userAdjlist);
 
-	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.10, perThreadUserSet, userList->size(), userIndexMap);
+	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.02, perThreadUserSet, userList->size(), userIndexMap);
 
 	delete userIndexMap;
 
+    std::unordered_map<int,std::vector<int>*>* seedSetMap = new std::unordered_map<int,std::vector<int>*>();
+    std::unordered_set<int>* uniqueSeedSet = new std::unordered_set<int>();
+
+//	utilsClass->getSeedClusters(argv[12], seedSetMap, uniqueSeedSet);
+
+	cout<<"Seed Set Size "<<uniqueSeedSet->size()<<"; numClusters "<<seedSetMap->size()<<" "<<endl;//<<seedSetMap->at(0)->at(0)<<" "<<seedSetMap->at(1)->at(0)<<" "<<seedSetMap->at(1)->at(2)<<endl;
+	
 	int numHeldoutEdges = numHeldAndTotalEdges.first;
+	int numTotalLinks = numHeldAndTotalEdges.second;
 
 //	testDataStructures(userList,threadList, userAdjlist,userThreadPost);
 
@@ -2140,9 +2353,10 @@ int main(int argc, char** argv) {
 //	mmsb->getParameters(matFile, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
 	double stepSizeNu = atof(argv[6]);
 	mmsb->initialize(K, userList, threadList, vocabList, userAdjlist, heldUserAdjlist, 
-			userThreadPost, stepSizeNu, numHeldoutEdges, atof(argv[7]), atof(argv[8]), atoi(argv[10]));
+			userThreadPost, stepSizeNu, numHeldoutEdges, atof(argv[7]), atof(argv[8]), atoi(argv[10]), 
+			seedSetMap, argv[12]);
 //	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
-	mmsb->getParametersInParallel(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[9]), argv[11], perThreadUserSet);
+	mmsb->getParametersInParallel(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[9]), argv[11], perThreadUserSet, numTotalLinks, argv[13]);
 
 	delete userList;
 	delete userAdjlist;

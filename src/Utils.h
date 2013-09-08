@@ -60,6 +60,8 @@ std::unordered_map<int,int>* userIndexMap);
 	char* readFile(FILE* graph_file_pointer, int* u1, int* u2, int* tid, char* s);
 
 	double getUniformRandom();
+	void getSeedClusters(char* fileName, std::unordered_map<int,std::vector<int>*>* seedSetMap, 
+		std::unordered_set<int>* uniqueSeedSet);
 };
 
 #endif /* UTILS_H_ */

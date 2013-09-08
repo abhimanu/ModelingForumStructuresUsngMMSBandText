@@ -68,6 +68,22 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 //	}
 //};
 
+
+void Utils::getSeedClusters(char* fileName, std::unordered_map<int,std::vector<int>*>* seedSetMap, 
+		std::unordered_set<int>* uniqueSeedSet){
+	char s[20000];
+	FILE* seedPointer = fopen(fileName,"r");
+	int index=0;
+	while(fgets(s, 20000, seedPointer)!=NULL){
+		std::vector<int>* seedIndex = new std::vector<int>();
+		std::vector<std::string> seedIds; 
+		boost::split(seedIds, s, boost::is_any_of("\t "));
+		addWords(seedIndex, &seedIds, uniqueSeedSet);
+		seedSetMap->insert({index, seedIndex});
+		index++;
+	}
+}
+
 std::pair<int,int> Utils::getTheHeldoutSet(
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
@@ -114,6 +130,29 @@ std::unordered_map<int,int>* userIndexMap){
 	return make_pair(numHeldoutEdges,totalLinkEdges);
 }
 
+
+void Utils::intializePiFromIndexFile(boost::numeric::ublas::matrix<double>* gamma, std::string filename, 
+		std::unordered_map<int,int>* userList){
+	FILE* seed_pointer = fopen(filename.c_str(), "r");
+	int u1;
+	int u2;
+	char s[20000];
+	// asuuming that gamma is already intialized with very low values
+	cout<<"\n Intialing gamma via graclus cluster\n";
+	while(readSeedIndexFile(seed_pointer, &u1, &u2, s) != NULL) {
+		int u_index = userList->at(u1);
+		(*gamma)(u_index,u2)=1;
+	}
+	
+}
+
+char* Utils::readSeedIndexFile(FILE* graph_file_pointer, int* u1, int* u2, char* s) {
+	//char seq[20000];
+	int err = fscanf(graph_file_pointer, "%d\t%d", u1, u2); 
+	return fgets(s, 20000, graph_file_pointer);
+
+//	printf("%d\t%d\t%d\t%s\n", *u1, *u2, *tid, s);
+}
 
 /*
  * userList is a list of users
