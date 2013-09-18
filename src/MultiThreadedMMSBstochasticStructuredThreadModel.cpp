@@ -400,7 +400,7 @@ MMSBpoisson::MMSBpoisson(Utils* utils){
 
 void MMSBpoisson::initializeAlpha(){
 	for (int k = 0; k < K; ++k) {
-		(*alpha)(k)= 0.5+(getUniformRandom()-0.5)*0.1;
+		(*alpha)(k)= 0.01;//0.05;//0.5+(getUniformRandom()-0.5)*0.1;
 	}
 }
 
@@ -936,7 +936,7 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	std::chrono::seconds main_second(1);
 
     int stabilityNum=0;
-	double floatThreshold = 1;//1e-3;
+	double floatThreshold = 1e-5;
 
 
 	//start main computation in an inf loop.
@@ -973,8 +973,8 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 //			}
 			if((end-begin)/CLOCKS_PER_SEC > 0)
 				cout<<"LogLikelihood calculation Clock: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
-			cout<<"iter "<<iter<<" held-LL"<<newLL<<";\n"<<flush;
-			if(abs(newLL-oldLL)<floatThreshold)
+			cout<<"iter "<<iter<<" held-LL"<<newLL<< " floatThresh "<<abs((newLL-oldLL)/newLL)<<"\n"<<flush;
+			if(abs((newLL-oldLL)/newLL) < floatThreshold)
 				stabilityNum++;
 			else
 				stabilityNum=0;
@@ -2318,6 +2318,8 @@ int main(int argc, char** argv) {
 		new std::unordered_map<std::pair<int,int>,std::vector<int>*, class_hash<pair<int,int>>>();
 
 //	username_mention_graph.txt
+	
+	cout<<"going to read thread Structure file\n";
 
 	utilsClass->readThreadStructureFile(argv[1], userList, threadList, vocabList, userAdjlist, userThreadPost);
 
@@ -2327,6 +2329,8 @@ int main(int argc, char** argv) {
 	std::unordered_map<int, int>* userIndexMap = initializeUserIndex(userList);
 	std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet = getPerThreadUserSet(userAdjlist);
 
+	cout<<"going to get heldout set, numUsers "<<userList->size()<<endl;
+	
 	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.02, perThreadUserSet, userList->size(), userIndexMap);
 
 	delete userIndexMap;

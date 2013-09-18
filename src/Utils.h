@@ -62,6 +62,9 @@ std::unordered_map<int,int>* userIndexMap);
 	double getUniformRandom();
 	void getSeedClusters(char* fileName, std::unordered_map<int,std::vector<int>*>* seedSetMap, 
 		std::unordered_set<int>* uniqueSeedSet);
+	void intializePiFromIndexFile(boost::numeric::ublas::matrix<double>* gamma, std::string filename, 
+		std::unordered_map<int,int>* userList);
+	char* readSeedIndexFile(FILE* graph_file_pointer, int* u1, int* u2, char* s);
 };
 
 #endif /* UTILS_H_ */

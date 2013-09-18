@@ -92,6 +92,7 @@ std::unordered_map<int,int>* userIndexMap){
 
 	int numHeldoutEdges = 0;
 	int totalLinkEdges = 0;
+	int attemptThreshold = 10;
 	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
 //		if(it1->second->size()<=1)
 		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
@@ -109,6 +110,8 @@ std::unordered_map<int,int>* userIndexMap){
 				}
 				numHeldoutEdges++;
 
+				int numAttempts = 0;
+
 				while(1){
 					int randomIndex = rand()%num_users;
 				   	int randomUserId = userIndexMap->at(randomIndex);
@@ -117,6 +120,9 @@ std::unordered_map<int,int>* userIndexMap){
 						numHeldoutEdges++;
 						break;
 					}
+					numAttempts++;
+					if(numAttempts>attemptThreshold)
+						break;
 				}
 
 				//TODO for now I am not removing it form the completeList; we will just not update this edge
@@ -173,6 +179,8 @@ void Utils::readThreadStructureFile (std::string fileName, std::unordered_map<in
 	FILE* graph_file_pointer = fopen(fileName.c_str(), "r");
 
     int num_users=0;
+
+	cout<<"file name to be read from "<<fileName<<endl;
 
     while(readFile(graph_file_pointer, &u1, &u2, &tid, s) != NULL) {
 		if(userList->count(u1)<=0){
@@ -232,6 +240,7 @@ void Utils::addWords(std::vector<int>* wordList, std::vector<std::string>* newWo
 char* Utils::readFile(FILE* graph_file_pointer, int* u1, int* u2, int* tid, char* s) {
 	//char seq[20000];
 	int err = fscanf(graph_file_pointer, "%d\t%d\t%d", u1, u2, tid); 
+//	printf("%d\t%d\t%d\t%s\n", *u1, *u2, *tid, s);
 	return fgets(s, 20000, graph_file_pointer);
 
 //	printf("%d\t%d\t%d\t%s\n", *u1, *u2, *tid, s);
