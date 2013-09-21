@@ -255,6 +255,8 @@ private:
 
 	matrix<double>* chi_kv_sum;
 	
+	std::vector<double>* prediction_error_thread_list;
+	
 	std::vector<matrix<double>*>* phi_gh_sum_thread_list;
 	std::vector<matrix<double>*>* phi_y_gh_sum_thread_list;
 	std::vector<matrix<double>*>* phi_qh_sum_thread_list;
@@ -302,7 +304,9 @@ private:
     double samplingThreshold=0.5;
 	double samplingThreadThreshold=0.2;
 
-    std::unordered_map<int,std::vector<int>*>* seedSetMap;
+	double heldoutPredictionError = 0.0;
+    
+	std::unordered_map<int,std::vector<int>*>* seedSetMap;
 
 	char* outputFile;
 
@@ -366,6 +370,9 @@ public:
 	void initializeTheta();
 	void initializeKappa();
 	
+	matrix<double>* getMeanBlockMat();
+	double getPredictionForEdge(matrix<double>* meanBlockMat, int p, int q);
+
 	double getHeldoutLogLikelihood();
 	double getParallelHeldoutLL(int threadID);
 	
@@ -531,6 +538,27 @@ void MMSBpoisson::getPerThreadUserList(){
 	}
 }
 
+matrix<double>* MMSBpoisson::getMeanBlockMat(){
+	matrix<double>* meanBlockMat= new matrix<double>(K,K);
+	for(int g =0; g<K; g++)
+		for(int h=0; h<K; h++)
+			(*meanBlockMat)(g,h) = (*nu)(g,h)*(*lambda)(g,h);
+	return meanBlockMat;
+
+}
+
+double MMSBpoisson::getPredictionForEdge(matrix<double>* meanBlockMat, int p, int q){
+	double pi_p_sum = 0, pi_q_sum=0, Y_predicted=0;
+	for(int k=0; k<K; k++){
+		pi_p_sum+=(*gamma)(p,k);
+        pi_q_sum+=(*gamma)(q,k);
+	}
+	for(int g=0; g<K; g++)
+		for(int h=0; h<K; h++)
+			Y_predicted += ((*meanBlockMat)(g,h)*((*gamma)(p,g)/pi_p_sum)*((*gamma)(q,h)/pi_q_sum));	
+
+	return Y_predicted;
+}
 
 double MMSBpoisson::getParallelHeldoutLL(int threadID){
 
@@ -551,6 +579,10 @@ double MMSBpoisson::getParallelHeldoutLL(int threadID){
 	double held_phi_logPhi = 0;
 	
 	clock_t end = clock();
+
+	matrix<double>* meanBlockMat = getMeanBlockMat();
+	prediction_error_thread_list->at(threadID) = 0;
+
 //	if((end-begin)/CLOCKS_PER_SEC > 0)
 //		cout<<"LL first K^2 loop: "<< (end-begin)/CLOCKS_PER_SEC<<";\n";
 
@@ -582,6 +614,7 @@ double MMSBpoisson::getParallelHeldoutLL(int threadID){
 			double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
 			double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
 			int Y_pq = it2->second + inputCountOffset;
+			prediction_error_thread_list->at(threadID) += (abs(Y_pq-getPredictionForEdge(meanBlockMat,p,q)));
 			totalEdges++;
 			phi_sum=0;
 			for(int g=0;g<K;g++){
@@ -854,6 +887,8 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 
     initializeChiPhiStatsOnce();
 
+	prediction_error_thread_list = new std::vector<double> (numParallelThreads);
+
 	phi_gh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
 	phi_y_gh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
 	phi_qh_sum_thread_list = new std::vector<matrix<double>*>(numParallelThreads);
@@ -877,7 +912,7 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 
 	int perThread_threadNum = num_threads*1.0/numParallelThreads;
 //	int perThreadindex = 0;
-	std::unordered_set<int>::iterator it = threadList->begin();
+//	std::unordered_set<int>::iterator it = threadList->begin();
 
 	for(int i_threads=0; i_threads<numParallelThreads; ++i_threads){
 		heldUserAdjlist_thread_list->at(i_threads) = new std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>();
@@ -896,6 +931,8 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	
 	}
 
+	std::unordered_set<int>::iterator it = threadList->begin();
+	
 	for(int i_threads=0; i_threads<numParallelThreads; i_threads++){
 		std::vector<int>* threadList_thread = new std::vector<int>();
 		
@@ -936,7 +973,7 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	std::chrono::seconds main_second(1);
 
     int stabilityNum=0;
-	double floatThreshold = 1e-5;
+	double floatThreshold = 5;//1e-5;
 
 
 	//start main computation in an inf loop.
@@ -974,7 +1011,8 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 			if((end-begin)/CLOCKS_PER_SEC > 0)
 				cout<<"LogLikelihood calculation Clock: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
 			cout<<"iter "<<iter<<" held-LL"<<newLL<< " floatThresh "<<abs((newLL-oldLL)/newLL)<<"\n"<<flush;
-			if(abs((newLL-oldLL)/newLL) < floatThreshold)
+			cout<<"prediction error: "<<heldoutPredictionError/numHeldoutEdges<<"\n"<<flush;
+			if(abs((newLL-oldLL)) < floatThreshold)
 				stabilityNum++;
 			else
 				stabilityNum=0;
@@ -1057,6 +1095,7 @@ double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 	multiThreadGlobalNetworkSampleSize = 0;
 	multiThreadGlobalPostsSampleSize = 0;
 	double ll=0;
+	heldoutPredictionError = 0;
 	for(int thr=0; thr<numParallelThreads; thr++){
 		for(int j=0; j<K; j++){
 			for(int i=0; i<num_users; i++){
@@ -1074,6 +1113,7 @@ double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 		multiThreadGlobalNetworkSampleSize += multiThreadNetworkSampleSizeList->at(thr);
 		multiThreadGlobalPostsSampleSize += multiThreadPostsSampleSizeList->at(thr);
 		ll+=heldLLcomputation_thread_list->at(thr);
+		heldoutPredictionError += prediction_error_thread_list->at(thr);
 	}
 	return ll;
 //	cout<<"multiThreadGlobalNetworkSampleSize "<<multiThreadGlobalNetworkSampleSize<<";\t";
