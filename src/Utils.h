@@ -46,7 +46,7 @@ public:
 	void addWords(std::vector<int>* wordList, std::vector<std::string>* newWords, std::unordered_set<int>* vocabList);
 
 //	template <class T>
-	void readThreadStructureFile (std::string fileName, std::unordered_map<int,int>* userList, 
+	void readThreadStructureFile (char* fileName, std::unordered_map<int,int>* userList, 
 			std::unordered_set<int>* threadList, std::unordered_set<int>* vocabList,
 			std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<std::pair<int,int>>>* userAdjlist ,
 			std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<std::pair<int,int>>>* userThreadPost);

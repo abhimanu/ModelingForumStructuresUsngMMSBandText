@@ -215,6 +215,7 @@ private:
 	int inputCountOffset=0;
 	double chi_epsilon = 1.5;	//1e-7;					// chi_epsilon should be high else it gives inf in phi updates
 	double link_epsilon = 1e-1;
+	int threadPostLengthThreshold = 200;
 
 	int numParallelThreads;
 	std::vector<std::thread>* parallelThreadList;
@@ -386,7 +387,7 @@ public:
 			int threadID, pair<int,int> user_thread_p, pair<int,int> user_thread_q, int real_delta_tp);
 	double multiThreadGlobalMatsFromLocal();
 	void multiThreadStochasticUpdateGlobalParams(int iter);
-	void multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_thread, int real_delta_tp, int threadID);
+	void multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_thread, int real_delta_tp, int threadID, std::vector<double>* constDigamma);
 	void initializeMultiThreadMats(std::vector<int>* threadList_thread, int threadID);
 	void multiThreadParallelUpdate(std::vector<int>* threadList_thread, int threadID);
 	matrix<double>* multiThreadStochasticUpdateNuFixedPoint();
@@ -653,17 +654,17 @@ double MMSBpoisson::getParallelHeldoutLL(int threadID){
 	// The following calculation is not part of heldoutLogLikelihood() function
 	// Also it is likelihood for the variational parameters
 
-//	for(int u=0; u<num_users; u++){
-//		double held_digamma_sum = 0;
-//		for(int g=0; g<K; g++)
-//			held_digamma_sum += (*gamma)(u,g);
-//		held_digamma_sum = getDigamaValue(held_digamma_sum);
-//		for(int g=0; g<K; g++){
-//			ll+=((*held_phi_pg_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
-//			ll+=((*held_phi_qh_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
-//		}
-//	}
-//	ll-=held_phi_logPhi;
+	for(int u=0; u<num_users; u++){
+		double held_digamma_sum = 0;
+		for(int g=0; g<K; g++)
+			held_digamma_sum += (*gamma)(u,g);
+		held_digamma_sum = getDigamaValue(held_digamma_sum);
+		for(int g=0; g<K; g++){
+			ll+=((*held_phi_pg_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
+			ll+=((*held_phi_qh_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
+		}
+	}
+	ll-=held_phi_logPhi;
 		
 	end = clock();
 //	if((end-begin)/CLOCKS_PER_SEC > 0)
@@ -855,7 +856,7 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	cout<<"iter_threshold: "<<iter_threshold<<"; inner_iter: "<<inner_iter<<"; nu_iter: "<<nu_iter
 		<<"; stochastic_tau: "<<stochastic_tau<<"; outputFile: "<<outputFile<<"; perThreadUserSet "<<
 		perThreadUserSet->size()<<"; numTotalLinks "<<numTotalLinks<<endl;
-	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
+//	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
 //	boost::numeric::ublas::vector<double>* oldAlpha = new boost::numeric::ublas::vector<double>(K);
 //	copyAlpha(oldAlpha);
 	double newLL = 0;//getVariationalLogLikelihood();
@@ -1096,6 +1097,7 @@ double MMSBpoisson::syncAndGlobalUpdate(int iter){
 }
 
 double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
+//	cout<<"Start of method multiThreadGlobalMatsFromLocal"<<endl;
 	initializeAllPhiMats();			// this sets all the global phi_mats to 0
 	initializeChiMats();
 	multiThreadGlobalNetworkSampleSize = 0;
@@ -1123,14 +1125,16 @@ double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 	}
 
 	for(std::unordered_map< std::pair<int,int>, std::vector<double>*,class_hash<pair<int,int>>>::iterator it = perUserThreadChiStats4Phi->begin(); it!=perUserThreadChiStats4Phi->end(); ++it){
-		for(int thr=0; thr<numParallelThreads; thr++){
-			if(perUserThreadChiStats4Phi_thread_list->at(thr)->count(it->first)>0){
-				for(int k=0; k<K; k++){
+		for(int k=0; k<K; k++){
+			it->second->at(k) = 0;
+			for(int thr=0; thr<numParallelThreads; thr++){
+				if(perUserThreadChiStats4Phi_thread_list->at(thr)->count(it->first)>0){
 					it->second->at(k) +=perUserThreadChiStats4Phi_thread_list->at(thr)->at(it->first)->at(k);
 				}
 			}
 		}
 	}
+//	cout<<"end of method multiThreadGlobalMatsFromLocal"<<endl;
 	return ll;
 	// TODO: sync ChiPhi stats as well
 	// NOTE: not updating perUserThreadPhiStats4Chi_thread_list 
@@ -1138,6 +1142,7 @@ double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 }
 
 void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
+//	cout<<"Start of method multiThreadStochasticUpdateGlobalParams"<<endl;
 
 	double stochastic_step_size = getStochasticStepSize(iter);
 
@@ -1189,6 +1194,7 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 	delete tau_p;
 	cout<<"Tau Prints"<<endl;
 	printNegOrNanInMat(tau,K,vocab_size);
+//	cout<<"End of method multiThreadStochasticUpdateGlobalParams"<<endl;
 
 }
 
@@ -1223,8 +1229,8 @@ void MMSBpoisson::threadEntryFunction(std::vector<int>* threadList_thread, int t
 		begin = clock();
 		multiThreadParallelUpdate(threadList_thread, threadID);
 		end = clock();
-//		if((end-begin)/CLOCKS_PER_SEC > 0)
-//			cout<<"parallel update Local Phis: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
+		if((end-begin)/CLOCKS_PER_SEC > 0)
+			cout<<"parallel update Local Phis threadID: "<<threadID<<", "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
 		parallelComputationFlagList->at(threadID)=false;
 
 		if(threadKillFlagList->at(threadID))
@@ -1292,13 +1298,26 @@ void MMSBpoisson::cleanUpChiPhiStats(int threadID){
 
 
 void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread, int threadID){
+//	cout<<"Start of method multiThreadParallelUpdate threadID "<<threadID<<endl;
 	multiThreadNetworkSampleSizeList->at(threadID)=0;
 	multiThreadPostsSampleSizeList->at(threadID) = 0;
 	int localThreadNum = threadList_thread->size();
 //	cout<<"localThreadNum: "<<localThreadNum<<"\t";
 	int constantThreads=100;									// TODO:  change this and mke it an argv
 	int constantUsers=100;
-	int zeroEdgesTimes = 5;
+	int zeroEdgesTimes = 0;
+	double lda_time =0, poisson_time=0;
+	clock_t begin_lda, end_lda, begin_poisson, end_poisson ;
+
+	std::vector<double>* constDigamma = new std::vector<double>(K);
+	for(int k=0; k<K; k++){
+		for(int v=0; v<vocab_size; v++){
+			if(v==0)
+				constDigamma->at(k) = (*tau)(k,v);
+			else
+				constDigamma->at(k) += (*tau)(k,v);
+		}
+	}
 
 //	cout<< "calling cleanUpChiPhiStats"<<endl;
 	cleanUpChiPhiStats(threadID);
@@ -1339,7 +1358,7 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 			perUserThreadPhiStats4Chi_thread_list->at(threadID)->insert({user_thread, phiStats4Chi});
 			// NOTE: we can pull this off just by local variables because we update chi after phi
 //			cout<< "accessed huzzah"<<endl;
-
+            begin_poisson = clock();
 
 			for(std::unordered_map<int,int>::iterator it=userAdjlist->at(user_thread)->begin(); it!=userAdjlist->at(user_thread)->end(); ++it){
 				int userid_q = it->first;
@@ -1413,83 +1432,114 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 			}
 //			delete pNeighbors;
 			delete pNeighborsYpq;
+			end_poisson = clock();
+			poisson_time += (end_poisson-begin_poisson);
+			
+			begin_lda = clock();
 			multiThreadPostsSampleSizeList->at(threadID) = multiThreadPostsSampleSizeList->at(threadID)+1;
-			multiThreadStochasticUpdateChi(p, user_thread, real_delta_tp, threadID);
-
+			multiThreadStochasticUpdateChi(p, user_thread, real_delta_tp, threadID, constDigamma);
+            end_lda = clock();
+            lda_time += (begin_lda-end_lda);
 			// check to see if the above loop throws caught exception
 		}
 		//		delete tempThreadUsers;
 }
-	cout<<"threadID: "<<threadID<<"; localThreadNum: "<<localThreadNum<<"; multiThreadNetworkSampleSizeList: "<<multiThreadNetworkSampleSizeList->at(threadID)<<";\t";
+//	cout<<"threadID: "<<threadID<<"; localThreadNum: "<<localThreadNum<<"; multiThreadNetworkSampleSizeList: "<<multiThreadNetworkSampleSizeList->at(threadID)<<";\t";
+//	cout<<"threadID: "<<threadID<<"; poisson_time: "<<poisson_time/CLOCKS_PER_SEC<<"; lda_time: "<<lda_time/CLOCKS_PER_SEC<<";\t";
+//	cout<<"End of method multiThreadParallelUpdate threadID "<<threadID<<endl;
 //delete tempThreadSet;
+	delete constDigamma;
 }
 
 void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_thread, int real_delta_tp, 
-		int threadID){
+		int threadID, std::vector<double>* constDigamma){
 	// TODO we have to update stats here for chiStats4Phi
 	//
-	if(userThreadPost->count(user_thread)<=0)
+//	cout<<"Start of method multiThreadStochasticUpdateChi, threadID "<<threadID<<endl;
+	if(userThreadPost->count(user_thread)<=0){
+//		cout<<"End of method multiThreadStochasticUpdateChi as postLength=0, threadID "<<threadID<<endl;
 		return;						
+	}
 	// return is a good idea for 2 reasons 1) no updating/updated, 2) phi is updated via global datastructure 
 
 
 	std::vector<double>* chiUpdatesForTau_p = new std::vector<double>(K);
 	std::vector<double>* chiUpdatesForPhi_p = new std::vector<double>(K);
-	std::vector<double>* constDigamma = new std::vector<double>(K);
 	std::vector<double>* chi_tpi = new std::vector<double>(K);
+	std::vector<double>* updatesFromPhi = new std::vector<double>(K);
 
 	std::vector<double>* chiStats4Phi = new std::vector<double>(K);		// dont delete
 
-
-
-	for(int k=0; k<K; k++){
-		for(int v=0; v<vocab_size; v++){
-			if(v==0)
-				constDigamma->at(k) = (*tau)(k,v);
-			else
-				constDigamma->at(k) += (*tau)(k,v);
-		}
-		chiUpdatesForPhi_p->at(k)=0;
-		chiUpdatesForTau_p->at(k)=0;
-		chiStats4Phi->at(k)=0;
-	}
-//	cout<<"In multiThreadStochasticUpdateChi "<<endl;
-//	cout<<" going to access threadPost vector "<<userThreadPost->at(user_thread)<<endl;
-	std::vector<double>* phiStatsForChi_p =perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread);
-	// NOTE: above we are readiong from the local thread data-structure.
-
-	perUserThreadChiStats4Phi_thread_list->at(threadID)->insert({user_thread, chiStats4Phi});
-
-	double updatesFromPhi = 0, chi_sum=0, log_epsilon_delta=0;
+	double  chi_sum=0, log_epsilon_delta=0;
 	log_epsilon_delta = chi_epsilon/(1.0*real_delta_tp);
 	if(log_epsilon_delta<1)
 		log_epsilon_delta = const_log_epsilon_delta;
+
+	std::vector<double>* phiStatsForChi_p =perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread);
+	// NOTE: above we are readiong from the local thread data-structure.
+
+	for(int k=0; k<K; k++){
+//		for(int v=0; v<vocab_size; v++){
+//			if(v==0)
+//				constDigamma->at(k) = (*tau)(k,v);
+//			else
+//				constDigamma->at(k) += (*tau)(k,v);
+//		}
+		chiUpdatesForPhi_p->at(k)=0;
+		chiUpdatesForTau_p->at(k)=0;
+		chiStats4Phi->at(k)=0;
+		updatesFromPhi->at(k)=0;
+		if(real_delta_tp>0)
+			updatesFromPhi->at(k) = log(log_epsilon_delta)*(1 - phiStatsForChi_p->at(k)) 
+				+ phiStatsForChi_p->at(k)*log(1 + log_epsilon_delta);
+	}
+//	cout<<"In multiThreadStochasticUpdateChi "<<endl;
+//	cout<<" going to access threadPost vector "<<userThreadPost->at(user_thread)<<endl;
+
+	perUserThreadChiStats4Phi_thread_list->at(threadID)->insert({user_thread, chiStats4Phi});
+
+	double samplingPostWordsThreshold = threadPostLengthThreshold*1.0/(userThreadPost->at(user_thread)->size()*1.0);
+	double multiplyingFactor = (samplingPostWordsThreshold<1)? 1.0/samplingPostWordsThreshold:1;
+
+//	if(samplingPostWordsThreshold <1)
+//		cout<<"user_thread: " << user_thread.first<<", "<<user_thread.second<<" postSize: "<<userThreadPost->at(user_thread)->size()<<endl;
+		
+//	multiplyingFactor = 1.0;
+
 	for(std::vector<int>::iterator it = userThreadPost->at(user_thread)->begin(); it!=userThreadPost->at(user_thread)->end(); ++it){
+		double randGenerated = rand()*1.0/RAND_MAX;//getUniformRandom(); // this was throwing seg fault
+//		cout<<"randGenerated: " << randGenerated<<" postSize: "<<userThreadPost->at(user_thread)->size()<<endl;
+		if(randGenerated>samplingPostWordsThreshold){
+//			cout<<"Skipping since the post is long" << endl;
+			continue;
+		}
+//		cout<<"Not Skipping " << endl;
+		
 		int wordId = (*it);
 		if(wordId >= vocab_size)
 			cout<<"wordId vocab_size "<<wordId << " "<<vocab_size<<endl;
 		chi_sum=0;
 		for(int k=0; k<K; k++){
-			if(real_delta_tp>0)
-				updatesFromPhi = log(log_epsilon_delta)*(1 - phiStatsForChi_p->at(k)) + 
-					phiStatsForChi_p->at(k)*log(1 + log_epsilon_delta);
-			chi_tpi->at(k) = exp(getDigamaValue((*tau)(k,wordId)) - getDigamaValue(constDigamma->at(k)) + updatesFromPhi);
+			//if(real_delta_tp>0)
+			//	updatesFromPhi = log(log_epsilon_delta)*(1 - phiStatsForChi_p->at(k)) + 
+			//		phiStatsForChi_p->at(k)*log(1 + log_epsilon_delta);
+			chi_tpi->at(k) = exp(getDigamaValue((*tau)(k,wordId)) - getDigamaValue(constDigamma->at(k)) + updatesFromPhi->at(k));
 			if(std::isnan(chi_tpi->at(k))||chi_tpi->at(k)<0){
-				cout<<"in multiThreadStochasticUpdateChi; chi_tpi->at(k): "<<chi_tpi->at(k)<<"; "<<phiStatsForChi_p->at(k)<<"; "<<real_delta_tp<<"; "<<threadID<<"; "<<(*tau)(k,wordId)<<"; "<<updatesFromPhi<<"; "<<constDigamma->at(k)<<endl;//<<user_thread.first<<","<<user_thread.second<<endl;
+				cout<<"in multiThreadStochasticUpdateChi; chi_tpi->at(k): "<<chi_tpi->at(k)<<"; "<<phiStatsForChi_p->at(k)<<"; "<<real_delta_tp<<"; "<<threadID<<"; "<<(*tau)(k,wordId)<<"; "<<updatesFromPhi->at(k)<<"; "<<constDigamma->at(k)<<endl;//<<user_thread.first<<","<<user_thread.second<<endl;
 				exit(0);
 			}
 			chi_sum +=chi_tpi->at(k);
 		}
-		if(chi_sum<=DBL_MIN)
+//		if(chi_sum<=DBL_MIN)
 		for(int k=0; k<K; k++){
 			if(chi_sum<=DBL_MIN)
 				chi_tpi->at(k) = 1.0/(1.0*K);
 			else
 				chi_tpi->at(k) = chi_tpi->at(k)/chi_sum;
-			(*chi_kv_sum_thread_list->at(threadID))(k,wordId) += chi_tpi->at(k);
-			chiStats4Phi->at(k) += chi_tpi->at(k);
+			(*chi_kv_sum_thread_list->at(threadID))(k,wordId) += multiplyingFactor*chi_tpi->at(k);
+			chiStats4Phi->at(k) += multiplyingFactor*chi_tpi->at(k);
 			if(std::isnan(chi_tpi->at(k))||chi_tpi->at(k)<0){
-				cout<<"in Normalization multiThreadStochasticUpdateChi; chi_tpi->at(k): "<<chi_sum<<"; "<<chi_tpi->at(k)<<"; "<<phiStatsForChi_p->at(k)<<"; "<<real_delta_tp<<"; "<<threadID<<"; "<<(*tau)(k,wordId)<<"; "<<updatesFromPhi<<"; "<<constDigamma->at(k)<<endl;//<<user_thread.first<<","<<user_thread.second<<endl;
+				cout<<"in Normalization multiThreadStochasticUpdateChi; chi_tpi->at(k): "<<chi_sum<<"; "<<chi_tpi->at(k)<<"; "<<phiStatsForChi_p->at(k)<<"; "<<real_delta_tp<<"; "<<threadID<<"; "<<(*tau)(k,wordId)<<"; "<<updatesFromPhi->at(k)<<"; "<<constDigamma->at(k)<<endl;//<<user_thread.first<<","<<user_thread.second<<endl;
 				exit(0);
 			}
 			//TODO: put in updates for phiStats4Chi
@@ -1500,8 +1550,9 @@ void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_
 
 	delete chiUpdatesForPhi_p;
 	delete chiUpdatesForTau_p;
-	delete constDigamma;
 	delete chi_tpi;
+	delete updatesFromPhi;
+//	cout<<"End of method multiThreadStochasticUpdateChi, threadID "<<threadID<<endl;
 }
 
 
@@ -1937,34 +1988,43 @@ matrix<double>* MMSBpoisson::stochasticUpdateLambda(){
 void MMSBpoisson::initializeNu(){
 	int nuThresh=10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*nu)(g,h)= rand()%nuThresh + 2;// 1;
+		for(int h=0; h<K; h++){
+			(*nu)(g,h)= 0.5;//1;//rand()%nuThresh + 2;// 1;
+			if(g==h) (*nu)(g,h)= 1;//rand()%nuThresh + 2;// 1;
+		}
 }
 
 void MMSBpoisson::initializeLambda(){
 	int lambdaThresh = 10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*lambda)(g,h) = rand()%lambdaThresh + 3;//1;
+		for(int h=0; h<K; h++){
+			(*lambda)(g,h) = 0.5;//rand()%lambdaThresh + 3;//1;
+			if(g==h) (*lambda)(g,h)=1;
+		}
 }
 
 void MMSBpoisson::initializeTheta(){
 	int thetaThresh=10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*theta)(g,h)=3;//rand()%thetaThresh + 1;
+		for(int h=0; h<K; h++){
+			(*theta)(g,h)=0.5;//rand()%thetaThresh + 1;
+			if(g==h) (*theta)(g,h)=1;   
+		}
 }
 
 void MMSBpoisson::initializeKappa(){
 	int kappaThresh=10;
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*kappa)(g,h)=2;//rand()%kappaThresh + 1;
+		for(int h=0; h<K; h++){
+			(*kappa)(g,h)=0.5;
+			if(g==h) (*kappa)(g,h)=1;//2;//rand()%kappaThresh + 1;
+		}
 }
 
 
 void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id, int Y_qp, 
 		int threadID, pair<int,int> user_thread_p, pair<int,int> user_thread_q, int real_delta_tp){ // we have to take pair
+//	cout<<"Start of method multiThreadedStochasticVariationalUpdatesPhi, threadID "<<threadID<<endl;
 	double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
 	double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
 
@@ -2007,6 +2067,12 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 	}
 
 	for(int g=0;g<K;g++){
+		double chi_p=0, chi_q=0;
+		if(delta_tp>0)
+			chi_p = chiStats_p*chi_vec_p->at(g);
+		if(delta_tq>0)
+			chi_q = chiStats_q*chi_vec_q->at(g);
+
 //		int h=g;
 //		int rand_indx = rand()%(K-1);
 //		if(rand_indx==g)
@@ -2017,11 +2083,6 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 //				+ (getDigamaValue((*gamma)(p,g)) - digamma_p_sum)
 //				+ (getDigamaValue((*gamma)(q,rand_indx)) - digamma_q_sum));
 //			phi_sum+=(*phi_gh_pq)(g,rand_indx);
-		double chi_p=0, chi_q=0;
-		if(delta_tp>0)
-			chi_p = chiStats_p*chi_vec_p->at(g);
-		if(delta_tq>0)
-			chi_q = chiStats_q*chi_vec_q->at(g);
 
 		for(int h=0;h<K;h++){
 			(*phi_gh_pq)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
@@ -2169,6 +2230,7 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 	delete phi_qh_update_q;
 	delete randomNonDiags;
 	delete randomNonDiags_q;
+//	cout<<"End of method multiThreadedStochasticVariationalUpdatesPhi, threadID "<<threadID<<endl;
 }
 
 void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id, int Y_qp){

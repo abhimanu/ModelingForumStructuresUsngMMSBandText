@@ -614,7 +614,9 @@ double MMSBpoisson::getParallelHeldoutLL(int threadID){
 			double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
 			double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
 			int Y_pq = it2->second + inputCountOffset;
-			prediction_error_thread_list->at(threadID) += (abs(Y_pq-getPredictionForEdge(meanBlockMat,p,q)));
+			double Y_predicted = getPredictionForEdge(meanBlockMat,p,q);
+			prediction_error_thread_list->at(threadID) += (abs(Y_pq-Y_predicted));
+//			cout<<"Y_pq, Y_predicted: "<<Y_pq<<", "<<Y_predicted<<endl<<flush;
 			totalEdges++;
 			phi_sum=0;
 			for(int g=0;g<K;g++){
@@ -1154,7 +1156,7 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 			(*nu)(l,m) = ((1-stochastic_step_size)*(*nu)(l,m) + stochastic_step_size*(*nu_p)(l,m));
 	delete nu_p;
 	printNegOrNanInMat(nu,K,K);
-//	printMat(nu,K,K);
+	printMat(nu,K,K);
 
 	matrix<double>* lambda_p = multiThreadStochasticUpdateLambda();
 	for(int l=0; l<K; l++)
@@ -1202,8 +1204,8 @@ void MMSBpoisson::threadEntryFunction(std::vector<int>* threadList_thread, int t
 		begin = clock();
 		multiThreadParallelUpdate(threadList_thread, threadID);
 		end = clock();
-//		if((end-begin)/CLOCKS_PER_SEC > 0)
-//			cout<<"parallel update Local Phis: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
+		if((end-begin)/CLOCKS_PER_SEC > 0)
+			cout<<"parallel update Local Phis threadID: "<<threadID<<", "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
 		parallelComputationFlagList->at(threadID)=false;
 
 		if(threadKillFlagList->at(threadID))

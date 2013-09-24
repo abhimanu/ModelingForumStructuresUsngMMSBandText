@@ -92,7 +92,7 @@ std::unordered_map<int,int>* userIndexMap){
 
 	int numHeldoutEdges = 0;
 	int totalLinkEdges = 0;
-	int attemptThreshold = 10;
+	int attemptThreshold = -1;//10;
 	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
 //		if(it1->second->size()<=1)
 		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
@@ -112,7 +112,7 @@ std::unordered_map<int,int>* userIndexMap){
 
 				int numAttempts = 0;
 
-				while(1){
+				while(numAttempts>attemptThreshold){
 					int randomIndex = rand()%num_users;
 				   	int randomUserId = userIndexMap->at(randomIndex);
 					if(it1->second->count(randomUserId)<=0 && perThreadUserSet->at(threadId)->count(randomUserId)<=0){
@@ -121,8 +121,8 @@ std::unordered_map<int,int>* userIndexMap){
 						break;
 					}
 					numAttempts++;
-					if(numAttempts>attemptThreshold)
-						break;
+//					if(numAttempts>attemptThreshold)
+//						break;
 				}
 
 				//TODO for now I am not removing it form the completeList; we will just not update this edge
@@ -167,7 +167,7 @@ char* Utils::readSeedIndexFile(FILE* graph_file_pointer, int* u1, int* u2, char*
  * */
 
 //template <class T>
-void Utils::readThreadStructureFile (std::string fileName, std::unordered_map<int,int>* userList, 
+void Utils::readThreadStructureFile (char* fileName, std::unordered_map<int,int>* userList, 
 		std::unordered_set<int>* threadList, std::unordered_set<int>* vocabList, 
 		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist, 
 		std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost){
@@ -176,7 +176,7 @@ void Utils::readThreadStructureFile (std::string fileName, std::unordered_map<in
 	int tid;
 	char s[20000];
 
-	FILE* graph_file_pointer = fopen(fileName.c_str(), "r");
+	FILE* graph_file_pointer = fopen(fileName, "r");
 
     int num_users=0;
 
