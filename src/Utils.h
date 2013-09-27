@@ -53,10 +53,16 @@ public:
 
 std::pair<int,int> getTheHeldoutSet(
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
-std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
 double heldPercent, std::unordered_map<int,std::unordered_set<int>*>* perThreadUserList, int num_users,
-std::unordered_map<int,int>* userIndexMap);
-	
+std::unordered_map<int,int>* userIndexMap,
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist_held, 
+char* filename, int attemptThreshold);
+
+void writeHeldoutAndTestToFile(
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+		char* fileName );
+
 	char* readFile(FILE* graph_file_pointer, int* u1, int* u2, int* tid, char* s);
 
 	double getUniformRandom();
@@ -65,6 +71,13 @@ std::unordered_map<int,int>* userIndexMap);
 	void intializePiFromIndexFile(boost::numeric::ublas::matrix<double>* gamma, std::string filename, 
 		std::unordered_map<int,int>* userList);
 	char* readSeedIndexFile(FILE* graph_file_pointer, int* u1, int* u2, char* s);
+
+std::pair<int,int> readHeldoutAndTest( 
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist_held,
+		char* fileName );
+
+char* readHeldAndTestFile(FILE* graph_file_pointer, int* u1, int* u2, int* testOrHeldEdges, int* threadId, int* count, char* s);
 };
 
 #endif /* UTILS_H_ */

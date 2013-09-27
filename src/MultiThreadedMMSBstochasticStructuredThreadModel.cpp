@@ -1086,8 +1086,14 @@ bool MMSBpoisson::areThreadsComputing(){
 }
 
 double MMSBpoisson::syncAndGlobalUpdate(int iter){
+	clock_t begin = clock();
     double ll = multiThreadGlobalMatsFromLocal();
+	clock_t end = clock();
+	cout<<"From Main Thread, computing multiThreadGlobalMatsFromLocal time:"<<(begin-end)/CLOCKS_PER_SEC<<endl;
+	begin = clock();
 	multiThreadStochasticUpdateGlobalParams(iter);
+	end = clock();
+	cout<<"From Main Thread, computing multiThreadStochasticUpdateGlobalParams time:"<<(begin-end)/CLOCKS_PER_SEC<<endl;
 	return ll;	
 }
 
@@ -1156,7 +1162,7 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 			(*nu)(l,m) = ((1-stochastic_step_size)*(*nu)(l,m) + stochastic_step_size*(*nu_p)(l,m));
 	delete nu_p;
 	printNegOrNanInMat(nu,K,K);
-	printMat(nu,K,K);
+//	printMat(nu,K,K);
 
 	matrix<double>* lambda_p = multiThreadStochasticUpdateLambda();
 	for(int l=0; l<K; l++)
@@ -1190,15 +1196,18 @@ void MMSBpoisson::threadEntryFunction(std::vector<int>* threadList_thread, int t
 		if(threadKillFlagList->at(threadID))
 			break;							//kill yourself i.e. just exit the loop and join main
 
+		clock_t begin = clock();
         double ll = getParallelHeldoutLL(threadID);
 		
 		heldLLcomputation_thread_list->at(threadID) = ll;
+		clock_t end = clock();
+		cout<<"getParallelHeldoutLL time threadID: "<<threadID<<", "<<(end-begin)/CLOCKS_PER_SEC<<";\t";
 
 //		cout<<"computed held-ll "<<ll<<" thread-"<<threadID;
 
-		clock_t begin = clock();
+		begin = clock();
 		initializeMultiThreadMats(threadList_thread, threadID);
-		clock_t end = clock();
+		end = clock();
 		if((end-begin)/CLOCKS_PER_SEC > 0)
 			cout<<"initializing Local Phis: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
 		begin = clock();
@@ -2373,7 +2382,7 @@ int main(int argc, char** argv) {
 
 	cout<<"going to get heldout set, numUsers "<<userList->size()<<endl;
 	
-	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.02, perThreadUserSet, userList->size(), userIndexMap);
+	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.05, perThreadUserSet, userList->size(), userIndexMap);
 
 	delete userIndexMap;
 

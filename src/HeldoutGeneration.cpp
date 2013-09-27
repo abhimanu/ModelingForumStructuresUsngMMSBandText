@@ -217,8 +217,6 @@ private:
 	double link_epsilon = 1e-1;
 	int threadPostLengthThreshold = 200;
     double textFactorForNWTextBalance = 1e-3;
-	double diagHyperInit;
-	double nonDiagHyperInit;
 
 	int numParallelThreads;
 	std::vector<std::thread>* parallelThreadList;
@@ -245,6 +243,7 @@ private:
 
 	std::vector<double>* heldLLcomputation_thread_list;
 
+	std::string seedIndexFileName;
 
 	//Phi terms
 	matrix<double>* phi_gh_sum;
@@ -280,9 +279,6 @@ private:
 	double stepSizeNu=0;
 	Utils* utils;
 	matrix<double>* bDenomSum;
-
-    int zeroEdgesTimes;
-    char* seedIndexFileName;
 
 	double stochasticSampleNodeMultiplier;
 	double stochasticSamplePairMultiplier;
@@ -325,9 +321,7 @@ public:
 	void updateNuFixedPoint();
 	void updateLambda();
 
-	void setZeroEdges(int zeroEdges);
-	void setHyperInits(double diagHyperInit, double nonDiagHyperInit);
-	void setSeedIndexFileName(char* seedIndexFileName);
+	void setZeroEdges();
 
 	matrix<double>* multiThreadStochasticUpdateTau();
     
@@ -414,18 +408,9 @@ MMSBpoisson::MMSBpoisson(Utils* utils){
 	this->utils = utils;
 }
 
-void MMSBpoisson::setZeroEdges(int zeroEdges){
-	this->zeroEdgesTimes = zeroEdges;
-}
-
-void MMSBpoisson::setHyperInits(double diagHyperInit, double nonDiagHyperInit){
-	this->diagHyperInit = diagHyperInit;
-	this->nonDiagHyperInit = nonDiagHyperInit;
-}
-
-void MMSBpoisson::setSeedIndexFileName(char* seedIndexFileName){
-	this->seedIndexFileName = seedIndexFileName;
-}
+//MMSBpoisson::setZeroEdges(int zeroEdges){
+//	this->zeroEdgesTimes = zeroEdges;
+//}
 
 void MMSBpoisson::initializeAlpha(){
 	for (int k = 0; k < K; ++k) {
@@ -630,9 +615,7 @@ double MMSBpoisson::getParallelHeldoutLL(int threadID){
 			double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
 			double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
 			int Y_pq = it2->second + inputCountOffset;
-			double Y_predicted = getPredictionForEdge(meanBlockMat,p,q);
-			prediction_error_thread_list->at(threadID) += (abs(Y_pq-Y_predicted));
-//			cout<<"Y_pq, Y_predicted: "<<Y_pq<<", "<<Y_predicted<<endl<<flush;
+			prediction_error_thread_list->at(threadID) += (abs(Y_pq-getPredictionForEdge(meanBlockMat,p,q)));
 			totalEdges++;
 			phi_sum=0;
 			for(int g=0;g<K;g++){
@@ -882,8 +865,8 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 //	initialize(num_users, K);//, inputMat);			// should be called from the main function
 	cout<<"iter_threshold: "<<iter_threshold<<"; inner_iter: "<<inner_iter<<"; nu_iter: "<<nu_iter
 		<<"; stochastic_tau: "<<stochastic_tau<<"; outputFile: "<<outputFile<<"; perThreadUserSet "<<
-		perThreadUserSet->size()<<"; numTotalLinks "<<numTotalLinks<<"; textFactorForNWTextBalance: "<<textFactorForNWTextBalance
-		<<"; zeroEdgesTimes: "<<zeroEdgesTimes<<endl;
+		perThreadUserSet->size()<<"; numTotalLinks "<<numTotalLinks<<"; textFactorForNWTextBalance: "<<textFactorForNWTextBalance<<endl;
+//		<<"; zeroEdgesTimes: "<<zeroEdgesTimes<<endl;
 //	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
 //	boost::numeric::ublas::vector<double>* oldAlpha = new boost::numeric::ublas::vector<double>(K);
 //	copyAlpha(oldAlpha);
@@ -1358,7 +1341,7 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 //	cout<<"localThreadNum: "<<localThreadNum<<"\t";
 	int constantThreads=100;									// TODO:  change this and mke it an argv
 	int constantUsers=100;
-//	int zeroEdgesTimes = 0;
+	int zeroEdgesTimes = 0;
 	double lda_time =0, poisson_time=0;
 	clock_t begin_lda, end_lda, begin_poisson, end_poisson ;
 
@@ -1447,7 +1430,6 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 						continue;
 					pNeighborsYpq->insert({randomUserId, std::make_pair(0,0)});
 					zeroIter++;
-					cout<<"\t\t\t\t In the zero EDGE PRODUCTION\n"<<flush;
 				}
 
 			}
@@ -2041,11 +2023,10 @@ matrix<double>* MMSBpoisson::stochasticUpdateLambda(){
 
 void MMSBpoisson::initializeNu(){
 	int nuThresh=10;
-	cout<<"nonDiagHyperInit: "<<nonDiagHyperInit<<"; diagHyperInit: "<<diagHyperInit<<endl<<flush;
 	for(int g=0; g<K; g++)
 		for(int h=0; h<K; h++){
-			(*nu)(g,h)= nonDiagHyperInit;//0.05;//1;//rand()%nuThresh + 2;// 1;
-			if(g==h) (*nu)(g,h)= diagHyperInit;//1;//rand()%nuThresh + 2;// 1;
+			(*nu)(g,h)= 0.5;//1;//rand()%nuThresh + 2;// 1;
+			if(g==h) (*nu)(g,h)= 1;//rand()%nuThresh + 2;// 1;
 		}
 }
 
@@ -2053,8 +2034,8 @@ void MMSBpoisson::initializeLambda(){
 	int lambdaThresh = 10;
 	for(int g=0; g<K; g++)
 		for(int h=0; h<K; h++){
-			(*lambda)(g,h) = nonDiagHyperInit;//0.5;//rand()%lambdaThresh + 3;//1;
-			if(g==h) (*lambda)(g,h)=diagHyperInit;//1;
+			(*lambda)(g,h) = 0.5;//rand()%lambdaThresh + 3;//1;
+			if(g==h) (*lambda)(g,h)=1;
 		}
 }
 
@@ -2062,8 +2043,8 @@ void MMSBpoisson::initializeTheta(){
 	int thetaThresh=10;
 	for(int g=0; g<K; g++)
 		for(int h=0; h<K; h++){
-			(*theta)(g,h)=nonDiagHyperInit;//0.5;//rand()%thetaThresh + 1;
-			if(g==h) (*theta)(g,h)=diagHyperInit;//1;   
+			(*theta)(g,h)=0.5;//rand()%thetaThresh + 1;
+			if(g==h) (*theta)(g,h)=1;   
 		}
 }
 
@@ -2071,8 +2052,8 @@ void MMSBpoisson::initializeKappa(){
 	int kappaThresh=10;
 	for(int g=0; g<K; g++)
 		for(int h=0; h<K; h++){
-			(*kappa)(g,h)=nonDiagHyperInit;//0.5;
-			if(g==h) (*kappa)(g,h)=diagHyperInit;//1;//2;//rand()%kappaThresh + 1;
+			(*kappa)(g,h)=0.5;
+			if(g==h) (*kappa)(g,h)=1;//2;//rand()%kappaThresh + 1;
 		}
 }
 
@@ -2520,21 +2501,13 @@ void MMSBpoisson::initializeGamma(){
 //		cout<<p<<" ";
 		int rand_indx = rand()%K;
 		for (int k = 0; k < K; ++k) {
-//			(*gamma)(p,k)=(*alpha)(k)+abs((getUniformRandom()-0.5)*0.1);
-			(*gamma)(p,k) = (getUniformRandom()/(K*K*1.0));
+			(*gamma)(p,k)=(*alpha)(k)+abs((getUniformRandom()-0.5)*0.1);
 //			cout<<(*alpha)(k)<<" "<<(*gamma)(p,k)<<" ";
 
 		}
-//		(*gamma)(p,rand_indx) += (*gamma)(p,rand_indx) + K;
+		(*gamma)(p,rand_indx) += (*gamma)(p,rand_indx) + K;
 //		cout<<endl;
 	}
-	if(strcmp(seedIndexFileName,"null"))
-		utils->intializePiFromIndexFile(gamma, seedIndexFileName, userList);
-    matrix<double>* init_pis = getPis();
-	char temp_str[] = "init_graclus_Pi";
-	cout<<temp_str<<endl;
-	printPiToFile(init_pis, num_users, K, temp_str, userIndexMap);
-	delete init_pis;
 }
 
 void MMSBpoisson::initializeTau(){
@@ -2663,17 +2636,17 @@ int main(int argc, char** argv) {
 	std::unordered_map<int, int>* userIndexMap = initializeUserIndex(userList);
 	std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet = getPerThreadUserSet(userAdjlist);
 
-//	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.05, perThreadUserSet, userList->size(), userIndexMap, heldUserAdjlist_held, argv[13]);
+	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.05, perThreadUserSet, userList->size(), userIndexMap, heldUserAdjlist_held, argv[2], atoi(argv[3]));
 	
 //	heldUserAdjlist_held->clear();
 //	heldUserAdjlist->clear();
-	std::pair<int,int> numHeldAndTestEdges = utilsClass->readHeldoutAndTest(heldUserAdjlist, heldUserAdjlist_held, argv[13]);
+//	std::pair<int,int> numHeldAndTestEdges = utilsClass->readHeldoutAndTest(heldUserAdjlist, heldUserAdjlist_held, argv[13]);
 
 	delete userIndexMap;
 
-	int numHeldoutEdges = numHeldAndTestEdges.first;
-	int numTotalLinks = 28800;//numHeldAndTotalEdges.second;	//this should be alculated in readThreadStructureFile method
-	int numTestEdges = numHeldAndTestEdges.second;
+//	int numHeldoutEdges = numHeldAndTestEdges.first;
+//	int numTotalLinks = 28800;//numHeldAndTotalEdges.second;	//this should be alculated in readThreadStructureFile method
+//	int numTestEdges = numHeldAndTestEdges.second;
 //	cout<< "numTestEdges "<< numTestEdges<<endl;
 
 //	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,std::pair<int,int>>*, class_hash<pair<int,int>>>::iterator it1=heldUserAdjlist->begin(); it1!=heldUserAdjlist->end(); ++it1){
@@ -2691,33 +2664,28 @@ int main(int argc, char** argv) {
 
 //	cout<<endl<<i<<" "<<INT_MAX<<endl;
 
-	cout<<"Before MMSB constructor"<<endl;
+//	cout<<"Before MMSB constructor"<<endl;
 
-	MMSBpoisson* mmsb = new MMSBpoisson(utilsClass);
+//	MMSBpoisson* mmsb = new MMSBpoisson(utilsClass);
 
 //	cout<<"after MMSB constructor call"<<endl;
 //	mmsb->getParameters(matFile, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
-	double stepSizeNu = atof(argv[6]);
-	int vocabSize = atoi(argv[12]);
-	double textFactorForNWTextBalance = atof(argv[14]);		
-	int zeroEdges = atoi(argv[15]);                         
-	double diagHyperInit = atof(argv[16]);
-	double nonDiagHyperInit = atof(argv[17]);                  
-	char* seedIndexFileName = argv[18];                     //LAST INDEX USED
-	mmsb->setZeroEdges(zeroEdges);
-	mmsb->setHyperInits(diagHyperInit, nonDiagHyperInit);
-	mmsb->setSeedIndexFileName(seedIndexFileName);
-	mmsb->initialize(K, userList, threadList, vocabList, userAdjlist, heldUserAdjlist, 
-			userThreadPost, stepSizeNu, numHeldoutEdges, atof(argv[7]), atof(argv[8]), atoi(argv[10]), vocabSize, heldUserAdjlist_held);
+//	double stepSizeNu = atof(argv[6]);
+//	int vocabSize = atoi(argv[12]);
+//	double textFactorForNWTextBalance = atof(argv[14]);		
+//	int zeroEdges = atoi(argv[15]);                         //LAST INDEX USED
+//	mmsb->setZeroEdges(zeroEdges);
+//	mmsb->initialize(K, userList, threadList, vocabList, userAdjlist, heldUserAdjlist, 
+//			userThreadPost, stepSizeNu, numHeldoutEdges, atof(argv[7]), atof(argv[8]), atoi(argv[10]), vocabSize, heldUserAdjlist_held);
 //	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
-	mmsb->getParametersInParallel(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[9]), argv[11], perThreadUserSet, numTotalLinks, textFactorForNWTextBalance);
-
-	delete userList;
-	delete userAdjlist;
-	delete threadList;
-	delete userThreadPost;
-
-	delete perThreadUserSet;
+//	mmsb->getParametersInParallel(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[9]), argv[11], perThreadUserSet, numTotalLinks, textFactorForNWTextBalance);
+//
+//	delete userList;
+//	delete userAdjlist;
+//	delete threadList;
+//	delete userThreadPost;
+//
+//	delete perThreadUserSet;
 
 //void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList, std::unordered_set<int>* threadList,  
 //	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist,

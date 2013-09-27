@@ -17,6 +17,8 @@
 #include <boost/random/uniform_01.hpp>
 #include <boost/generator_iterator.hpp>
 #include <boost/random.hpp>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace boost::numeric::ublas;
@@ -86,13 +88,17 @@ void Utils::getSeedClusters(char* fileName, std::unordered_map<int,std::vector<i
 
 std::pair<int,int> Utils::getTheHeldoutSet(
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
-std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
 double heldPercent, std::unordered_map<int,std::unordered_set<int>*>* perThreadUserSet, int num_users,
-std::unordered_map<int,int>* userIndexMap){
+std::unordered_map<int,int>* userIndexMap,
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist_held,
+char* filename, int attemptThreshold){
 
 	int numHeldoutEdges = 0;
 	int totalLinkEdges = 0;
-	int attemptThreshold = -1;//10;
+//	int attemptThreshold = -1;//10;
+	int testOrHeldEdges = 0;
+	int testOrHeldNonEdges = 0;
 	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
 //		if(it1->second->size()<=1)
 		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
@@ -102,22 +108,41 @@ std::unordered_map<int,int>* userIndexMap){
 			if(getUniformRandom()<=heldPercent){
 				std::pair<int,int> user_thread = it1->first;
 				int threadId = it1->first.second;
+				
 				if(heldoutUserAdjlist->count(user_thread)>0){
-					heldoutUserAdjlist->at(user_thread)->insert({it2->first, it2->second});
+					heldoutUserAdjlist->at(user_thread)->insert({it2->first, std::make_pair(testOrHeldEdges,it2->second)});
 				}else{
-					heldoutUserAdjlist->insert({user_thread, new std::unordered_map<int,int>()});
-					heldoutUserAdjlist->at(user_thread)->insert({it2->first, it2->second});
+					heldoutUserAdjlist->insert({user_thread, new std::unordered_map<int,std::pair<int,int>>()});
+					heldoutUserAdjlist->at(user_thread)->insert({it2->first, std::make_pair(testOrHeldEdges,it2->second)});
+				}
+				if(testOrHeldEdges==0){
+					if(heldoutUserAdjlist_held->count(user_thread)>0){
+						heldoutUserAdjlist_held->at(user_thread)->insert({it2->first, it2->second});
+					}else{
+						heldoutUserAdjlist_held->insert({user_thread, new std::unordered_map<int,int>()});
+						heldoutUserAdjlist_held->at(user_thread)->insert({it2->first, it2->second});
+					}
 				}
 				numHeldoutEdges++;
-
+                testOrHeldEdges = (testOrHeldEdges+1)%2;
 				int numAttempts = 0;
 
-				while(numAttempts>attemptThreshold){
+				while(numAttempts<attemptThreshold){
+					cout<<"in the nonEdge prodcution code"<<endl;
 					int randomIndex = rand()%num_users;
 				   	int randomUserId = userIndexMap->at(randomIndex);
 					if(it1->second->count(randomUserId)<=0 && perThreadUserSet->at(threadId)->count(randomUserId)<=0){
-						heldoutUserAdjlist->at(user_thread)->insert({randomUserId, 0});
+						heldoutUserAdjlist->at(user_thread)->insert({randomUserId, std::make_pair(testOrHeldEdges,0)});
+						if(testOrHeldNonEdges==0){
+							if(heldoutUserAdjlist_held->count(user_thread)>0){
+								heldoutUserAdjlist_held->at(user_thread)->insert({randomUserId, 0});
+							}else{
+								heldoutUserAdjlist_held->insert({user_thread, new std::unordered_map<int,int>()});
+								heldoutUserAdjlist_held->at(user_thread)->insert({randomUserId, 0});
+							}
+						}
 						numHeldoutEdges++;
+						testOrHeldNonEdges = (testOrHeldNonEdges+1)%2;
 						break;
 					}
 					numAttempts++;
@@ -133,9 +158,73 @@ std::unordered_map<int,int>* userIndexMap){
 //			num_nonzeros++;
 		}
 	}
+	writeHeldoutAndTestToFile(heldoutUserAdjlist, filename);
 	return make_pair(numHeldoutEdges,totalLinkEdges);
 }
 
+void Utils::writeHeldoutAndTestToFile(
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+		char* fileName ){
+	// 1/0(test/held),  U1, U2, thread, count, post?
+	ofstream outfile(fileName);
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,std::pair<int,int>>*, class_hash<pair<int,int>>>::iterator it1=heldoutUserAdjlist->begin(); it1!=heldoutUserAdjlist->end(); ++it1){
+		int U1 = it1->first.first;
+		int threadId = it1->first.second;
+		for(std::unordered_map<int,std::pair<int,int>>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+			int U2 = it2->first;
+			int count = it2->second.second;
+			int testOrHeldEdges = it2->second.first;
+			outfile << testOrHeldEdges <<" "<<U1<<" "<<U2<<" "<<threadId<<" "<<count<<" "<<"NOPOST"<<endl;
+		}
+	}
+	outfile.flush();
+	outfile.close();
+	cout<<"heldoutAndTestSet written to "<<fileName<<endl;
+}
+
+std::pair<int,int> Utils::readHeldoutAndTest( 
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* heldoutUserAdjlist_held,
+		char* fileName ){
+	FILE* heldAndTestFile = fopen(fileName, "r");
+	int u1;
+	int u2;
+	int testOrHeldEdges;
+	int threadId;
+	int count;
+	char s[20000];
+	int numHeldEdges = 0;
+	int numTestEdges = 0;
+
+	while(readHeldAndTestFile(heldAndTestFile, &u1, &u2, &testOrHeldEdges, &threadId, &count, s) != NULL) {
+		std::pair<int,int> user_thread = std::make_pair(u1,threadId);
+		if(heldoutUserAdjlist->count(user_thread)>0){
+			heldoutUserAdjlist->at(user_thread)->insert({u2, std::make_pair(testOrHeldEdges,count)});
+		}else{
+			heldoutUserAdjlist->insert({user_thread, new std::unordered_map<int,std::pair<int,int>>()});
+			heldoutUserAdjlist->at(user_thread)->insert({u2, std::make_pair(testOrHeldEdges,count)});
+		}
+		numTestEdges++;
+		if(testOrHeldEdges==0){
+			numHeldEdges++;
+			if(heldoutUserAdjlist_held->count(user_thread)>0){
+				heldoutUserAdjlist_held->at(user_thread)->insert({u2, count});
+			}else{
+				heldoutUserAdjlist_held->insert({user_thread, new std::unordered_map<int,int>()});
+				heldoutUserAdjlist_held->at(user_thread)->insert({u2, count});
+			}
+		}
+//		cout<<testOrHeldEdges<<" "<<u1<<" "<<u2<<" "<<" "<<threadId<<" "<<count<<endl;
+	}
+	return std::make_pair(numHeldEdges, numTestEdges-numHeldEdges);
+}
+
+char* Utils::readHeldAndTestFile(FILE* graph_file_pointer, int* u1, int* u2, int* testOrHeldEdges, int* threadId, int* count, char* s) {
+	int err = fscanf(graph_file_pointer, "%d\t%d\t%d\t%d\t%d", testOrHeldEdges, u1, u2, threadId, count); 
+	return fgets(s, 20000, graph_file_pointer);
+
+//	printf("%d\t%d\t%d\t%s\n", *u1, *u2, *tid, s);
+}
 
 void Utils::intializePiFromIndexFile(boost::numeric::ublas::matrix<double>* gamma, std::string filename, 
 		std::unordered_map<int,int>* userList){
