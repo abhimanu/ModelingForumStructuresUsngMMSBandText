@@ -17,6 +17,7 @@
 #include <boost/random/uniform_01.hpp>
 #include <boost/generator_iterator.hpp>
 #include <boost/random.hpp>
+//#include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -70,6 +71,16 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 //	}
 //};
 
+void Utils::readVocabMap(std::unordered_map<int, string>* vocabMap, char* fileName){
+	char s[20000];
+	FILE* filePointer = fopen(fileName,"r");
+	int index=1;
+	while(fgets(s, 20000, filePointer)!=NULL){
+		//boost::algorithm::trim(s);
+		vocabMap->insert({index, s});
+		index++;
+	}
+}
 
 void Utils::getSeedClusters(char* fileName, std::unordered_map<int,std::vector<int>*>* seedSetMap, 
 		std::unordered_set<int>* uniqueSeedSet){

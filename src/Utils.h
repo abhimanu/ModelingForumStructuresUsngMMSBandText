@@ -78,6 +78,7 @@ std::pair<int,int> readHeldoutAndTest(
 		char* fileName );
 
 char* readHeldAndTestFile(FILE* graph_file_pointer, int* u1, int* u2, int* testOrHeldEdges, int* threadId, int* count, char* s);
+void readVocabMap(std::unordered_map<int, string>* vocabMap, char* fileName);
 };
 
 #endif /* UTILS_H_ */
