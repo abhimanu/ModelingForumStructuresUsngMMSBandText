@@ -66,6 +66,14 @@ void printMat(matrix<T> *mat, int M, int N) {
 	}
 }
 
+void printLogLLtoFile(std::vector<double>* heldLogLikelihood, std::string logLLfile){
+
+	ofstream outfile(logLLfile);
+	for(std::vector<double>::iterator it = heldLogLikelihood->begin(); it!=heldLogLikelihood->end(); ++it){
+		outfile<<(*it)<<endl;
+	}
+}
+
 
 template <class T>
 void printPiToFile(matrix<T> *mat, int M, int N, std::string fileName, unordered_map<int,int>* userIndexMap){
@@ -78,6 +86,56 @@ void printPiToFile(matrix<T> *mat, int M, int N, std::string fileName, unordered
 		}
 		outfile << endl;
 	}
+}
+
+void printPerUserThreadTopicStats(std::string fileName, std::vector<std::unordered_map<int,std::vector<double>*>*>* perUserThreadTopicStats_thread_list, int K, std::vector<std::unordered_map<int,int>*>* perUserTopicStats_thread_list, int num_users, std::unordered_map<int,int>* userIndexMap, int topicDiffTopKUsers, int numParallelThreads){
+	ofstream outfile(fileName);
+	std::unordered_map<int,int>* final_map = new std::unordered_map<int,int>();
+
+	for(int u=0; u<num_users; ++u){
+		final_map->insert({u,0});
+		for(int thr=0; thr<numParallelThreads; ++thr){
+			if(perUserTopicStats_thread_list->at(thr)->count(u)>0)
+				final_map->at(u)+=perUserTopicStats_thread_list->at(thr)->at(u);
+		}
+	} 
+	for(int ind=1; ind<10; ++ind){
+		double countSum=0;
+		for(int k=0; k<K; k++){
+			double count = 0;
+			for(int thr=0; thr<numParallelThreads; ++thr){
+				count+=perUserThreadTopicStats_thread_list->at(thr)->at(ind)->at(k);
+			}
+			outfile<<count<<",";
+			countSum+=count;
+		}
+		outfile<<countSum<<endl;
+	}
+	std::unordered_set<int>* keySetHigh = new std::unordered_set<int>();
+	std::unordered_set<int>* keySetLow = new std::unordered_set<int>();
+	for(int n=0; n<topicDiffTopKUsers; ++n){
+		int currUserLow = 0;
+		int currUserHigh = 0;
+		for(std::unordered_map<int,int>::iterator it = final_map->begin(); it!=final_map->end(); ++it){
+		   if(keySetLow->count(it->first)<=0 && it->second<final_map->at(currUserLow) && it->second>5*K)
+			   currUserLow=it->first; 
+		   if(keySetHigh->count(it->first)<=0 && it->second>final_map->at(currUserHigh))
+			   currUserHigh=it->first;
+		}
+		keySetHigh->insert(currUserHigh);
+		keySetLow->insert(currUserLow);
+	}
+	outfile<<"\n========Bottom "<<topicDiffTopKUsers<<"=======\n";
+	for(std::unordered_set<int>::iterator it=keySetLow->begin(); it!=keySetLow->end(); ++it){
+		outfile<<userIndexMap->at(*it)<<",";
+	}
+	outfile<<"\n========Top "<<topicDiffTopKUsers<<"=======\n";
+	for(std::unordered_set<int>::iterator it=keySetHigh->begin(); it!=keySetHigh->end(); ++it){
+		outfile<<userIndexMap->at(*it)<<",";
+	}
+	outfile<<endl;
+    outfile.flush();
+	outfile.close();
 }
 
 void printLDATopics(matrix<double> *mat, int M, int N, std::string fileName, int topKWords, std::unordered_map<int, std::string>* vocabMap){
@@ -209,6 +267,26 @@ void printMat3D(boost::multi_array<double,3> *mat, int M, int N, int P) {
 	}
 }
 
+double getBaseLinePrediction(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist_held, int inputCountOffset){
+	double mean = 0, numEdges=0, basePrediction=0;
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=heldUserAdjlist_held->begin(); it1!=heldUserAdjlist_held->end(); ++it1){
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+			int Y_pq = it2->second + inputCountOffset;
+			numEdges++;
+			mean+=Y_pq;
+		}
+	}
+	mean = mean/numEdges;
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=heldUserAdjlist_held->begin(); it1!=heldUserAdjlist_held->end(); ++it1){
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+			int Y_pq = it2->second + inputCountOffset;
+			basePrediction += abs(Y_pq-mean);
+		}
+	}
+	basePrediction = basePrediction/numEdges;
+	return basePrediction;
+}
+
 class MMSBpoisson{
 
 private:
@@ -243,6 +321,10 @@ private:
 	double nonDiagHyperInit;
 	std::string outputDir = "outputDir";
 	char* outputFile;
+	bool fasterFlag = false;
+	int constantThreads=100;
+	double topicDiffConstant=0.20;
+	int topicDiffTopKUsers=20;
 
 	int numParallelThreads;
 	std::vector<std::thread>* parallelThreadList;
@@ -335,6 +417,8 @@ private:
 	double samplingThreadThreshold=0.2;
 
 	double heldoutPredictionError = 0.0;
+	std::vector<std::unordered_map<int,std::vector<double>*>*>* perUserThreadTopicStats_thread_list;
+	std::vector<std::unordered_map<int,int>*>* perUserTopicStats_thread_list;
 
 public:
 	MMSBpoisson(Utils *);
@@ -353,6 +437,8 @@ public:
 	void setHyperInits(double diagHyperInit, double nonDiagHyperInit);
 	void setSeedIndexFileName(char* seedIndexFileName);
 	void setVocabMap(std::unordered_map<int, std::string>* vocabMap);
+	void setFasterFlag(bool fasterFlag);
+	void setConstantThreads(int constantThreads);
 
 	matrix<double>* multiThreadStochasticUpdateTau();
     
@@ -407,7 +493,7 @@ public:
 	matrix<double>* getMeanBlockMat();
 	double getPredictionForEdge(matrix<double>* meanBlockMat, int p, int q);
 	
-	std::vector<double>* getPerThreadLDATopicVector(std::pair<int,int> user_thread, std::vector<double>* constDigamma, std::vector<double>* user_topic, matrix<double>* pi);
+	std::vector<double>* getPerThreadLDATopicVector(std::pair<int,int> user_thread, std::vector<double>* constDigamma, std::vector<double>* user_topic, matrix<double>* pi, int threadID);
 	void printPerThreadLDAUserTopics(std::vector<int>* threadList_thread, int threadID);
 	void performEndOfThreadTask(std::vector<int>* threadList_thread, int threadID);
 
@@ -448,6 +534,14 @@ void MMSBpoisson::setZeroEdges(int zeroEdges){
 	this->zeroEdgesTimes = zeroEdges;
 }
 
+void MMSBpoisson::setFasterFlag(bool fasterFlag){
+	this->fasterFlag = fasterFlag;
+}
+
+void MMSBpoisson::setConstantThreads(int constantThreads){
+	this->constantThreads=constantThreads;
+}
+
 void MMSBpoisson::setVocabMap(std::unordered_map<int, std::string>* vocabMap){
 	this->vocabMap = vocabMap;
 }
@@ -475,7 +569,7 @@ void MMSBpoisson::initializeAlpha(double initValue){
 
 void MMSBpoisson::initializeEta(){
 	for (int k = 0; k < vocab_size; ++k) {
-		(*eta)(k)= (getUniformRandom())*0.5;
+		(*eta)(k)= 0.01;//(getUniformRandom())*0.5;
 	}
 //	cout<<"initialized Eta"<<endl;
 }
@@ -505,9 +599,11 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	this->parallelComputationFlagList = new std::vector<bool>(numParallelThreads);
 	this->threadKillFlagList = new std::vector<bool>(numParallelThreads);
 
+//	for(int k=0;k<K;k++)cout<<(*alpha)(k)<<" ";
+//	cout<<endl;
 	cout<<"num_users:"<<num_users<<"; stepSizeNu: "<<stepSizeNu<<"; num_threads: "<<num_threads<<
 		"; numHeldoutEdges: "<<numHeldoutEdges<<"; stochastic_step_kappa: "<<stochastic_step_kappa<<
-		"; samplingThreshold: "<<samplingThreshold<<"; numParallelThreads: "<<numParallelThreads<<
+		"; samplingThreshold/floatThreshold: "<<samplingThreshold<<"; numParallelThreads: "<<numParallelThreads<<
 		"; vocab_size"<<vocab_size<<endl;
 	this->K=K;            
 	this->stepSizeNu=stepSizeNu;
@@ -517,6 +613,7 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	cout<<" (num_threads*num_users*num_users-numHeldoutEdges)"
 		<<((double)num_threads*num_users*num_users-numHeldoutEdges)	<<endl;
 //TODO: At present we are not using samplingThreshold
+//TODO: At present it is used as floatThreshold
 	
 	
 	stochasticSamplePostsMultiplier = ((double)num_threads*num_users-numHeldoutPosts);//*samplingThreshold);
@@ -579,8 +676,8 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	initializeTau();
 
 //	cout<<"After intializeGamma\n";
-	for(int k=0;k<K;k++)cout<<(*alpha)(k)<<" ";
-	cout<<endl;
+//	for(int k=0;k<K;k++)cout<<(*alpha)(k)<<" ";
+//	cout<<endl;
 //	printMat(gamma,num_users,K);
 //	cout<<"Fag end of initialize()\n";
 }
@@ -721,17 +818,19 @@ double MMSBpoisson::getParallelHeldoutLL(int threadID){
 	// The following calculation is not part of heldoutLogLikelihood() function
 	// Also it is likelihood for the variational parameters
 
-	for(int u=0; u<num_users; u++){
-		double held_digamma_sum = 0;
-		for(int g=0; g<K; g++)
-			held_digamma_sum += (*gamma)(u,g);
-		held_digamma_sum = getDigamaValue(held_digamma_sum);
-		for(int g=0; g<K; g++){
-			ll+=((*held_phi_pg_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
-			ll+=((*held_phi_qh_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
+	if(!fasterFlag){
+		for(int u=0; u<num_users; u++){
+			double held_digamma_sum = 0;
+			for(int g=0; g<K; g++)
+				held_digamma_sum += (*gamma)(u,g);
+			held_digamma_sum = getDigamaValue(held_digamma_sum);
+			for(int g=0; g<K; g++){
+				ll+=((*held_phi_pg_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
+				ll+=((*held_phi_qh_sum_thread_list->at(threadID))(u,g)*(getDigamaValue((*gamma)(u,g)) - held_digamma_sum));
+			}
 		}
+		ll-=held_phi_logPhi;
 	}
-	ll-=held_phi_logPhi;
 		
 	end = clock();
 //	if((end-begin)/CLOCKS_PER_SEC > 0)
@@ -923,7 +1022,9 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	cout<<"iter_threshold: "<<iter_threshold<<"; inner_iter: "<<inner_iter<<"; nu_iter: "<<nu_iter
 		<<"; stochastic_tau: "<<stochastic_tau<<"; outputFile: "<<outputFile<<"; perThreadUserSet "<<
 		perThreadUserSet->size()<<"; numTotalLinks "<<numTotalLinks<<"; textFactorForNWTextBalance: "<<textFactorForNWTextBalance
-		<<"; zeroEdgesTimes: "<<zeroEdgesTimes<<endl;
+		<<"; zeroEdgesTimes: "<<zeroEdgesTimes<<"; constantThreads: "<<constantThreads<<"; fasterFlag: "<<fasterFlag<<endl;
+	for(int k=0;k<K;k++)cout<<(*alpha)(k)<<" ";
+	cout<<endl;
 //	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
 //	boost::numeric::ublas::vector<double>* oldAlpha = new boost::numeric::ublas::vector<double>(K);
 //	copyAlpha(oldAlpha);
@@ -957,6 +1058,8 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	perUserThreadChiStats4Phi_thread_list = new std::vector<std::unordered_map< std::pair<int,int>, std::vector<double>*,class_hash<pair<int,int>>>*>(numParallelThreads);
 	perUserThreadPhiStats4Chi_thread_list = new std::vector<std::unordered_map< std::pair<int,int>, std::vector<double>*,class_hash<pair<int,int>>>*>(numParallelThreads);
 
+	perUserThreadTopicStats_thread_list = new std::vector<std::unordered_map<int,std::vector<double>*>*>(numParallelThreads);
+	perUserTopicStats_thread_list = new std::vector<std::unordered_map<int,int>*>(numParallelThreads);
 //	std::vector<std::unordered_map<int,int>*>* 
 	
 	prediction_error_thread_list = new std::vector<double> (numParallelThreads);
@@ -1026,6 +1129,8 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
         perUserThreadPhiStats4Chi_thread_list->at(i_threads) = new std::unordered_map<std::pair<int,int>, std::vector<double>*,class_hash<pair<int,int>>>();
         perUserThreadChiStats4Phi_thread_list->at(i_threads) = new std::unordered_map<std::pair<int,int>, std::vector<double>*,class_hash<pair<int,int>>>();
 
+		perUserThreadTopicStats_thread_list->at(i_threads) = new std::unordered_map<int, std::vector<double>*>();
+		perUserTopicStats_thread_list->at(i_threads) = new std::unordered_map<int, int>();
 
 
 		phi_gh_sum_thread_list->at(i_threads) = new matrix<double>(K,K);
@@ -1050,13 +1155,15 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	std::chrono::seconds main_second(1);
 
     int stabilityNum=0;
-	double floatThreshold = 5;//1e-3;
+	double floatThreshold = samplingThreshold;//5;//1e-3;
 
 
 	//start main computation in an inf loop.
 	
 	int consec_dec_ll = 0;
 	int iterThreshLL = 1;
+	
+    double baselineHeld=getBaseLinePrediction(heldUserAdjlist_held, inputCountOffset);
 
 	do{
 
@@ -1089,6 +1196,7 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 				cout<<"LogLikelihood calculation: "<< (end-begin)/CLOCKS_PER_SEC<<";\t";
 			cout<<"iter "<<iter<<" held-LL"<<newLL<< " floatThresh "<<abs((newLL-oldLL)/newLL)<<"\n"<<flush;
 			cout<<"prediction error: "<<heldoutPredictionError/numHeldoutEdges<<"\n"<<flush;
+			cout<<"baseline prediction error: "<<baselineHeld<<"\n"<<flush;
 			if(abs(newLL-oldLL)<floatThreshold)
 				stabilityNum++;
 			else
@@ -1134,10 +1242,18 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 	std::ostringstream s;
 	s<<outputDir<<"/"<<outputFile;
 	printPiToFile(pi,num_users,K,s.str(),userIndexMap);	
-	std::ostringstream s1;
-	s1<<outputDir<<"/"<<outputFile<<".perTopicTop"<<topKWords<<"Words.txt";
-	printLDATopics(tau, K, vocab_size, s1.str(), topKWords, vocabMap);
+	if(textFactorForNWTextBalance>0){
+		std::ostringstream s1;
+		s1<<outputDir<<"/"<<outputFile<<".perTopicTop"<<topKWords<<"Words.txt";
+		printLDATopics(tau, K, vocab_size, s1.str(), topKWords, vocabMap);
+		std::ostringstream s2;
+		s2<<outputDir<<"/"<<outputFile<<".perUserThreadTopicStats.txt";
+		printPerUserThreadTopicStats(s2.str(), perUserThreadTopicStats_thread_list, K, perUserTopicStats_thread_list, num_users, userIndexMap, topicDiffTopKUsers, numParallelThreads);
+	}
 //	printErrorToFile(prediction_error_thread_list, num_threads);
+	std::ostringstream logLLfile;
+	logLLfile<<outputDir<<"/"<<outputFile<<".LL.txt";
+	printLogLLtoFile(heldLogLikelihood, logLLfile.str());
 
 
 }
@@ -1149,6 +1265,10 @@ void MMSBpoisson::printPerThreadLDAUserTopics(std::vector<int>* threadList_threa
 	s<<outputDir<<"/"<<outputFile<<".perUserThreadTopic_thread_"<<threadID<<".txt";
 	ofstream outfile(s.str()); 
 	std::vector<double>* constDigamma = new std::vector<double>(K);
+	for(int ind=1;ind<10;ind++){
+		perUserThreadTopicStats_thread_list->at(threadID)->insert({ind,new std::vector<double>(K)});
+	}
+
 	for(int k=0; k<K; k++){
 		for(int v=0; v<vocab_size; v++){
 			if(v==0)
@@ -1156,14 +1276,18 @@ void MMSBpoisson::printPerThreadLDAUserTopics(std::vector<int>* threadList_threa
 			else
 				constDigamma->at(k) += (*tau)(k,v);
 		}
+		for(int ind=1;ind<10;ind++){
+			perUserThreadTopicStats_thread_list->at(threadID)->at(ind)->at(k)=0;
+		}
 	}
+	
 	for(std::vector<int>::iterator it = threadList_thread->begin(); it!=threadList_thread->end(); ++it){
 		int curr_thread = (*it);
 		for(std::vector<int>::iterator it2 = perThreadUserList->at(curr_thread)->begin(); it2!=perThreadUserList->at(curr_thread)->end(); ++it2){
 			int curr_user = (*it2);
 			std::pair<int,int> user_thread = std::make_pair(curr_user, curr_thread);
 			std::vector<double>* user_topic = new std::vector<double>(K);
-			user_topic = getPerThreadLDATopicVector(user_thread, constDigamma, user_topic, pi);
+			user_topic = getPerThreadLDATopicVector(user_thread, constDigamma, user_topic, pi, threadID);
 			outfile<<curr_user<<","<<curr_thread;
 			for(int k=0; k<K; k++){
 				outfile<<","<<user_topic->at(k);
@@ -1175,7 +1299,7 @@ void MMSBpoisson::printPerThreadLDAUserTopics(std::vector<int>* threadList_threa
 	delete pi;
 }
 
-std::vector<double>* MMSBpoisson::getPerThreadLDATopicVector(std::pair<int,int> user_thread, std::vector<double>* constDigamma, std::vector<double>* user_topic, matrix<double>* pi){
+std::vector<double>* MMSBpoisson::getPerThreadLDATopicVector(std::pair<int,int> user_thread, std::vector<double>* constDigamma, std::vector<double>* user_topic, matrix<double>* pi, int threadID){
 	double samplingPostWordsThreshold = threadPostLengthThreshold*1.0/(userThreadPost->at(user_thread)->size()*1.0);
 	double multiplyingFactor = (samplingPostWordsThreshold<1)? 1.0/samplingPostWordsThreshold:1;
 	double chi_sum = 0;
@@ -1204,6 +1328,8 @@ std::vector<double>* MMSBpoisson::getPerThreadLDATopicVector(std::pair<int,int> 
 		//		cout<<"Not Skipping " << endl;
 
 		int wordId = (*it);
+		if(wordId >= vocab_size)
+			continue;
 		if(wordId >= vocab_size)
 			cout<<"wordId vocab_size "<<wordId << " "<<vocab_size<<endl;
 		chi_sum=0;
@@ -1241,6 +1367,19 @@ std::vector<double>* MMSBpoisson::getPerThreadLDATopicVector(std::pair<int,int> 
 			user_topic->at(k)= 1.0/K;
 		else
 			user_topic->at(k)= user_topic->at(k)/topic_sum;
+		double topicDiff = abs((*pi)(p,k) - user_topic->at(k));
+		for(int ind=1;ind<10;ind++){
+			if(topicDiff*10 > ind){
+				perUserThreadTopicStats_thread_list->at(threadID)->at(ind)->at(k) +=1;
+			}
+		}
+		if(topicDiff>=topicDiffConstant){
+			if(perUserTopicStats_thread_list->at(threadID)->count(p)>0){
+				perUserTopicStats_thread_list->at(threadID)->at(p) +=1;
+			}else{
+				perUserTopicStats_thread_list->at(threadID)->insert({p,1});
+			}
+		}
 	}
 	return user_topic;
 }
@@ -1273,18 +1412,20 @@ double MMSBpoisson::syncAndGlobalUpdate(int iter){
 	clock_t begin = clock();
     double ll = multiThreadGlobalMatsFromLocal();
 	clock_t end = clock();
-//	cout<<"From Main Thread, computing multiThreadGlobalMatsFromLocal time:"<<(begin-end)/CLOCKS_PER_SEC<<endl;
+	cout<<"From Main Thread, computing multiThreadGlobalMatsFromLocal time:"<<(begin-end)/CLOCKS_PER_SEC<<endl;
 	begin = clock();
 	multiThreadStochasticUpdateGlobalParams(iter);	
 	end = clock();
-//	cout<<"From Main Thread, computing multiThreadStochasticUpdateGlobalParams time:"<<(begin-end)/CLOCKS_PER_SEC<<endl;
+	cout<<"From Main Thread, computing multiThreadStochasticUpdateGlobalParams time:"<<(begin-end)/CLOCKS_PER_SEC<<endl;
 	return ll;
 }
 
 double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 //	cout<<"Start of method multiThreadGlobalMatsFromLocal"<<endl;
 	initializeAllPhiMats();			// this sets all the global phi_mats to 0
-	initializeChiMats();
+	if(textFactorForNWTextBalance>0){
+		initializeChiMats();
+	}
 	multiThreadGlobalNetworkSampleSize = 0;
 	multiThreadGlobalPostsSampleSize = 0;
 	double ll=0;
@@ -1299,8 +1440,10 @@ double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 				(*phi_gh_sum)(i,j)+=(*phi_gh_sum_thread_list->at(thr))(i,j);
 				(*phi_y_gh_sum)(i,j)+=(*phi_y_gh_sum_thread_list->at(thr))(i,j);
 			}
-			for(int v=0; v<vocab_size; ++v){
-				(*chi_kv_sum)(j,v)+=(*chi_kv_sum_thread_list->at(thr))(j,v);
+			if(textFactorForNWTextBalance>0){
+				for(int v=0; v<vocab_size; ++v){
+					(*chi_kv_sum)(j,v)+=(*chi_kv_sum_thread_list->at(thr))(j,v);
+				}
 			}
 		}
 		multiThreadGlobalNetworkSampleSize += multiThreadNetworkSampleSizeList->at(thr);
@@ -1311,11 +1454,13 @@ double MMSBpoisson::multiThreadGlobalMatsFromLocal(){
 
 
 	clock_t begin = clock();
-	for(int thr=0; thr<numParallelThreads; thr++){
-		for(std::unordered_map< std::pair<int,int>, std::vector<double>*,class_hash<pair<int,int>>>::iterator it = perUserThreadChiStats4Phi_thread_list->at(thr)->begin(); it!=perUserThreadChiStats4Phi_thread_list->at(thr)->end(); ++it){
-			for(int k=0; k<K; k++){
-				perUserThreadChiStats4Phi->at(it->first)->at(k) = it->second->at(k);
-				// This works on the assumption that on user_thread goes to exactly one process thread.
+	if(textFactorForNWTextBalance>0){
+		for(int thr=0; thr<numParallelThreads; thr++){
+			for(std::unordered_map< std::pair<int,int>, std::vector<double>*,class_hash<pair<int,int>>>::iterator it = perUserThreadChiStats4Phi_thread_list->at(thr)->begin(); it!=perUserThreadChiStats4Phi_thread_list->at(thr)->end(); ++it){
+				for(int k=0; k<K; k++){
+					perUserThreadChiStats4Phi->at(it->first)->at(k) = it->second->at(k);
+					// This works on the assumption that on user_thread goes to exactly one process thread.
+				}
 			}
 		}
 	}
@@ -1350,7 +1495,7 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 		cout<<"multiThreadGlobalNetworkSampleSize is 0\n";
 		return;
 	}
-	if(multiThreadGlobalPostsSampleSize==0){
+	if(multiThreadGlobalPostsSampleSize==0 && textFactorForNWTextBalance>0){
 		cout<<"multiThreadGlobalPostsSampleSize is 0\n";
 		exit(0);
 	}
@@ -1370,14 +1515,14 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 		delete gamma_p;
 	}
 //	cout<<"gamma\n";
-	printNegOrNanInMat(gamma,num_users,K);
+//	printNegOrNanInMat(gamma,num_users,K);
 	
 	matrix<double>* nu_p = multiThreadStochasticUpdateNuFixedPoint();
 	for(int l=0; l<K; l++)
 		for(int m=0; m<K; m++)
 			(*nu)(l,m) = ((1-stochastic_step_size)*(*nu)(l,m) + stochastic_step_size*(*nu_p)(l,m));
 	delete nu_p;
-	printNegOrNanInMat(nu,K,K);
+//	printNegOrNanInMat(nu,K,K);
 //	printMat(nu,K,K);
 
 	matrix<double>* lambda_p = multiThreadStochasticUpdateLambda();
@@ -1385,15 +1530,17 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 		for(int m=0; m<K; m++)
 			(*lambda)(l,m) = ((1-stochastic_step_size)*(*lambda)(l,m) + stochastic_step_size*(*lambda_p)(l,m));
 	delete lambda_p;
-	printNegOrNanInMat(lambda,K,K);
+//	printNegOrNanInMat(lambda,K,K);
 
-	matrix<double>* tau_p = multiThreadStochasticUpdateTau();
-	for(int k=0; k<K; k++)
-		for(int v=0; v<vocab_size; v++)
-			(*tau)(k,v) = ((1-stochastic_step_size)*(*tau)(k,v) + stochastic_step_size*(*tau_p)(k,v));
-	delete tau_p;
-	cout<<"Tau Prints"<<endl;
-	printNegOrNanInMat(tau,K,vocab_size);
+	if(textFactorForNWTextBalance>0){
+		matrix<double>* tau_p = multiThreadStochasticUpdateTau();
+		for(int k=0; k<K; k++)
+			for(int v=0; v<vocab_size; v++)
+				(*tau)(k,v) = ((1-stochastic_step_size)*(*tau)(k,v) + stochastic_step_size*(*tau_p)(k,v));
+		delete tau_p;
+		cout<<"Tau Prints"<<endl;
+//		printNegOrNanInMat(tau,K,vocab_size);
+	}
 //	cout<<"End of method multiThreadStochasticUpdateGlobalParams"<<endl;
 
 }
@@ -1448,7 +1595,8 @@ void MMSBpoisson::threadEntryFunction(std::vector<int>* threadList_thread, int t
 
 void MMSBpoisson::performEndOfThreadTask(std::vector<int>* threadList_thread, int threadID){
 	cout<<"In performEndOfThreadTask"<<endl;
-	printPerThreadLDAUserTopics(threadList_thread, threadID);
+	if(textFactorForNWTextBalance>0)
+		printPerThreadLDAUserTopics(threadList_thread, threadID);
 }
 
 void MMSBpoisson::initializeMultiThreadMats(std::vector<int>* threadList_thread, int threadID){
@@ -1462,8 +1610,10 @@ void MMSBpoisson::initializeMultiThreadMats(std::vector<int>* threadList_thread,
 			(*phi_pg_sum_thread_list->at(threadID))(p,g) = 0;
 			(*phi_qh_sum_thread_list->at(threadID))(p,g) = 0;
 		}
-        for(int v=0; v<vocab_size; ++v){
-			(*chi_kv_sum_thread_list->at(threadID))(g,v) = 0;
+		if(textFactorForNWTextBalance>0){
+			for(int v=0; v<vocab_size; ++v){
+				(*chi_kv_sum_thread_list->at(threadID))(g,v) = 0;
+			}
 		}
 
 	}
@@ -1515,19 +1665,21 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 	multiThreadPostsSampleSizeList->at(threadID) = 0;
 	int localThreadNum = threadList_thread->size();
 //	cout<<"localThreadNum: "<<localThreadNum<<"\t";
-	int constantThreads=100;									// TODO:  change this and mke it an argv
+//	int constantThreads=100;									// TODO:  change this and mke it an argv
 	int constantUsers=100;
 //	int zeroEdgesTimes = 0;
 	double lda_time =0, poisson_time=0;
 	clock_t begin_lda, end_lda, begin_poisson, end_poisson ;
 
 	std::vector<double>* constDigamma = new std::vector<double>(K);
-	for(int k=0; k<K; k++){
-		for(int v=0; v<vocab_size; v++){
-			if(v==0)
-				constDigamma->at(k) = (*tau)(k,v);
-			else
-				constDigamma->at(k) += (*tau)(k,v);
+	if(textFactorForNWTextBalance>0){
+		for(int k=0; k<K; k++){
+			for(int v=0; v<vocab_size; v++){
+				if(v==0)
+					constDigamma->at(k) = (*tau)(k,v);
+				else
+					constDigamma->at(k) += (*tau)(k,v);
+			}
 		}
 	}
 
@@ -1535,8 +1687,8 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 	cleanUpChiPhiStats(threadID);
 
 //	std::unordered_set<int>* tempThreadSet = new std::unordered_set<int>();
-	constantThreads = (constantThreads>localThreadNum)? localThreadNum:constantThreads;
-	for(int thr=0; thr<constantThreads; thr++){
+	int temp_constantThreads = (constantThreads>localThreadNum)? localThreadNum:constantThreads;
+	for(int thr=0; thr<temp_constantThreads; thr++){
 		int i_thr = rand()%localThreadNum;
 		int curr_thread_id = threadList_thread->at(i_thr);
 		//		tempThreadSet->insert(threadList_thread->at(i_thr));
@@ -1649,8 +1801,10 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 			poisson_time += (end_poisson-begin_poisson);
 			
 			begin_lda = clock();
-			multiThreadPostsSampleSizeList->at(threadID) = multiThreadPostsSampleSizeList->at(threadID)+1;
-			multiThreadStochasticUpdateChi(p, user_thread, real_delta_tp, threadID, constDigamma);
+			if(textFactorForNWTextBalance>0){
+				multiThreadPostsSampleSizeList->at(threadID) = multiThreadPostsSampleSizeList->at(threadID)+1;
+				multiThreadStochasticUpdateChi(p, user_thread, real_delta_tp, threadID, constDigamma);
+			}
             end_lda = clock();
             lda_time += (begin_lda-end_lda);
 			// check to see if the above loop throws caught exception
@@ -1658,7 +1812,7 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 		//		delete tempThreadUsers;
 }
 //	cout<<"threadID: "<<threadID<<"; localThreadNum: "<<localThreadNum<<"; multiThreadNetworkSampleSizeList: "<<multiThreadNetworkSampleSizeList->at(threadID)<<";\t";
-//	cout<<"threadID: "<<threadID<<"; poisson_time: "<<poisson_time/CLOCKS_PER_SEC<<"; lda_time: "<<lda_time/CLOCKS_PER_SEC<<";\t";
+	cout<<"threadID: "<<threadID<<"; poisson_time: "<<poisson_time/CLOCKS_PER_SEC<<"; lda_time: "<<lda_time/CLOCKS_PER_SEC<<";\t";
 //	cout<<"End of method multiThreadParallelUpdate threadID "<<threadID<<endl;
 //delete tempThreadSet;
 	delete constDigamma;
@@ -1730,6 +1884,8 @@ void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_
 		
 		int wordId = (*it);
 		if(wordId >= vocab_size)
+			continue;
+		if(wordId >= vocab_size)
 			cout<<"wordId vocab_size "<<wordId << " "<<vocab_size<<endl;
 		chi_sum=0;
 		for(int k=0; k<K; k++){
@@ -1791,7 +1947,7 @@ double MMSBpoisson::stochasticUpdateGlobalParams(int inner_iter, int* num_iters)
 				for(int q=p+1; q<num_users; q++){
 					double randomNum = getUniformRandom();
 //					cout<<"randomNum "<<randomNum<<endl;
-					if(randomNum>samplingThreshold)
+					if(randomNum>samplingThreshold)	// TODO: this is outdateed code; using samplingThreshold as floatThreshold
 						continue;
 					int userid_p = userIndexMap->at(p);
 //					cout<<"userid_p "<<p<<"\n";
@@ -2261,23 +2417,25 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 	
 	double chiStats_p =0, chiStats_q=0, delta_tp=0, delta_tq=0;
 	std::vector<double>* chi_vec_p, *chi_vec_q;
-	if(perUserThreadDelta->count(user_thread_p)>0)
-		delta_tp = perUserThreadDelta->at(user_thread_p);
-	if(perUserThreadDelta->count(user_thread_q)>0)
-		delta_tq = perUserThreadDelta->at(user_thread_q);
-	if(delta_tp>0){
-		double log_epsilon_delta = chi_epsilon/(1.0*delta_tp);
-		if(log_epsilon_delta<1)
-			log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
-		chiStats_p = (-1.0*log(log_epsilon_delta)*(1.0/delta_tp) + log(1 + log_epsilon_delta)*(1.0/delta_tp));
-        chi_vec_p = perUserThreadChiStats4Phi->at(user_thread_p);
-	}
-	if(delta_tq>0){
-		double log_epsilon_delta = chi_epsilon/(1.0*delta_tq);
-		if(log_epsilon_delta<1)
-			log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
-		chiStats_q = (-1.0*log(log_epsilon_delta)*(1.0/delta_tq) + log(1 + log_epsilon_delta)*(1.0/delta_tq));
-		chi_vec_q = perUserThreadChiStats4Phi->at(user_thread_q);
+	if(textFactorForNWTextBalance>0){
+		if(perUserThreadDelta->count(user_thread_p)>0)
+			delta_tp = perUserThreadDelta->at(user_thread_p);
+		if(perUserThreadDelta->count(user_thread_q)>0)
+			delta_tq = perUserThreadDelta->at(user_thread_q);
+		if(delta_tp>0){
+			double log_epsilon_delta = chi_epsilon/(1.0*delta_tp);
+			if(log_epsilon_delta<1)
+				log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
+			chiStats_p = (-1.0*log(log_epsilon_delta)*(1.0/delta_tp) + log(1 + log_epsilon_delta)*(1.0/delta_tp));
+			chi_vec_p = perUserThreadChiStats4Phi->at(user_thread_p);
+		}
+		if(delta_tq>0){
+			double log_epsilon_delta = chi_epsilon/(1.0*delta_tq);
+			if(log_epsilon_delta<1)
+				log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
+			chiStats_q = (-1.0*log(log_epsilon_delta)*(1.0/delta_tq) + log(1 + log_epsilon_delta)*(1.0/delta_tq));
+			chi_vec_q = perUserThreadChiStats4Phi->at(user_thread_q);
+		}
 	}
 
 	for(int g=0;g<K;g++){
@@ -2430,7 +2588,7 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 		(*phi_pg_sum_thread_list->at(threadID))(p,k) += ((*phi_pg_update)(k));
 
         // TODO initialize the vectors and set them to 0
-		if(Y_pq>0 && real_delta_tp>0){
+		if(Y_pq>0 && real_delta_tp>0 && delta_tp>0){
 
 			perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread_p)->at(k) += (((*phi_pg_update)(k))/delta_tp);
 			if(std::isnan(perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread_p)->at(k)) || perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread_p)->at(k) <0){
@@ -2823,7 +2981,7 @@ int main(int argc, char** argv) {
 	std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet = getPerThreadUserSet(userAdjlist);
 
 	std::unordered_map<int, std::string>* vocabMap = new std::unordered_map<int, std::string>();
-	char* vocabFile = argv[19];                     //LAST INDEX USED
+	char* vocabFile = argv[19];                     
 	utilsClass->readVocabMap(vocabMap, vocabFile);
 
 //	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.05, perThreadUserSet, userList->size(), userIndexMap, heldUserAdjlist_held, argv[13]);
@@ -2867,7 +3025,15 @@ int main(int argc, char** argv) {
 	double diagHyperInit = atof(argv[16]);
 	double nonDiagHyperInit = atof(argv[17]);                  
 	char* seedIndexFileName = argv[18];                     
-	double alpha = atof(argv[20]);                   //LAST INDEX USED
+	double alpha = atof(argv[20]);                   
+	if(argc>21){
+		bool fasterFlag = (atoi(argv[21])==1);                 //LAST INDEX USED
+		mmsb->setFasterFlag(fasterFlag);
+	}
+	if(argc>22){
+		int constantThreads=atoi(argv[22]);
+		mmsb->setConstantThreads(constantThreads);
+	}
 	mmsb->setZeroEdges(zeroEdges);
 	mmsb->setHyperInits(diagHyperInit, nonDiagHyperInit);
 	mmsb->setSeedIndexFileName(seedIndexFileName);
