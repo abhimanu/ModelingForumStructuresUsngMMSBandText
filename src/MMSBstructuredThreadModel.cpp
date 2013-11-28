@@ -7,6 +7,7 @@
 //============================================================================
 
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <cstdlib>
 #include <boost/numeric/ublas/vector.hpp>
@@ -29,6 +30,36 @@
 using namespace std;
 using namespace boost::numeric::ublas;
 
+std::unordered_map<int,std::unordered_set<int>*>* getPerThreadUserSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* userAdjlist){
+	std::unordered_map<int,std::unordered_set<int>*>* perThreadUserSet  = new std::unordered_map<int,std::unordered_set<int>*>();
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>::iterator it1= userAdjlist->begin(); it1!=userAdjlist->end(); ++it1){
+		if(perThreadUserSet->count(it1->first.second)<=0)
+			perThreadUserSet->insert({it1->first.second, new std::unordered_set<int>()});
+		perThreadUserSet->at(it1->first.second)->insert(it1->first.first);
+	}
+	return perThreadUserSet;
+}
+
+std::unordered_map<int,int>* initializeUserIndex(unordered_map<int,int>* userList){ 
+	std::unordered_map<int,int>* userIndexMap = new unordered_map<int,int>();
+	for(std::unordered_map<int,int>::iterator it=userList->begin(); it!=userList->end(); it++){
+		userIndexMap->insert({it->second, it->first});
+	}	
+	return userIndexMap;
+}
+
+template <class T>
+void printPiToFile(matrix<T> *mat, int M, int N, char* fileName, unordered_map<int,int>* userIndexMap){
+	ofstream outfile(fileName);
+	for (int k = 0; k < M; ++k) {
+		int userId = userIndexMap->at(k);
+		outfile << userId <<",";
+		for (int j = 0; j < N; ++j) {
+			outfile << (*mat)(k,j) << "," ;
+		}
+		outfile << endl;
+	}
+}
 
 template <class T>
 void printMat(matrix<T> *mat, int M, int N) {
@@ -165,7 +196,7 @@ private:
 
 public:
 	MMSBpoisson(Utils *);
-	void getParameters(int iter_threshold, int inner_iter,int nu_iter);
+	void getParameters(int iter_threshold, int inner_iter,int nu_iter, char* outputFile);
 	double getUniformRandom();
 //	matrix<double>* updatePhiVariational(int p, int q, double sumGamma_p, double sumGamma_q);
 	double getVariationalLogLikelihood();
@@ -219,7 +250,7 @@ MMSBpoisson::MMSBpoisson(Utils* utils){
 
 void MMSBpoisson::initializeAlpha(){
 	for (int k = 0; k < K; ++k) {
-		(*alpha)(k)= 0.5+(getUniformRandom()-0.5)*0.1;
+		(*alpha)(k)= 0.1;//0.5+(getUniformRandom()-0.5)*0.1;
 	}
 }
 
@@ -308,7 +339,7 @@ double MMSBpoisson::getHeldoutLogLikelihood(){
 			double digamma_p_sum = getDigamaValue(getMatrixRowSum(gamma,p,K));
 			double digamma_q_sum = getDigamaValue(getMatrixRowSum(gamma,q,K));
 			int Y_pq = it2->second;
-			double ph_sum=0;
+			phi_sum=0;
 			for(int g=0;g<K;g++){
 				for(int h=0;h<K;h++){
 					(*phi_gh_pq)(g,h) = exp(dataFunctionPhiUpdates(g,h,Y_pq) 
@@ -411,7 +442,7 @@ double MMSBpoisson::getLnGamma(double value){
 	return boost::math::lgamma(value);
 }
 
-void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter){ // TODO: change phi coz it is K*K*N*N 
+void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter, char* outputFile){ // TODO: change phi coz it is K*K*N*N 
 //	initialize(num_users, K);//, inputMat);			// should be called from the main function
 	cout<<"ll-0"<<getVariationalLogLikelihood()<<endl;
 //	boost::numeric::ublas::vector<double>* oldAlpha = new boost::numeric::ublas::vector<double>(K);
@@ -422,12 +453,20 @@ void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter)
 	this->nuIter = nu_iter;
 //	int iter_threshold = 30;
 //	int inner_iter = 4;
+    int stabilityNum=0;
+	double floatThreshold = 1;//1e-3;
+	int consec_dec_ll = 0;
+	int iterThreshLL = 1;
 	do{
         iter++;
 		cout<<"iter "<<iter<<endl;
 		oldLL=newLL;
 		newLL=updateGlobalParams(inner_iter);
-		if(iter>=iter_threshold)
+		if(abs(newLL-oldLL)<floatThreshold)
+			stabilityNum++;
+		else
+			stabilityNum=0;
+		if(iter>=iter_threshold || stabilityNum==3)
 			break;
 	}while(1);//abs(oldLL-newLL)>globalThreshold);
 	matrix<double>* pi = getPis();
@@ -439,6 +478,7 @@ void MMSBpoisson::getParameters(int iter_threshold, int inner_iter, int nu_iter)
 	printMat(nu,K,K);
 	cout<<"Lambda\n";
 	printMat(lambda,K,K);
+	printPiToFile(pi,num_users,K,outputFile,userIndexMap);	
 
 }
 
@@ -515,9 +555,13 @@ double MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_
 //		cout<<"Lambda\n";
 //		printNanInMat(lambda,K,K);
 //		printNegInMat(lambda,K,K);
-		ll = getVariationalLogLikelihood();
-        cout<<"held-ll "<<getHeldoutLogLikelihood()<<"\t ll ";
-		cout<<ll<<endl;
+
+//		ll = getVariationalLogLikelihood();
+//        cout<<"held-ll "<<getHeldoutLogLikelihood()<<"\t ll ";
+//		cout<<ll<<endl;
+
+		ll = getHeldoutLogLikelihood();
+        cout<<"held-ll "<<ll<<endl;
 		//       pi = gamma./repmat(sum(gamma,2),1,K)
 	}
 	return ll;
@@ -613,26 +657,38 @@ void MMSBpoisson::updateLambda(){
 
 void MMSBpoisson::initializeNu(){
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*nu)(g,h)=2;
+		for(int h=0; h<K; h++){
+			(*nu)(g,h)=0.5;
+			if(g==h)
+				(*nu)(g,h)=1;
+		}
 }
 
 void MMSBpoisson::initializeLambda(){
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*lambda)(g,h)=3;
+		for(int h=0; h<K; h++){
+			(*lambda)(g,h)=0.5;
+			if(g==h)
+				(*lambda)(g,h)=1;
+		}
 }
 
 void MMSBpoisson::initializeTheta(){
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*theta)(g,h)=3;
+		for(int h=0; h<K; h++){
+			(*theta)(g,h)=0.5;
+			if(g==h)
+				(*theta)(g,h)=1;
+		}
 }
 
 void MMSBpoisson::initializeKappa(){
 	for(int g=0; g<K; g++)
-		for(int h=0; h<K; h++)
-			(*kappa)(g,h)=2;
+		for(int h=0; h<K; h++){
+			(*kappa)(g,h)=0.5;
+			if(g==h)
+				(*kappa)(g,h)=1;
+		}
 }
 
 
@@ -876,6 +932,7 @@ int main(int argc, char** argv) {
 
 	std::unordered_map<int,int>* userList = new std::unordered_map<int,int>();
 	std::unordered_set<int>* threadList = new std::unordered_set<int>();
+	std::unordered_set<int>* vocabList = new std::unordered_set<int>();
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* userAdjlist = 
 		new std::unordered_map<std::pair<int,int>,std::unordered_map<int,int>*, class_hash<pair<int,int>>>();
 	std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost = 
@@ -883,12 +940,18 @@ int main(int argc, char** argv) {
 
 //	username_mention_graph.txt
 
-	utilsClass->readThreadStructureFile(argv[1], userList, threadList, userAdjlist, userThreadPost);
+	utilsClass->readThreadStructureFile(argv[1], userList, threadList, vocabList, userAdjlist, userThreadPost);
 
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* heldUserAdjlist = 
 		new std::unordered_map<std::pair<int,int>,std::unordered_map<int,int>*, class_hash<pair<int,int>>>();
 
-	utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.10);
+//	utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.10);
+	std::unordered_map<int, int>* userIndexMap = initializeUserIndex(userList);
+	std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet = getPerThreadUserSet(userAdjlist);
+
+	cout<<"going to get heldout set, numUsers "<<userList->size()<<endl;
+	
+	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.02, perThreadUserSet, userList->size(), userIndexMap);
 
 //	testDataStructures(userList,threadList, userAdjlist,userThreadPost);
 
@@ -901,7 +964,7 @@ int main(int argc, char** argv) {
 //	mmsb->getParameters(matFile, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
 	double stepSizeNu = atof(argv[6]);
 	mmsb->initialize(K, userList, threadList, userAdjlist, heldUserAdjlist, userThreadPost, stepSizeNu);	
-	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+	mmsb->getParameters(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), argv[7]);
 	delete userList;
 	delete userAdjlist;
 	delete threadList;

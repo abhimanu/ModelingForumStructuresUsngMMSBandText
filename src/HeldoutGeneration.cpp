@@ -2627,22 +2627,38 @@ int main(int argc, char** argv) {
 //	username_mention_graph.txt
 
 	utilsClass->readThreadStructureFile(argv[1], userList, threadList, vocabList, userAdjlist, userThreadPost);
+		std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet = getPerThreadUserSet(userAdjlist);
 
-	std::unordered_map< std::pair<int,int>, std::unordered_map<int,std::pair<int,int>>*, class_hash<pair<int,int>>>* heldUserAdjlist = 
-		new std::unordered_map<std::pair<int,int>,std::unordered_map<int,std::pair<int,int>>*, class_hash<pair<int,int>>>();
-	std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* heldUserAdjlist_held = 
-		new std::unordered_map<std::pair<int,int>,std::unordered_map<int,int>*, class_hash<pair<int,int>>>();
+	if(!strcmp(argv[4],"generate")){
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int,std::pair<int,int>>*, class_hash<pair<int,int>>>* heldUserAdjlist = 
+			new std::unordered_map<std::pair<int,int>,std::unordered_map<int,std::pair<int,int>>*, class_hash<pair<int,int>>>();
+		std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* heldUserAdjlist_held = 
+			new std::unordered_map<std::pair<int,int>,std::unordered_map<int,int>*, class_hash<pair<int,int>>>();
 
-	std::unordered_map<int, int>* userIndexMap = initializeUserIndex(userList);
-	std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet = getPerThreadUserSet(userAdjlist);
+		std::unordered_map<int, int>* userIndexMap = initializeUserIndex(userList);
 
-	std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.05, perThreadUserSet, userList->size(), userIndexMap, heldUserAdjlist_held, argv[2], atoi(argv[3]));
-	
+		std::pair<int,int> numHeldAndTotalEdges = utilsClass->getTheHeldoutSet(userAdjlist, heldUserAdjlist, 0.05, perThreadUserSet, userList->size(), userIndexMap, heldUserAdjlist_held, argv[2], atoi(argv[3]));
+	delete userIndexMap;
+	}else if(!strcmp(argv[4],"similarity")){
+		cout<<"generating similarity count file\n";
+		char* clusterFile = argv[5];
+		int K = atoi(argv[6]);
+		char* countFile = argv[2];
+		utilsClass->generateSimilarityCount(clusterFile, countFile, userAdjlist, K);
+	}
+	else if(!strcmp(argv[4],"stats")){
+		cout<<"generating data Stats\n";
+		utilsClass->getDataStats(userAdjlist, perThreadUserSet, userList->size(), argv[2]);	
+	}else if(!strcmp(argv[4],"degree")){
+		cout<<"generating degree file\n";
+		char* piFile = argv[5];
+		char* degreeFile = argv[2];
+		utilsClass->getNodeDegree(piFile, degreeFile, userAdjlist);
+	}
 //	heldUserAdjlist_held->clear();
 //	heldUserAdjlist->clear();
 //	std::pair<int,int> numHeldAndTestEdges = utilsClass->readHeldoutAndTest(heldUserAdjlist, heldUserAdjlist_held, argv[13]);
 
-	delete userIndexMap;
 
 //	int numHeldoutEdges = numHeldAndTestEdges.first;
 //	int numTotalLinks = 28800;//numHeldAndTotalEdges.second;	//this should be alculated in readThreadStructureFile method

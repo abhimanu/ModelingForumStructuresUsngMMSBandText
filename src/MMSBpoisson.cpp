@@ -299,6 +299,9 @@ float MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_i
 				if(p==q)
 					continue;
 				variationalUpdatesPhi(p,q);//Y(p,q),phi(:,:,p,q),B,gamma(p,:),gamma(q,:),alpha,inner_iter);
+				stochasticUpdateGamma(p,q);
+				stochasticUpdateNuFixedPoint(nuStepSize, nuIters, p, q);
+				stochasticUpdateLambda(p, q);
 //				cout<<"p,q "<<p<<" "<<q<<"||";
 //				printPhi(p,q);
 			}
@@ -326,6 +329,8 @@ float MMSBpoisson::updateGlobalParams(int inner_iter){//(gamma,B,alpha,Y,inner_i
 	return ll;
 
 }
+
+void MMSBpoisson::stochasticUpdateNuFixedPoint
 
 /*
  * This method needs to incorporate the thread structure t
@@ -478,7 +483,10 @@ void MMSBpoisson::variationalUpdatesPhi(int p, int q){
 
 	for(int g=0;g<K;g++){
 		for(int h=0;h<K;h++){
-			(*phiPQ)[g][h][p][q] = ((*phiPQ)[g][h][p][q])/phi_sum ;
+			if(phi_sum==0)
+				(*phiPQ)[g][h][p][q] = 1/(K*K);
+			else
+				(*phiPQ)[g][h][p][q] = ((*phiPQ)[g][h][p][q])/phi_sum ;
 //			cout<<(*phiPQ)[g][h][p][q]<<" ";
 		}
 	}

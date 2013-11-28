@@ -97,6 +97,164 @@ void Utils::getSeedClusters(char* fileName, std::unordered_map<int,std::vector<i
 	}
 }
 
+
+void Utils::getDataStats(
+std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
+std::unordered_map<int,std::unordered_set<int>*>* perThreadUserSet, int num_users, char* filename){
+
+	int totalPosts = 0;
+	int totalEdgeCounts = 0;
+//	int attemptThreshold = -1;//10;
+	int histLimit = 10;
+	std::vector<double>* edgeHistogram = new std::vector<double>(histLimit+1); // edge weights 1, 2, 3, 4, 5, 6, 7 8 9 10 above
+
+	for(int wt=0; wt<histLimit+1; wt++){
+		edgeHistogram->at(wt)=0;
+	}
+	ofstream outfile(filename);
+	cout<<"after inititalization\n";
+
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
+//		if(it1->second->size()<=1)
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+			totalPosts += it2->second;		
+			totalEdgeCounts++;
+			if(it2->second<=10)
+				edgeHistogram->at(it2->second-1) +=1;
+			else
+				edgeHistogram->at(10) +=1;
+		}
+	}
+	outfile<<"TotalPosts: "<<totalPosts<<endl;
+	outfile<<"TotalEdges: "<<totalEdgeCounts<<endl;
+	outfile<<"numUsers: "<<num_users<<endl;
+	outfile<<"numThreads: "<<perThreadUserSet->size()<<endl;
+	outfile<<"=======EdgeHistograms======\n";
+	for(int wt=0; wt<histLimit+1; wt++){
+		outfile<<wt+1<<","<<edgeHistogram->at(wt)<<endl;
+	}
+	outfile.close();
+}
+
+void Utils::getNodeDegree(char* piFile,char* degreeFile,std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist){
+	FILE* piFileDescriptor = fopen(piFile, "r");
+	int user;
+	char s[20000];
+	std::unordered_map<int,int>* nodeDegreeMap = new unordered_map<int, int>();
+	long total_counts = 0;
+	ofstream outfile(degreeFile);
+
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<std::pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+			if(nodeDegreeMap->count(it1->first.first)>0){
+				nodeDegreeMap->at(it1->first.first) += it2->second;
+				total_counts+=it2->second;
+			}else{
+				nodeDegreeMap->insert({it1->first.first,it2->second});
+				total_counts+=it2->second;
+			}
+		}
+	}
+	// NOTE: remember to change the format of the file 
+	int max_count = 0;
+	while(readPiFile(piFileDescriptor, &user, s) != NULL) {
+		if(getUniformRandom()>0.50)
+			continue;
+		if(nodeDegreeMap->count(user)>0){
+			outfile<<user<<","<<nodeDegreeMap->at(user)<<s;//<<endl;
+			if(max_count<nodeDegreeMap->at(user))
+				max_count=nodeDegreeMap->at(user);
+		}
+		else
+			outfile<<user<<","<<0<<s;//<<endl;
+	}
+	cout<<"max_count "<<max_count<<endl;
+	outfile.flush();
+	outfile.close();
+}
+
+char* Utils::readPiFile(FILE* graph_file_pointer, int* u1, char* s) {
+	//char seq[20000];
+	int err = fscanf(graph_file_pointer, "%d", u1); 
+	return fgets(s, 20000, graph_file_pointer);
+
+//	printf("%d\t%d\t%d\t%s\n", *u1, *u2, *tid, s);
+}
+
+void Utils::generateSimilarityCount(char* clusterFile, char* countFile,std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, int K){
+	std::unordered_map<std::pair<int,int>, int, class_hash<std::pair<int,int>>>* userUserCounts = new std::unordered_map<std::pair<int,int>, int, class_hash<std::pair<int,int>>>();
+	FILE* discreteClusters = fopen(clusterFile, "r");
+	int user;
+	int cluster;
+	char s[20000];
+	std::unordered_map<int, std::vector<int>*>* clusterUserMap = new std::unordered_map<int, std::vector<int>*>();
+	ofstream outfile(countFile);
+	while(readSeedIndexFile(discreteClusters, &user, &cluster, s) != NULL) {
+//		cout<<user<<" "<<cluster;
+		if(clusterUserMap->count(cluster))
+			clusterUserMap->at(cluster)->push_back(user);
+		else{
+			clusterUserMap->insert({cluster, new std::vector<int>()});
+			clusterUserMap->at(cluster)->push_back(user);
+		}
+	}
+	cout<<"generated cluster-user map\n";
+	std::vector<int>* fullSortedList = new std::vector<int>();
+	for(int k=1; k<=K; ++k){
+		cout<<"k is "<<k<<endl;
+		fullSortedList->insert(fullSortedList->end(),clusterUserMap->at(k)->begin(), clusterUserMap->at(k)->end());
+		cout<<"cluster  "<<k<<" size "<<clusterUserMap->at(k)->size()<<endl;
+	}
+	cout<<"final list size "<<fullSortedList->size()<<endl;
+	long total_counts = 0;
+	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<std::pair<int,int>>>::iterator it1=completeUserAdjlist->begin(); it1!=completeUserAdjlist->end(); ++it1){
+//		if(it1->second->size()<=1)
+		for(std::unordered_map<int,int>::iterator it2 = it1->second->begin(); it2!=it1->second->end(); ++it2){
+			std::pair<int,int> user_pair = std::make_pair(it1->first.first, it2->first);
+			if(userUserCounts->count(user_pair)>0){
+				userUserCounts->at(user_pair) += it2->second;
+				total_counts+=it2->second;
+			}else{
+				userUserCounts->insert({user_pair,it2->second});
+				total_counts+=it2->second;
+			}
+		}
+	}
+	cout<<"generated userUserCounts "<<total_counts<<"\n";
+	// NOTE: careful to bring the clusterfile in this fromat separated by space
+//	while(readSeedIndexFile(discreteClusters, &user, &cluster, s) != NULL) {
+//		cout<<user<<" "<<cluster;
+//		if(clusterUserMap->count(cluster))
+//			clusterUserMap->at(cluster)->push_back(user);
+//		else{
+//			clusterUserMap->insert({cluster, new std::vector<int>()});
+//			clusterUserMap->at(cluster)->push_back(user);
+//		}
+//	}
+	// Unravel the map into 
+//	std::vector<int>* fullSortedList = new std::vector<int>();
+//	for(int k=1; k<=K; ++k){
+//		fullSortedList->insert(fullSortedList->end(),clusterUserMap->at(k)->begin(), clusterUserMap->at(k)->end());
+//		cout<<"cluster  "<<k<<" size "<<clusterUserMap->at(k)->size()<<endl;
+//	}
+	for(std::vector<int>::iterator it1 = fullSortedList->begin(); it1!=fullSortedList->end(); ++it1){
+		for(std::vector<int>::iterator it2 = fullSortedList->begin(); it2!=fullSortedList->end(); ++it2){
+			std::pair<int, int> userPair = std::make_pair((*it1),(*it2));
+			if(userUserCounts->count(userPair)>0){
+				outfile<<userUserCounts->at(userPair)<<",";
+//				cout<<"printed a non-zero "<<userUserCounts->at(userPair)<<endl;
+			}
+			else
+				outfile<<0<<",";
+		}
+		outfile<<endl;
+	}
+	outfile.flush();
+	outfile.close();
+
+}
+
+
 std::pair<int,int> Utils::getTheHeldoutSet(
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*,class_hash<pair<int,int>>>* heldoutUserAdjlist, 

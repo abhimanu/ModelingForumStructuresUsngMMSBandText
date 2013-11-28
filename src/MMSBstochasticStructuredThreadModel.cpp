@@ -42,27 +42,35 @@ void printMat(matrix<T> *mat, int M, int N) {
 }
 
 template <class T>
-void printNanInMat(matrix<T> *mat, int M, int N) {
-	cout<<"In printNanInMat\t";
+bool printNanInMat(matrix<T> *mat, int M, int N) {
+//	cout<<"In printNanInMat\t";
+	bool flag=false;
 	for (int k = 0; k < M; ++k) {
 		for (int j = 0; j < N; ++j) {
-			if(std::isnan((*mat)(k,j)))
+			if(std::isnan((*mat)(k,j))){
+				flag =true;
 				cout << (*mat)(k,j) << ","<<k<<","<<j<<"||\t";
+			}
 		}
 	}
-	cout << endl;
+//	cout << endl;
+	return flag;
 }
 
 template <class T>
-void printNegInMat(matrix<T> *mat, int M, int N) {
-	cout<<"In printNegInMat\t";
+bool printNegInMat(matrix<T> *mat, int M, int N) {
+//	cout<<"In printNegInMat\t";
+	bool flag=false;
 	for (int k = 0; k < M; ++k) {
 		for (int j = 0; j < N; ++j) {
-			if(((*mat)(k,j))<=0)
+			if(((*mat)(k,j))<=0){
+				flag =true;
 				cout << (*mat)(k,j) << ","<<k<<","<<j<<"||\t";
+			}
 		}
 	}
-	cout << endl;
+//	cout << endl;
+	return flag;
 }
 
 void testDataStructures(std::unordered_map<int,int>* userList, 
@@ -552,6 +560,19 @@ double MMSBpoisson::stochasticUpdateGlobalParams(int inner_iter, int* num_iters)
 						for(int m=0; m<K; m++)
                             (*lambda)(l,m) = ((1-stochastic_step_size)*(*lambda)(l,m) + stochastic_step_size*(*lambda_p)(l,m));
 					delete lambda_p;
+					bool flag = false;
+//					cout<<"Nu\n";
+					flag = printNanInMat(nu,K,K);
+					flag = (flag||printNegInMat(nu,K,K));
+//					cout<<"Lambda\n";
+					flag = (flag||printNanInMat(lambda,K,K));
+					flag = (flag||printNegInMat(lambda,K,K));
+
+					if(flag){
+						cout<<"Nu or Lambda nan/neg\n";
+						exit(0);
+					}
+
 
 //					ll = getHeldoutLogLikelihood();
 //					cout<<"held-ll "<<ll<<endl;//<<"\t ll ";
@@ -869,6 +890,12 @@ void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int th
 				+ (getDigamaValue((*gamma)(q,g)) - digamma_q_sum)
 				+ (getDigamaValue((*gamma)(p,h)) - digamma_p_sum));
 			phi_sum_q += (*phi_gh_qp)(g,h);
+
+            if(std::isnan(phi_sum)){
+				cout<<"VariationalUpdate in phi_sum creation "<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<" "<<dataFunctionPhiUpdates(g,h,Y_pq)<<" "<< exp(dataFunctionPhiUpdates(g,h,Y_pq))<<phi_sum<<endl;
+			}
+
+
 //			if(std::isnan((*phi_gh_pq)(g,h))){
 //				cout<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<endl;
 //			}
@@ -904,8 +931,16 @@ void MMSBpoisson::stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int th
 			(*phi_gh_sum)(g,h) = ((*phi_gh_pq)(g,h) + (*phi_gh_qp)(g,h));
 			(*phi_y_gh_sum)(g,h) = ((*phi_gh_pq)(g,h)*Y_pq + (*phi_gh_qp)(g,h)*Y_qp);//((*inputMat)(p,q)));
 
-			if(std::isnan((*phi_gh_pq)(g,h))||(*phi_gh_pq)(g,h)<0)
-				cout<<"VariationalUpdate "<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<temp_phi_gh<<" "<<dataFunctionPhiUpdates(g,h,Y_pq)<<" "<< exp(dataFunctionPhiUpdates(g,h,Y_pq))<<" DBL_MIN "<<DBL_MIN<<endl;
+			if(std::isnan((*phi_gh_pq)(g,h))||(*phi_gh_pq)(g,h)<0){
+				cout<<"VariationalUpdate "<<p<<" "<<q<<" "<<Y_pq<<" "<<thread_id<<" "<<(*phi_gh_pq)(g,h)<<" "<<temp_phi_gh<<" "<<dataFunctionPhiUpdates(g,h,Y_pq)<<" "<< exp(dataFunctionPhiUpdates(g,h,Y_pq))<<phi_sum<<" DBL_MIN "<<DBL_MIN<<endl;
+				cout<<"gamma\n";
+				printNanInMat(gamma,num_users,K);
+				printNegInMat(gamma,num_users,K);
+				printNanInMat(lambda,num_users,K);
+				printNegInMat(lambda,num_users,K);
+//				cout<<"dataFunction";
+				exit(0);
+			}
 		}
 	}
 	for(int h=0; h<K; h++){

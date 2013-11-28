@@ -756,6 +756,10 @@ std::vector<double>* MMSBpoisson::getSimpleLDATopicVector(std::pair<int,int> use
 	double multiplyingFactor = (samplingPostWordsThreshold<1)? 1.0/samplingPostWordsThreshold:1;
 	double chi_sum = 0;
 	std::vector<double>* chi_tpi = new std::vector<double>(K);
+	for(int k=0; k<K; k++){
+		user_topic->at(k)=0;
+	}
+	double topic_sum =0;
 
 	for(std::vector<int>::iterator it = userThreadPost->at(user_thread)->begin(); it!=userThreadPost->at(user_thread)->end(); ++it){
 		double randGenerated = rand()*1.0/RAND_MAX;//getUniformRandom(); // this was throwing seg fault
@@ -788,6 +792,7 @@ std::vector<double>* MMSBpoisson::getSimpleLDATopicVector(std::pair<int,int> use
 			else
 				chi_tpi->at(k) = chi_tpi->at(k)/chi_sum;
 			user_topic->at(k) += multiplyingFactor*chi_tpi->at(k);
+			topic_sum += chi_tpi->at(k);
 			if(std::isnan(chi_tpi->at(k))||chi_tpi->at(k)<0){
 				cout<<"in Normalization multiThreadStochasticUpdateChi; chi_tpi->at(k): "<<chi_sum<<"; "<<chi_tpi->at(k)<<"; "<<(*tau)(k,wordId)<<"; "<<constDigamma->at(k)<<endl;//<<user_thread.first<<","<<user_thread.second<<endl;
 				exit(0);
@@ -796,6 +801,9 @@ std::vector<double>* MMSBpoisson::getSimpleLDATopicVector(std::pair<int,int> use
 		}
 
 		//		for()
+	}
+	for(int k=0; k<K; k++){
+		user_topic->at(k)= user_topic->at(k)/topic_sum;
 	}
 	return user_topic;
 }

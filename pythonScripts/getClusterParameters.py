@@ -68,7 +68,7 @@ def getWithInAndAccrossParams(clusterDict, edgeDict, nodeSet):
 					accrossCount = accrossCount + [1,0][bool(edgeDict.get((u1, u2),0)==0)]
 			#print u1, edgeClusterDict1[u1]
 		clusterParams[c] = (withinSum, accrosSum, len(clusterDict[c]), withinCount, accrossCount, edgeClusterDict1, edgeClusterDict2)
-		print c#, clusterParams[c]
+		print c, clusterParams[c]
 	return clusterParams
 
 
@@ -78,9 +78,11 @@ def main():
 	clusterReadFile = open(sys.argv[3],'r')
 	clusterWriteFile = open(sys.argv[4],'w')
 	results = readThreadStructureFile(readFile)
+	print "Done woth reading thread structure file"
 	edgeDict = results['edgeDict']
 	nodeSet = results['nodeSet']
 	clusterDict = readClusterFile(clusterReadFile)
+	print "Done with reading cluster file"
 	clusterParams = getWithInAndAccrossParams(clusterDict, edgeDict, nodeSet)
 	print "I have the clusterParams\n"
 	for c in clusterParams:
