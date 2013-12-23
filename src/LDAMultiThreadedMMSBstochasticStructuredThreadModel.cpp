@@ -38,6 +38,11 @@ using namespace boost::numeric::ublas;
 //error: ‘sleep_for’ is not a member of ‘std::this_thread’ is solved via including -D_GLIBCXX_USE_NANOSLEEP
 //#define _GLIBCXX_USE_NANOSLEEP
 
+/*
+ *
+ * This gets the users in each thread of the forum.
+ *
+ */
 std::unordered_map<int,std::unordered_set<int>*>* getPerThreadUserSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* userAdjlist){
 	std::unordered_map<int,std::unordered_set<int>*>* perThreadUserSet  = new std::unordered_map<int,std::unordered_set<int>*>();
 	for(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>::iterator it1= userAdjlist->begin(); it1!=userAdjlist->end(); ++it1){
@@ -48,6 +53,13 @@ std::unordered_map<int,std::unordered_set<int>*>* getPerThreadUserSet(std::unord
 	return perThreadUserSet;
 }
 
+/*
+ *
+ * This method takes the userList which is a hashmap and contains <userId, index> pair and returns
+ * a hashmap containing <index, userId> hashmap.
+ *
+ */
+
 std::unordered_map<int,int>* initializeUserIndex(unordered_map<int,int>* userList){ 
 	std::unordered_map<int,int>* userIndexMap = new unordered_map<int,int>();
 	for(std::unordered_map<int,int>::iterator it=userList->begin(); it!=userList->end(); it++){
@@ -55,6 +67,12 @@ std::unordered_map<int,int>* initializeUserIndex(unordered_map<int,int>* userLis
 	}	
 	return userIndexMap;
 }
+
+/*
+ *
+ * This will print any general matrix 
+ *
+ */
 
 template <class T>
 void printMat(matrix<T> *mat, int M, int N) {
@@ -66,6 +84,12 @@ void printMat(matrix<T> *mat, int M, int N) {
 	}
 }
 
+/*
+ *
+ * Prints just the Log Likelihood in a file 
+ *
+ */
+
 void printLogLLtoFile(std::vector<double>* heldLogLikelihood, std::string logLLfile){
 
 	ofstream outfile(logLLfile);
@@ -73,6 +97,13 @@ void printLogLLtoFile(std::vector<double>* heldLogLikelihood, std::string logLLf
 		outfile<<(*it)<<endl;
 	}
 }
+
+/*
+ *
+ * Prints the Log Likelihood as well as time it takes to 
+ * reach that likelihood in a file 
+ *
+ */
 
 void printLogLLtoFile(std::vector<double>* heldLogLikelihood, std::vector<double>* globalTimeList, std::string logLLfile){
 
@@ -83,6 +114,12 @@ void printLogLLtoFile(std::vector<double>* heldLogLikelihood, std::vector<double
 		ind++;
 	}
 }
+
+/*
+ *
+ * Prints the Pi of the model into a file 
+ *
+ */
 
 template <class T>
 void printPiToFile(matrix<T> *mat, int M, int N, std::string fileName, unordered_map<int,int>* userIndexMap){
@@ -97,6 +134,14 @@ void printPiToFile(matrix<T> *mat, int M, int N, std::string fileName, unordered
 	}
 }
 
+/*
+ *
+ * Prints the topUsers in a thread that deviate alot  
+ * fromm their global topic proportion in the thread.
+ *
+ */
+
+template <class T>
 void printPerUserThreadTopicStats(std::string fileName, std::vector<std::unordered_map<int,std::vector<double>*>*>* perUserThreadTopicStats_thread_list, int K, std::vector<std::unordered_map<int,int>*>* perUserTopicStats_thread_list, int num_users, std::unordered_map<int,int>* userIndexMap, int topicDiffTopKUsers, int numParallelThreads){
 	ofstream outfile(fileName);
 	std::unordered_map<int,int>* final_map = new std::unordered_map<int,int>();
@@ -147,6 +192,12 @@ void printPerUserThreadTopicStats(std::string fileName, std::vector<std::unorder
 	outfile.close();
 }
 
+/*
+ *
+ * This prints the topics topKWords in each topic
+ *
+ */
+
 void printLDATopics(matrix<double> *mat, int M, int N, std::string fileName, int topKWords, std::unordered_map<int, std::string>* vocabMap){
 	ofstream outfile(fileName);
 	for(int k=0; k<M; ++k){
@@ -178,6 +229,12 @@ void printLDATopics(matrix<double> *mat, int M, int N, std::string fileName){
 	}	
 }
 
+/*
+ *
+ * this prints any matrix to file
+ *
+ */
+
 template <class T>
 void printToFile(matrix<T> *mat, int M, int N, char* fileName) {
 	ofstream outfile(fileName);
@@ -188,6 +245,13 @@ void printToFile(matrix<T> *mat, int M, int N, char* fileName) {
 		outfile << endl;
 	}
 }
+/*
+ *
+ * This is for debugging purposes and prints 
+ * any matrix that has NAN element. It tells
+ * which indices has NAN
+ *
+ */
 
 template <class T>
 void printNanInMat(matrix<T> *mat, int M, int N) {
