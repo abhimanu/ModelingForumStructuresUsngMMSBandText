@@ -1,0 +1,57 @@
+LDAMultiThreadedMMSBstochasticStructuredThreadModel.cpp file functions :
+
+
+std::unordered_map<int,std::unordered_set<int>*>* getPerThreadUserSet(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* userAdjlist)
+
+std::unordered_map<int,int>* initializeUserIndex(unordered_map<int,int>* userList) 
+
+template <class T> void printMat(matrix<T> *mat, int M, int N) 
+
+void printLogLLtoFile(std::vector<double>* heldLogLikelihood, std::string logLLfile)
+
+template <class T> void printPiToFile(matrix<T> *mat, int M, int N, std::string fileName, unordered_map<int,int>* userIndexMap)
+
+template <class T> void printPerUserThreadTopicStats(std::string fileName, std::vector<std::unordered_map<int,std::vector<double>*>*>* perUserThreadTopicStats_thread_list, int K, std::vector<std::unordered_map<int,int>*>* perUserTopicStats_thread_list, int num_users, std::unordered_map<int,int>* userIndexMap, int topicDiffTopKUsers, int numParallelThreads)
+
+void printLDATopics(matrix<double> *mat, int M, int N, std::string fileName, int topKWords, std::unordered_map<int, std::string>* vocabMap)
+
+void printLDATopics(matrix<double> *mat, int M, int N, std::string fileName)
+
+template <class T> void printNanInMat(matrix<T> *mat, int M, int N) 
+
+template <class T> void printNegInMat(matrix<T> *mat, int M, int N) 
+
+template <class T> void printNegOrNanInMat(matrix<T> *mat, int M, int N) 
+
+void testDataStructures(std::unordered_map<int,int>* userList, std::unordered_set<int>* threadList, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist, std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost)
+
+double getBaseLinePrediction(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist_held, int inputCountOffset)
+
+void MMSBpoisson::setZeroEdges(int zeroEdges)
+
+void MMSBpoisson::setFasterFlag(bool fasterFlag)
+
+void MMSBpoisson::setConstantThreads(int constantThreads)
+
+void MMSBpoisson::setHyperInits(double diagHyperInit, double nonDiagHyperInit)
+
+void MMSBpoisson::setSeedIndexFileName(char* seedIndexFileName)
+
+void MMSBpoisson::initializeAlpha()
+
+void MMSBpoisson::initializeAlpha(double initValue)
+
+void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList, std::unordered_set<int>* threadList, std::unordered_set<int>* vocabList, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* userAdjlist, std::unordered_map< std::pair<int,int>, std::unordered_map<int, std::pair<int,int>>*, class_hash<pair<int,int>>>* heldUserAdjlist, std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost, double stepSizeNu, int numHeldoutEdges, double stochastic_step_kappa, double samplingThreshold, int numParallelThreads, int vocabSize, std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist_held)        
+
+void MMSBpoisson::getPerThreadUserList()
+
+
+======================================================================
+
+Utils.cpp function :
+
+matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) 
+
+void Utils::readVocabMap(std::unordered_map<int, string>* vocabMap, char* fileName)
+
+void Utils::getDataStats( std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, std::unordered_map<int,std::unordered_set<int>*>* perThreadUserSet, int num_users, char* filename)

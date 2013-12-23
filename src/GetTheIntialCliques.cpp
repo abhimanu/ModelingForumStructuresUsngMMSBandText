@@ -2052,6 +2052,13 @@ double MMSBpoisson::getUniformRandom(){
 }
 
 //NOTE: Graclus starts user numbering from 1
+/*
+ *
+ * This is the main method that converts per thread user
+ * user network format into Graclus format
+ *
+ */
+
 void getGraclusFormat(std::unordered_map< std::pair<int,int>, std::unordered_map<int,int>*, class_hash<pair<int,int>>>* userAdjlist, std::unordered_map<int,int>* userList, char* filename, 
 		std::unordered_map<int,int>* userIndexMap, bool weighted){
 	cout<<"Going to create adjacencyMatrix, size: "<<userList->size()<<endl;

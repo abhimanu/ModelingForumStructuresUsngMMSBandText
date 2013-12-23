@@ -245,6 +245,7 @@ void printToFile(matrix<T> *mat, int M, int N, char* fileName) {
 		outfile << endl;
 	}
 }
+
 /*
  *
  * This is for debugging purposes and prints 
@@ -265,6 +266,14 @@ void printNanInMat(matrix<T> *mat, int M, int N) {
 	cout << endl;
 }
 
+/*
+ *
+ * This is for debugging purposes and prints 
+ * any matrix that has negative element. It tells
+ * which indices has negative value
+ *
+ */
+
 template <class T>
 void printNegInMat(matrix<T> *mat, int M, int N) {
 	bool flag=false;
@@ -280,6 +289,14 @@ void printNegInMat(matrix<T> *mat, int M, int N) {
 	if(flag)
 		cout << endl;
 }
+
+/*
+ *
+ * This is for debugging purposes and prints 
+ * any matrix that has negative or NAN element. It tells
+ * which indices has negative or NAN value
+ *
+ */
 
 template <class T>
 void printNegOrNanInMat(matrix<T> *mat, int M, int N) {
@@ -297,6 +314,14 @@ void printNegOrNanInMat(matrix<T> *mat, int M, int N) {
 	if(flag)
 		cout << endl;
 }
+
+/*
+ *
+ * This is for debugging purposes and prints 
+ * all the datastructures used for model 
+ * computation
+ *
+ */
 
 void testDataStructures(std::unordered_map<int,int>* userList, 
 		std::unordered_set<int>* threadList,
@@ -339,6 +364,13 @@ void testDataStructures(std::unordered_map<int,int>* userList,
 
 }
 
+/*
+ *
+ * It prints a 3D matrix with the third dimension 
+ * separated by ||==||
+ *
+ */
+
 void printMat3D(boost::multi_array<double,3> *mat, int M, int N, int P) {
 	for (int k = 0; k < M; ++k) {
 		for (int j = 0; j < N; ++j) {
@@ -350,6 +382,15 @@ void printMat3D(boost::multi_array<double,3> *mat, int M, int N, int P) {
 		cout << endl;
 	}
 }
+
+/*
+ *
+ * This give the prediction results for 
+ * simple LDA model. The prediction results 
+ * for the LDA just use topic discovered to 
+ * predict the link weight 
+ *
+ */
 
 double getBaseLinePrediction(std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist_held, int inputCountOffset){
 	double mean = 0, numEdges=0, basePrediction=0;
@@ -618,38 +659,103 @@ MMSBpoisson::MMSBpoisson(Utils* utils){
 	this->utils = utils;
 }
 
+/*
+ *
+ * The numbe rof zeroEdges to sample from each 
+ * thread for stochastic variational inference 
+ *
+ */
+
 void MMSBpoisson::setZeroEdges(int zeroEdges){
 	this->zeroEdgesTimes = zeroEdges;
 }
+
+/*
+ *
+ * This sets the faster flag to compute the 
+ * log likelihood. In case of faster flag on
+ * we compute a shorter version of log likelihood
+ *
+ */
 
 void MMSBpoisson::setFasterFlag(bool fasterFlag){
 	this->fasterFlag = fasterFlag;
 }
 
+/*
+ *
+ * This sets the number of threads to sampled 
+ * randomly in each iteration. 
+ *
+ */
+
 void MMSBpoisson::setConstantThreads(int constantThreads){
 	this->constantThreads=constantThreads;
 }
+
+/*
+ *
+ * This is the weight that text portion gets from
+ * the n/w side
+ *
+ */
 
 void MMSBpoisson::setNwFactorForText(double nwFactorForText){
 	this->nwFactorForText=nwFactorForText;
 }
 
+/*
+ *
+ * This sets the flag for printng the full LDA 
+ * topic probabilities
+ *
+ */
+
 void MMSBpoisson::setPrintFullLDATopics(bool printFullLDATopics){
 	this->printFullLDATopics=printFullLDATopics;
 }
 
+/*
+ *
+ * This sets the vocabMap which has the form 
+ * <index, string> pair 
+ *
+ */
+
 void MMSBpoisson::setVocabMap(std::unordered_map<int, std::string>* vocabMap){
 	this->vocabMap = vocabMap;
 }
+
+/*
+ *
+ * This sets the hyper parameters of the block
+ * matrix of MMSB 
+ *
+ */
 
 void MMSBpoisson::setHyperInits(double diagHyperInit, double nonDiagHyperInit){
 	this->diagHyperInit = diagHyperInit;
 	this->nonDiagHyperInit = nonDiagHyperInit;
 }
 
+/*
+ *
+ * This sets the seedIndex file that is used
+ * for intialization of the model for 
+ * faster convergence 
+ *
+ */
+
 void MMSBpoisson::setSeedIndexFileName(char* seedIndexFileName){
 	this->seedIndexFileName = seedIndexFileName;
 }
+
+/*
+ *
+ * This intializes the alpha hyperparameter 
+ * for the MMSB Pi parameter 
+ *
+ */
 
 void MMSBpoisson::initializeAlpha(){
 	for (int k = 0; k < K; ++k) {
@@ -663,12 +769,27 @@ void MMSBpoisson::initializeAlpha(double initValue){
 	}
 }
 
+/*
+ *
+ * This intializes the eta hyperparameter 
+ * for the MMSB Block matrix 
+ *
+ */
+
 void MMSBpoisson::initializeEta(){
 	for (int k = 0; k < vocab_size; ++k) {
 		(*eta)(k)= 0.01;//(getUniformRandom())*0.5;
 	}
 //	cout<<"initialized Eta"<<endl;
 }
+
+/*
+ *
+ * This intializes the datastructure for the model.
+ * This is the first function called after initializing
+ * the MMSBPoisson class 
+ *
+ */
 
 void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 	std::unordered_set<int>* threadList, std::unordered_set<int>* vocabList, 
@@ -777,6 +898,14 @@ void MMSBpoisson::initialize(int K, std::unordered_map<int,int>* userList,
 //	printMat(gamma,num_users,K);
 //	cout<<"Fag end of initialize()\n";
 }
+
+/*
+ *
+ * This give a list of users that 
+ * have posted on thread, for every thread
+ * present in the forum
+ *
+ */
 
 void MMSBpoisson::getPerThreadUserList(){
 	perThreadUserList  = new std::unordered_map<int,std::vector<int>*>();

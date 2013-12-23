@@ -23,6 +23,14 @@
 
 using namespace std;
 using namespace boost::numeric::ublas;
+
+/*
+ *
+ * This function reads a CSV file and converts
+ * it into a boost matrix format
+ *
+ */
+
 matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 
 	//		const char * filename = "monkLK.csv";
@@ -71,6 +79,13 @@ matrix<int> *Utils::readCsvToMat(char* filename, int numRows, int numColumns) {
 //	}
 //};
 
+/*
+ *
+ * This reads off the vocab file into a hashmap.
+ * The line number becomes the index for the string
+ *
+ */
+
 void Utils::readVocabMap(std::unordered_map<int, string>* vocabMap, char* fileName){
 	char s[20000];
 	FILE* filePointer = fopen(fileName,"r");
@@ -81,6 +96,13 @@ void Utils::readVocabMap(std::unordered_map<int, string>* vocabMap, char* fileNa
 		index++;
 	}
 }
+
+/*
+ *
+ * This reads the seedIndex file and gets a hashmap 
+ * to be used for intializing the Pis of MMSB
+ *
+ */
 
 void Utils::getSeedClusters(char* fileName, std::unordered_map<int,std::vector<int>*>* seedSetMap, 
 		std::unordered_set<int>* uniqueSeedSet){
@@ -97,6 +119,13 @@ void Utils::getSeedClusters(char* fileName, std::unordered_map<int,std::vector<i
 	}
 }
 
+/*
+ *
+ * This method reads of the main dataset file
+ * that contains line in the fomrat of 
+ * user1 user2 thread_id word1 word2..... 
+ *
+ */
 
 void Utils::getDataStats(
 std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist, 
@@ -136,6 +165,13 @@ std::unordered_map<int,std::unordered_set<int>*>* perThreadUserSet, int num_user
 	outfile.close();
 }
 
+/*
+ *
+ * This is for calclating statistics needed 
+ * for per user node degree. 
+ *
+ */
+
 void Utils::getNodeDegree(char* piFile,char* degreeFile,std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*,class_hash<pair<int,int>>>* completeUserAdjlist){
 	FILE* piFileDescriptor = fopen(piFile, "r");
 	int user;
@@ -172,6 +208,12 @@ void Utils::getNodeDegree(char* piFile,char* degreeFile,std::unordered_map< std:
 	outfile.flush();
 	outfile.close();
 }
+
+/*
+ *
+ * This reads the pi file  from the file
+ *
+ */
 
 char* Utils::readPiFile(FILE* graph_file_pointer, int* u1, char* s) {
 	//char seq[20000];
