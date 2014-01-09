@@ -141,7 +141,7 @@ void printPiToFile(matrix<T> *mat, int M, int N, std::string fileName, unordered
  *
  */
 
-template <class T>
+//template <class T>
 void printPerUserThreadTopicStats(std::string fileName, std::vector<std::unordered_map<int,std::vector<double>*>*>* perUserThreadTopicStats_thread_list, int K, std::vector<std::unordered_map<int,int>*>* perUserTopicStats_thread_list, int num_users, std::unordered_map<int,int>* userIndexMap, int topicDiffTopKUsers, int numParallelThreads){
 	ofstream outfile(fileName);
 	std::unordered_map<int,int>* final_map = new std::unordered_map<int,int>();
@@ -554,6 +554,16 @@ public:
 //	matrix<double>* updatePhiVariational(int p, int q, double sumGamma_p, double sumGamma_q);
 	double getVariationalLogLikelihood();
 //	void updateB(int p, int q, matrix<double>* oldPhi_pq);
+
+	matrix<double>* multiThreadStochasticUpdateTau();
+    
+	matrix<double>* stochasticUpdateLambda();
+	matrix<double>* stochasticUpdateNuFixedPoint();
+	matrix<double>* stochasticUpdateGamma(int p, int q);
+	void stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id, int Y_qp);
+	double stochasticUpdateGlobalParams(int inner_iter, int* num_iters);
+    void getPerThreadUserList();
+
 	void updateB();
 	void updateGamma(int p);
 	void updateNu();
@@ -568,15 +578,6 @@ public:
 	void setConstantThreads(int constantThreads);
 	void setNwFactorForText(double nwFactorForText);
 	void setPrintFullLDATopics(bool printFullLDATopics);
-
-	matrix<double>* multiThreadStochasticUpdateTau();
-    
-	matrix<double>* stochasticUpdateLambda();
-	matrix<double>* stochasticUpdateNuFixedPoint();
-	matrix<double>* stochasticUpdateGamma(int p, int q);
-	void stochasticVariationalUpdatesPhi(int p, int q, int Y_pq, int thread_id, int Y_qp);
-	double stochasticUpdateGlobalParams(int inner_iter, int* num_iters);
-    void getPerThreadUserList();
 
 	double getStochasticStepSize(int iter_no);
 	
@@ -605,6 +606,14 @@ public:
 	std::unordered_map< std::pair<int,int>, std::vector<int>*, class_hash<pair<int,int>>>* userThreadPost,
 	double stepSizeNu, int numHeldoutEdges, double stochastic_step_kappa, double samplingThreshold, int numParallelThreads, int vocabSize,
 	std::unordered_map< std::pair<int,int>, std::unordered_map<int, int>*, class_hash<pair<int,int>>>* heldUserAdjlist_held);        
+	
+	matrix<double>* getMeanBlockMat();
+	double getPredictionForEdge(matrix<double>* meanBlockMat, int p, int q);
+	
+	std::vector<double>* getPerThreadLDATopicVector(std::pair<int,int> user_thread, std::vector<double>* constDigamma, std::vector<double>* user_topic, matrix<double>* pi, int threadID);
+	void printPerThreadLDAUserTopics(std::vector<int>* threadList_thread, int threadID);
+	void performEndOfThreadTask(std::vector<int>* threadList_thread, int threadID);
+
 	void initializeB();
 
 	void initializeAllPhiMats();
@@ -619,13 +628,6 @@ public:
 	void initializeTheta();
 	void initializeKappa();
 	
-	matrix<double>* getMeanBlockMat();
-	double getPredictionForEdge(matrix<double>* meanBlockMat, int p, int q);
-	
-	std::vector<double>* getPerThreadLDATopicVector(std::pair<int,int> user_thread, std::vector<double>* constDigamma, std::vector<double>* user_topic, matrix<double>* pi, int threadID);
-	void printPerThreadLDAUserTopics(std::vector<int>* threadList_thread, int threadID);
-	void performEndOfThreadTask(std::vector<int>* threadList_thread, int threadID);
-
 	double getHeldoutLogLikelihood();
 	double getParallelHeldoutLL(int threadID);
 	
@@ -1486,6 +1488,7 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 		printLDATopics(tau, K, vocab_size, s1.str(), topKWords, vocabMap);
 		std::ostringstream s2;
 		s2<<outputDir<<"/"<<outputFile<<".perUserThreadTopicStats.txt";
+		// TODO: debug this
 		printPerUserThreadTopicStats(s2.str(), perUserThreadTopicStats_thread_list, K, perUserTopicStats_thread_list, num_users, userIndexMap, topicDiffTopKUsers, numParallelThreads);
 	}
 //	printErrorToFile(prediction_error_thread_list, num_threads);
@@ -1773,12 +1776,22 @@ void MMSBpoisson::multiThreadStochasticUpdateGlobalParams(int iter){
 
 	if(textFactorForNWTextBalance>0){
 		matrix<double>* tau_p = multiThreadStochasticUpdateTau();
-		for(int k=0; k<K; k++)
-			for(int v=0; v<vocab_size; v++)
+		for(int k=0; k<K; k++){
+			double sum_v=0;
+			for(int v=0; v<vocab_size; v++){
 				(*tau)(k,v) = ((1-stochastic_step_size)*(*tau)(k,v) + stochastic_step_size*(*tau_p)(k,v));
+				sum_v+=(*tau)(k,v);
+			}
+			for(int v=0; v<vocab_size; v++){
+				(*tau)(k,v) = (*tau)(k,v)/sum_v;
+			}
+		}
 		delete tau_p;
+		//TODO: tau needs to be normalized.
 		cout<<"Tau Prints"<<endl;
 //		printNegOrNanInMat(tau,K,vocab_size);
+	} else{
+		cout<<endl<<"textFactorForNWTextBalance is ZERO; thus LDA code not run"<<endl;
 	}
 //	cout<<"End of method multiThreadStochasticUpdateGlobalParams"<<endl;
 
