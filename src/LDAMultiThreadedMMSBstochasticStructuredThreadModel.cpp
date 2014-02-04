@@ -445,7 +445,7 @@ private:
     std::unordered_map<int, std::unordered_set<int>*>* perThreadUserSet;
 
 	int inputCountOffset=0;
-	double chi_epsilon = 1.5;	//1e-7;					// chi_epsilon should be high else it gives inf in phi updates
+	double chi_epsilon = 0.05;//1.5;	//1e-7;					// chi_epsilon should be high else it gives inf in phi updates
 	double link_epsilon = 1e-1;
 	int threadPostLengthThreshold = 10000;//200;
     double textFactorForNWTextBalance = 1e-3;
@@ -1509,7 +1509,9 @@ void MMSBpoisson::getParametersInParallel(int iter_threshold, int inner_iter, in
 			sf<<outputDir<<"/"<<outputFile<<".perTopicFullWordIndices.txt";
 			printLDATopics(tau, K, vocab_size, sf.str());
 		}
-		printLDATopics(tau, K, vocab_size, s1.str(), topKWords, vocabMap);
+//		printLDATopics(tau, K, vocab_size, s1.str(), topKWords, vocabMap);
+//		TODO: change the top K words to this as well?
+		printLDATopics(chi_kv_sum, K, vocab_size, s1.str(), topKWords, vocabMap);
 		std::ostringstream s2;
 		s2<<outputDir<<"/"<<outputFile<<".perUserThreadTopicStats.txt";
 		// TODO: debug this
@@ -1947,7 +1949,7 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 	int localThreadNum = threadList_thread->size();
 //	cout<<"localThreadNum: "<<localThreadNum<<"\t";
 //	int constantThreads=100;									// TODO:  change this and mke it an argv
-	int constantUsers=100;
+	int constantUsers=1000;
 //	int zeroEdgesTimes = 0;
 	double lda_time =0, poisson_time=0;
 	clock_t begin_lda, end_lda, begin_poisson, end_poisson ;
@@ -1984,6 +1986,9 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 		//		std::unordered_set<int>* tempThreadUsers = new std::unordered_set<int>();
 		int numThreadUser = perThreadUserList->at(curr_thread_id)->size();
 		constantUsers = (constantUsers>numThreadUser)? numThreadUser:constantUsers;
+//		if(constantUsers>1)
+//			cout<<"\nthreadID: "<<threadID<<" constantUsers: "<<constantUsers<<";\n";
+//	cout<<"End of method multiThreadParallelUpdate threadID "<<threadID<<endl;
 		for(int users=0; users<constantUsers; ++users){
 			int i_user = rand()%numThreadUser;
 //			cout<<"numThreadUser "<<numThreadUser<<"; i_user "<<i_user<<"\t";
@@ -2093,7 +2098,7 @@ void MMSBpoisson::multiThreadParallelUpdate(std::vector<int>* threadList_thread,
 		//		delete tempThreadUsers;
 }
 //	cout<<"threadID: "<<threadID<<"; localThreadNum: "<<localThreadNum<<"; multiThreadNetworkSampleSizeList: "<<multiThreadNetworkSampleSizeList->at(threadID)<<";\t";
-	cout<<"threadID: "<<threadID<<"; poisson_time: "<<poisson_time/CLOCKS_PER_SEC<<"; lda_time: "<<lda_time/CLOCKS_PER_SEC<<";\t";
+	cout<<"threadID: "<<threadID<<"; poisson_time: "<<poisson_time/CLOCKS_PER_SEC<<"; lda_time: "<<lda_time/CLOCKS_PER_SEC<<"forum_hreads: "<<temp_constantThreads<<"constantUsers: "<<constantUsers<<";\t";
 //	cout<<"End of method multiThreadParallelUpdate threadID "<<threadID<<endl;
 //delete tempThreadSet;
 	delete constDigamma;
@@ -2121,8 +2126,9 @@ void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_
 	long double  chi_sum=0; 
 	double log_epsilon_delta=0;
 	log_epsilon_delta = chi_epsilon/(1.0*real_delta_tp);
-	if(log_epsilon_delta<1)
-		log_epsilon_delta = const_log_epsilon_delta;
+//TODO Do we need const_log_epsilon_delta?
+//	if(log_epsilon_delta<1)
+//		log_epsilon_delta = const_log_epsilon_delta;
 
 	std::vector<double>* phiStatsForChi_p =perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread);
 	// NOTE: above we are readiong from the local thread data-structure.
@@ -2139,8 +2145,10 @@ void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_
 		chiStats4Phi->at(k)=0;
 		updatesFromPhi->at(k)=0;
 		if(real_delta_tp>0)
-			updatesFromPhi->at(k) = log(log_epsilon_delta)*(1 - phiStatsForChi_p->at(k)) 
-				+ phiStatsForChi_p->at(k)*log(1 + log_epsilon_delta);
+			updatesFromPhi->at(k) = real_delta_tp*(log(log_epsilon_delta)*(1 - phiStatsForChi_p->at(k)) 
+				+ phiStatsForChi_p->at(k)*log(1 + log_epsilon_delta));
+//			updatesFromPhi->at(k) = (log(log_epsilon_delta)*(1 - phiStatsForChi_p->at(k)) 
+//				+ phiStatsForChi_p->at(k)*log(1 + log_epsilon_delta);
 	}
 //	cout<<"In multiThreadStochasticUpdateChi "<<endl;
 //	cout<<" going to access threadPost vector "<<userThreadPost->at(user_thread)<<endl;
@@ -2167,12 +2175,13 @@ void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_
 //			continue;
 //		}
 //		cout<<"Not Skipping " << endl;
-		if(debugThreadID==threadID)
-			if((double)rand()/RAND_MAX < 0.01)
-				debugFlagPrint=true;
-			else
-				debugFlagPrint=false;
-		else
+
+//		if(debugThreadID==threadID && real_delta_tp>0)
+//			if((double)rand()/RAND_MAX < 0.01)
+//				debugFlagPrint=true;
+//			else
+//				debugFlagPrint=false;
+//		else
 			debugFlagPrint=false;
 		
 		int wordId = (*it);
@@ -2208,8 +2217,9 @@ void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_
 				chi_sum +=chi_tpi->at(k);
 			}
 		}
-//		if(debugFlagPrint)
-//			cout<<endl<<"chi_tpi/phi_tpi";
+		if(debugFlagPrint)
+			cout<<endl<<"chi_tpi/phi_tpi";
+		double chi_tpi_sum=0;
 		for(int k=0; k<K; k++){
 			chi_tpi->at(k) = chi_tpi->at(k)/chi_sum;
 			(*chi_kv_sum_thread_list->at(threadID))(k,wordId) += multiplyingFactor*(double)chi_tpi->at(k);
@@ -2219,12 +2229,21 @@ void MMSBpoisson::multiThreadStochasticUpdateChi(int p, std::pair<int,int> user_
 				exit(0);
 			}
 			//TODO: put in updates for phiStats4Chi
-//			if(debugFlagPrint)
-//				cout<<","<<k<<","<<perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread)->at(k)/chi_tpi->at(k);
+			if(debugFlagPrint){
+				cout<<","<<k<<","<<perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread)->at(k)/chi_tpi->at(k);
+				chi_tpi_sum+=perUserThreadPhiStats4Chi_thread_list->at(threadID)->at(user_thread)->at(k)/(chi_tpi->at(k)*K);
+			}
 		}
 		infFalg=false;
-//		if(debugFlagPrint)
-//			cout<<endl;
+		if(debugFlagPrint){
+			double chi_tpi_var=0;
+			for(int k=0; k<K; k++){  
+				chi_tpi_var += (chi_tpi->at(k)-chi_tpi_sum)*(chi_tpi->at(k)-chi_tpi_sum)/K;
+			}
+			cout<<endl<<"variance= "<<chi_tpi_var;
+		}
+		if(debugFlagPrint)
+			cout<<endl;
 
 //		for()
 	}
@@ -2742,16 +2761,18 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 			delta_tq = perUserThreadDelta->at(user_thread_q);
 		if(delta_tp>0){
 			double log_epsilon_delta = chi_epsilon/(1.0*delta_tp);
-			if(log_epsilon_delta<1)
-				log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
-			chiStats_p = (-1.0*log(log_epsilon_delta)*(1.0/delta_tp) + log(1 + log_epsilon_delta)*(1.0/delta_tp));
+//			if(log_epsilon_delta<1)
+//				log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
+//			chiStats_p = (-1.0*log(log_epsilon_delta)*(1.0/delta_tp) + log(1 + log_epsilon_delta)*(1.0/delta_tp));
+//			chiStats_p = (-1.0*log(log_epsilon_delta) + log(1 + log_epsilon_delta));
 			chi_vec_p = perUserThreadChiStats4Phi->at(user_thread_p);
 		}
 		if(delta_tq>0){
-			double log_epsilon_delta = chi_epsilon/(1.0*delta_tq);
-			if(log_epsilon_delta<1)
-				log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
-			chiStats_q = (-1.0*log(log_epsilon_delta)*(1.0/delta_tq) + log(1 + log_epsilon_delta)*(1.0/delta_tq));
+//			double log_epsilon_delta = chi_epsilon/(1.0*delta_tq);
+//			if(log_epsilon_delta<1)
+//				log_epsilon_delta = const_log_epsilon_delta;				//TODO: make it a constant
+//			chiStats_q = (-1.0*log(log_epsilon_delta)*(1.0/delta_tq) + log(1 + log_epsilon_delta)*(1.0/delta_tq));
+//			chiStats_q = (-1.0*log(log_epsilon_delta) + log(1 + log_epsilon_delta));
 			chi_vec_q = perUserThreadChiStats4Phi->at(user_thread_q);
 		}
 	}
@@ -2764,9 +2785,11 @@ void MMSBpoisson::multiThreadedStochasticVariationalUpdatesPhi(int p, int q, int
 	for(int g=0;g<K;g++){
 		double chi_p=0, chi_q=0;
 		if(delta_tp>0)
-			chi_p = textFactorForNWTextBalance*chiStats_p*chi_vec_p->at(g);
+			chi_p = textFactorForNWTextBalance*chi_vec_p->at(g);
+//			chi_p = textFactorForNWTextBalance*chiStats_p*chi_vec_p->at(g);
 		if(delta_tq>0)
-			chi_q = textFactorForNWTextBalance*chiStats_q*chi_vec_q->at(g);
+			chi_q = textFactorForNWTextBalance*chi_vec_q->at(g);
+//			chi_q = textFactorForNWTextBalance*chiStats_q*chi_vec_q->at(g);
 
 		int h=g;
 		int rand_indx = rand()%(K-1);
