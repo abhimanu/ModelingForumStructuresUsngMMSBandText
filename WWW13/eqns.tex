@@ -1,0 +1,41 @@
+\documentclass[a4paper]{article}
+\usepackage[margin=1cm]{geometry}
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage[charter,greekuppercase=italicized]{mathdesign}
+\usepackage{isomath}
+
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\setbox0\hbox{$#1#2$}%
+\copy0\kern-\wd0\mkern4mu\box0}} 
+
+\begin{document}
+
+\title{}
+\author{}
+\date{}
+\maketitle
+
+\begin{align}
+P(Y, R_{p} | \alpha, \beta, \kappa, \eta) &= \int_{\Phi} \! \int_{\Pi} \sum_{z} \! P(Y, R_{p}, z_{p \rightarrow q}, z_{p \leftarrow q}, \Phi, \Pi | \alpha, \beta, \kappa, \eta)\\
+										  &= \int_{\Phi} \! \int_{\Pi} \sum_{z} \! \bigg[ \prod_{p,q} \prod_{t} P(Y_{pq}^{t} | z_{p \rightarrow q}^{t}, z_{p \leftarrow q}^{t}, B) \cdot P(z_{p \rightarrow q}^{t} | \Pi_{p}) \cdot P(z_{p \leftarrow q}^{t} | \Pi_{q}) \cdot (\Pi_{p} P(\Pi_{p} | \alpha) \prod_{t} \prod_{p} P(R_{p}^{t} | z_{p \rightarrow q}^{t}, \Phi) \cdot \\\nonumber &\prod_{k} P(\Phi_{k} | \beta)) \bigg]
+\end{align}
+
+\begin{align}
+\log \! P(Y, W, z_{\rightarrow}, z_{\leftarrow}, \Phi, \Pi, B | \kappa, \eta, \beta, \alpha) &= \sum_{t} \! \sum_{p,q} \! \log P(Y_{pq}^{t} | z_{p \rightarrow q}^{t} , z_{p \leftarrow q}^{t}, B) +\\\nonumber &\sum_{t} \! \sum_{p,q} \! (\log P(z_{p \rightarrow q}^{t} | \Pi_{p}) + \log \! P(z_{p \leftarrow q}^{t} | \Pi_{p})) + \sum_{p} \! \log \! P(\Pi_{p} | \alpha) +\\\nonumber & \sum_{t} \! \sum_{p} \! \sum_{w \in R_{p}^{t}} \log P(w | z_{p \rightarrow}, \Phi) + \sum_{k} \! \log P(\Phi_{k} | \beta) + \sum_{gh} \! \log P(B_{gh} | \eta, \kappa)
+\end{align}
+
+\begin{align}
+q(z, \Phi, \Pi, B | \Delta_{z_{\rightarrow}}, \Delta_{\Phi}, \Delta_{B}, \Delta_{z_{\leftarrow}}, \Delta_{B_{\kappa}}) &= \prod_{t} \! \prod_{p,q} \! \bigg( q_{1}(z_{p \rightarrow q}^{t} | \Delta_{z_{p \rightarrow q}}) + q_{1}(z_{p \leftarrow q}^{t} | \Delta_{z_{p \leftarrow q}})  \bigg) \prod_{p} \! q_{4}(\Pi_{p} | \Delta_{\Pi_{p}}) \prod_{k} q_{3} (\Phi_{k} | \Delta_{\Phi_{k}}) \prod_{g,h} \! q(B_{g,h} | \Delta_{B_{\eta}}, \Delta_{B_{\kappa}})
+\end{align}
+
+\begin{align}
+L_{\Delta} &= E_{q}\bigg[ \log \! P(Y, W, z_{\rightarrow}, z_{\leftarrow}, \Phi, \Pi, B | \kappa, \eta, \beta, \alpha) - \log \! q \bigg]
+\end{align}
+
+\begin{align}
+L_{\Delta} &= E_{q} \bigg[ \sum_{t} \! \sum_{p,q} \! \log \bigg( B_{g,h}^{Y_{p,q}^t} \frac{e^{-B_{gh}}}{Y_{pq}^{t}!} \bigg) +\\\nonumber &\sum_{t} \! \sum_{pq} \! \log\bigg( \prod_{k} (\pi_{p,k}^{z_{p \rightarrow q} = k}) \bigg) + \sum_{t} \! \sum_{p,q} \log \! \bigg( \prod_{k}(\pi_{q,k})^{z_{p \leftarrow q} = k} \bigg) +\\\nonumber &\sum_{p} \! \log\big[ \prod_{k} (\Pi_{p,k})^{\alpha_{k} - 1} \cdot \frac{\Gamma(\sum \alpha_{k})}{\prod_{k} \Gamma(\alpha_{k})} \big] + \sum_{g,h} \! \log \! \big[ B_{g,h}^{\kappa - 1} / \eta^{\kappa} \Gamma(\kappa) \cdot \exp(-B_{g,h}/\eta) \big] -\\\nonumber &E_{q} \big[ \sum_{t} \! \sum_{p,q} \log \big( \prod_{k} (\Delta_{z_{p \rightarrow q}, k})^{z_{p \rightarrow q}=k} \big) + \sum_{t} \! \sum_{p,q} \! \log \! \big( \prod_{k} \! (\Delta_{z_{p \leftarrow q}, k})^{z_{p \leftarrow q} = k} \big) \big] + \sum \! \log \big[ \prod_{k} \! (\Pi_{p,k})^{\Delta_{\pi_{pk}}-1} \frac{\Gamma(\Delta_{\Pi_{p}})}{\prod_{k=1} \! \Gamma(\Delta_{\Pi_{p,k}})} \big] \bigg] + \\\nonumber &\sum_{k} \log \! \big[ \prod_{u \in v}(\Phi_{k,u})^{\Delta(\Phi_{ku} - 1)} \frac{\Gamma(\Delta_{\Phi_{k}})}{\prod_{u \in v} \! \Gamma(\Delta_{\Phi_{k,u}})} \big] + \sum_{g,h} \log \! \big[ \frac{B_{g,h}^{\Delta_{\kappa = 1}}}{\Delta_{\eta}^{\Delta_{\kappa}} \Gamma(\Delta_{\kappa})} \exp(-B_{g,h}/\Delta_{\eta}) \big]
+\end{align}
+
+
+\end{document}

@@ -1,0 +1,178 @@
+\label{sec:appendix}
+% \onecolumn{}
+
+The log-likelihood of the model:
+\begin{align}
+\log L &= \log \! P(Y, W, Z_{\leftarrow}, 
+Z_{\rightarrow}, \Pi, B, \beta | \alpha, \eta, \theta, \alpha) \nonumber\\
+\nonumber &= \sum_{t} \bigg[ \sum_{p,q} \! \log P(Y_{t,p, q} | Z_{t,p \rightarrow q} 
+     , Z_{t,p \leftarrow q}, B) \\ \nonumber 
+     &+ \sum_{p,q} \log P(Z_{t, p \rightarrow q} | \Pi_q) \\ \nonumber 
+     & + \sum_{p,q} \log \! P(Z_{t, p \leftarrow q} | \Pi_{q}) \bigg] 
+     + \sum_{p} \log \! P(\Pi_{p} | \alpha)  \\ \nonumber 
+     & + \bigg[ \sum_{t=1}^{T} \! \sum_{p \in t} \sum_{i=1}^{N_{T_{p}}} 
+     \log \! P(w_{t,p,i} | Z'_{t,p,i}, \beta) \\ \nonumber 
+     & + \sum_{t=1}^{T} \sum_{p \in t} \sum_{i=1^{N_{T_{p}}}} \log \! 
+     P(Z'_{t,p,i} | \bar{Z}_{t, p \rightarrow q}) \bigg]   
+     \\ \nonumber & + \sum_{k} \log P(\beta_{k} | 
+     \eta) +  \sum_{g,h} \log P(B_{g,h} | \kappa, \theta).\\ 
+     \label{eqn:LL}
+\end{align}
+
+The data likelihood for the model in figure~1
+
+\begin{align}
+P(Y, R_{p} | \alpha, \beta, \kappa, \eta) &=  \nonumber\\ 
+ \int_{\Phi} \!
+\int_{\Pi} \sum_{z} \! P(Y, R_{p}, & z_{p \rightarrow q}, z_{p \leftarrow q},
+\Phi, \Pi | \alpha, \beta, \kappa, \eta)  \nonumber \\  \nonumber
+%\\ 
+= \int_{\Phi} \! \int_{\Pi} \sum_{z} \! \bigg[ \prod_{p,q} & \prod_{t}
+P(Y_{pq}^{t} | z_{p \rightarrow q}^{t}, z_{p \leftarrow q}^{t}, B) 
+\cdot P(z_{p \rightarrow q}^{t} | \Pi_{p}) \nonumber
+\\  \cdot P(z_{p \leftarrow q}^{t} |
+\Pi_{q})   & \cdot \bigg(\prod_{p} P(\Pi_{p} | \alpha) \prod_{t} \prod_{p}
+P(R_{p}^{t} | z_{p \rightarrow q}^{t}, \Phi) \nonumber
+\\ \cdot \prod_{k} P(\Phi_{k} |
+\beta)&\bigg) \cdot \prod_{g,h}P(B_{gh} | \eta, \kappa) \bigg].
+\end{align}
+
+The complete log likelihood of the model is:
+
+\begin{align}
+\log \! &P(Y, W, z_{\rightarrow}, z_{\leftarrow}, \Phi, \Pi, B | \kappa, \eta,
+\beta, \alpha) \nonumber
+\\ & = \sum_{t} \! \sum_{p,q} \! \log P(Y_{pq}^{t} | z_{p
+\rightarrow q}^{t} , z_{p \leftarrow q}^{t}, B) \nonumber
+\\ &+ \nonumber \sum_{t} \!
+\sum_{p,q} \! (\log P(z_{p \rightarrow q}^{t} | \Pi_{p}) + \log \! P(z_{p \leftarrow q}^{t} |
+\Pi_{p})) \\  
+&+ \sum_{p} \! \log \! P(\Pi_{p} | \alpha) ~+ \sum_{t} \!
+\sum_{p} \! \sum_{w \in R_{p}^{t}} \log P(w | z_{p \rightarrow}, \Phi)
+\nonumber\\ 
+&+ \sum_{k} \! \log P(\Phi_{k} | \beta) + \sum_{gh} \! \log P(B_{gh} | \eta,
+\kappa).
+\end{align}
+
+The mean field variational approximation for the posterior is 
+
+\begin{align}
+q(z, &\Phi, \Pi, B | \Delta_{z_{\rightarrow}}, \Delta_{\Phi}, \Delta_{B},
+\Delta_{z_{\leftarrow}}, \Delta_{B_{\kappa}})  = \nonumber \\ \prod_{t} \!
+& \prod_{p,q} \! \bigg( q_{1}(z_{p \rightarrow q}^{t} | \Delta_{z_{p \rightarrow
+q}}) + q_{1}(z_{p \leftarrow q}^{t} | \Delta_{z_{p \leftarrow q}})  \bigg) \nonumber \\
+\cdot \prod_{p} &\! q_{4}(\Pi_{p} | \Delta_{\Pi_{p}}) \prod_{k} q_{3} (\Phi_{k}
+| \Delta_{\Phi_{k}}) \prod_{g,h} \! q(B_{g,h} | \Delta_{B_{\eta}},
+\Delta_{B_{\kappa}}).
+\end{align}
+
+The lower bound for the data log-likelihood from jensen's inequality is: 
+
+\begin{align}
+&L_{\Delta} = E_{q}\bigg[ \log \! P(Y, W, z_{\rightarrow}, z_{\leftarrow}, \Phi,
+\Pi, B | \kappa, \eta, \beta, \alpha) - \log \! q \bigg]\nonumber\\
+&= E_{q} \Bigg[ \sum_{t} \! \sum_{p,q} \! \log \left(
+B_{g,h}^{Y_{p,q}^t} \frac{e^{-B_{gh}}}{Y_{pq}^{t}!} \right) +
+\sum_{t} \! \sum_{pq} \! \log\left( \prod_{k} (\pi_{p,k}^{z_{p \rightarrow q} =
+k}) \right) \nonumber\\
+&+ \sum_{t} \! \sum_{p,q} \log \! \left(
+\prod_{k}(\pi_{q,k})^{z_{p \leftarrow q} = k} \right)\nonumber\\ 
+&+\sum_{t} \! \sum_{p} \! \sum_{w\in R_p^t}  \log \! \left(
+\prod_{u\in V}(\bar{z}^T\phi_u)^{w = u} \right)
+\nonumber\\ &+ 
+\sum_{p} \! \log \left( \prod_{k}
+(\Pi_{p,k})^{\alpha_{k} - 1} \cdot \frac{\Gamma(\sum \alpha_{k})}{\prod_{k}
+\Gamma(\alpha_{k})} \right) \nonumber\\ & + 
+\sum_{k} \! \log\left( \prod_{u\in V}
+(\phi_{k,u})^{\beta_{k} - 1} \cdot \frac{\Gamma(\sum \beta_{k})}{\prod_{k}
+\Gamma(\beta_{k})} \right) \nonumber\\ &+
+ \sum_{g,h} \! \log \! \left( B_{g,h}^{\kappa - 1} /
+\eta^{\kappa} \Gamma(\kappa) \cdot \exp(-B_{g,h}/\eta) \right) \Bigg]
+\nonumber\\ 
+& -E_{q} \Bigg[ \sum_{t} \! \sum_{p,q} \log \big( \prod_{k} (\Delta_{z_{p
+\rightarrow q}, k})^{z_{p \rightarrow q}=k} \big) \nonumber \\&+ \sum_{t} \!
+\sum_{p,q} \! \log \! \left(
+\prod_{k} \! (\Delta_{z_{p \leftarrow q}, k})^{z_{p \leftarrow q} = k} \right)
+  \nonumber \\
+ &+\sum \! \log \left( \prod_{k} \! (\Pi_{p,k})^{\Delta_{\pi_{pk}}-1}
+\frac{\Gamma(\Delta_{\Pi_{p}})}{\prod_{k=1} \! \Gamma(\Delta_{\Pi_{p,k}})}
+\right) \nonumber \\ &+ 
+\sum_{k} \log \! \left( \prod_{u \in v}
+(\Phi_{k,u})^{\Delta_{\Phi_{ku}} - 1)} \frac{\Gamma(\Delta_{\Phi_{k}})}
+{\prod_{u \in v} \! \Gamma(\Delta_{\Phi_{k,u}})} \right) \nonumber \\ 
+&+ \sum_{g,h} \log \! \left(
+\frac{B_{g,h}^{\Delta_{\kappa = 1}}}{\Delta_{\eta}^{\Delta_{\kappa}}
+\Gamma(\Delta_{\kappa})} \exp(-B_{g,h}/\Delta_{\eta}) \right) \Bigg].
+\label{eqn:VarLowerBound}
+\end{align}
+
+$\Delta_{\phi}$ used in the update of $\phi$ in equation~\ref{eqn:phiUp}. The
+parameter $\omega$ is used here to balance out the contribution from the text
+side to the network. 
+
+\begin{align}
+\Delta_{\phi^{'}_{t,p,g,h}} &= y_{t,p,q}( \log \! \lambda_{g,h} + 
+\Psi(\nu_{g,h})) - \nu_{g,h} \lambda_{g,h} - \log \! (y_{t,p,q}!)
+\nonumber \\ & + \Psi(\gamma_{p,g}) - \Psi(\sum_{g} \gamma_{p,g})
+\nonumber \\  & + \Psi(\gamma_{q,h}) - \Psi(\sum_{h} \gamma_{q,h})
+\nonumber \\  & + \omega\sum_{i=1}^{N_{T_{P}}} \! \chi_{t,p,i,g} 
+\bigg[ \ln \! \frac{\epsilon}{\delta_{p,t}} - \frac{1}{\delta_{t,p}} 
++ \ln \bigg( 1 + \frac{\epsilon}{\delta_{p,t}} \bigg) 
+\cdot \frac{1}{\delta_{t,p}} \bigg].
+\label{eqn:phiDelta}
+\end{align}
+
+$\Delta_{\chi}$ used in equation~\ref{eqn:chiUp} for $\chi$ update
+
+\begin{align}
+\Delta_{\chi^{'}_{t,p,g,h}} &= \bigg[ \Psi(\tau_{k,w_{t,p,i}}) - 
+\Psi(\sum_{w_{t,p,i}} \! \tau_{k, w_{t,p,i}}) \bigg]
+\nonumber \\  & + \ln \! (\frac{\epsilon}{\delta{p,t}}) \frac{1 - 
+\sum_{q,h} \! \phi_{t,p,q,k,j}}{\delta_{t,p}} 
+\nonumber\\  & + \frac{\sum_{q,h} \phi_{t,p,q,k,h}}{\delta_{t,p}} 
+\ln \! (1 + \frac{\epsilon}{\delta_{t,p}}).
+%\nonumber\\  & - 1 - \log \! \chi_{t,p,i,k}
+\label{eqn:chiDelta}
+\end{align}
+
+
+Partial derivative of $\nu$
+\begin{align}
+\frac{dL}{\partial\nu_{g,h}} &= \sum_{t} \! \sum_{p,q} \! 
+\phi_{t,p,q,g,h} (y_{t,p,q} \Psi'(\nu_{g,h}) - \lambda_{g,h})
+\nonumber\\  & + (\kappa_{g,h} - \nu_{g,h})\Psi'(\nu_{g,h}) + 
+1 - \frac{\lambda_{g,h}}{\theta_{g,h}}.
+\label{eqn:partialNu}
+\end{align}
+
+The traditional variational updates for the global parameters
+
+\begin{align}
+\gamma_{p,k} &= \alpha_{k} + \sum_{t} \! \sum_{q} \! \sum_{h} \! \phi_{t,p,q,k,h} 
++ \sum_{t} \! \sum_{q} \! \sum_{g} \! \phi_{t,q,p,g,k}.
+\label{eqn:gammaUp}
+\end{align}
+
+\begin{align}
+\nu_{g,h}^{t+1} &= \nu_{g,h}^{t}+\rho_\nu \frac{dL}{\partial\nu_{g,h}}. 
+\label{eqn:nuUp}
+\end{align}
+
+\begin{align}
+\lambda_{g,h} &= \frac{\bigg( \sum_{t} \! \sum_{p,q} \! \phi_{t,p,q,g,h} y_{t,p,q} + 
+\kappa_{g,h} \bigg) }{
+ \bigg( \bigg( \sum_{t} \! \sum_{p,q} \! \phi_{t,p,q,g,h} \bigg) + 
+\frac{1}{\theta_{g,h}} \bigg) \nu_{g,h}}.
+\label{eqn:lambdaUp}
+\end{align}
+
+\begin{align}
+\tau_{p,v} = \nu_{v} + \sum_{t} \! \sum_{p \in t}
+\bigg(\sum_{w_{t,p,i}=v}^{N_{t,p}} \chi_{t,p,i,k} \bigg).
+\label{eqn:tauUp}
+\end{align}
+
+
+where $\rho_\nu$ is $\nu$'s gradient ascent update step-size using its partial
+derivative $\frac{dL}{\partial\nu_{g,h}}$ define in equation~\ref{eqn:partialNu}.
+

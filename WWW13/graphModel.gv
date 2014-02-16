@@ -1,0 +1,6 @@
+digraph G{
+	main->parse->execute;
+	main->init;
+	init->make_string;
+	main->cleanup; 
+}
