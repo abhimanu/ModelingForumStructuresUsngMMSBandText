@@ -1,0 +1,110 @@
+\documentclass{sig-alternate}
+% \usepackage{nips12submit_e,times}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx, subfigure, fink, grffile, placeins}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{upgreek}
+
+% \title{Modeling Network and Text Structure in Online Forums}
+% \title{Simultaneous text \& Network modeling in MMSB for Learning Structured
+% Interactions on Online Forums}
+% \title{Modeling Structured Interaction in Big Online User Forums }
+% \title{Modeling Structured Interaction in \\ Large Online User Forums }
+\title{Scalable Modeling of Conversational-role based Self-presentation
+Characteristics in Large Online Forums}
+
+% \author{
+% Abhimanu Kumar \\
+% Carnegie Mellon University\\
+% \texttt{abhimank@cs.cmu.edu}\\
+% \And
+% Chong Wang \\
+% Carnegie Mellon University\\
+% \texttt{chongw@cs.cmu.edu}\\
+% \And
+% Carolyn P. Rose \\
+% Carnegie Mellon University\\
+% \texttt{cprose@cs.cmu.edu}\\
+% }
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand{\comment}[1]{{\color{red}{#1}}}
+
+%\nipsfinalcopy
+
+\begin{document}
+\maketitle
+\begin{abstract}
+
+Online discussion forums are complex webs of overlapping subcommunities 
+(macrolevel structure, across threads) in which users enact different roles 
+depending on which subcommunity they are participating in within a particular 
+time point (microlevel structure, within threads).  This sub-network structure 
+is implicit in massive collections of threads. To uncover this implicit structure, 
+we develop a scalable algorithm based on stochastic variational inference and 
+levearge topic models (LDA) along with mixed membership stochastic block (MMSB) 
+models. We evaluate our model on three large-scale datasets, Cancer-ThreadStarter (22K
+users and 14.4K threads), Cancer-NameMention(15.1K users and 12.4K threads) and
+StackOverFlow (1.19 million users and 4.55 million threads). Qualitatively, we
+demonstrate that our model can provide useful explanations of microlevel
+and macrolevel user presentation charcteristics in different communities
+using the topics discovered from posts. Quantitatively, we show our model
+does better than MMSB and LDA in predicting user reply structure within threads. 
+% On another task of user survival prediction (evaluating factors that predict drop 
+% off in participation), indicators extracted using our model increase the predictive 
+% validity of previously published models.  
+In addition, we demonstrate via synthetic 
+data experiments that the proposed active sub-network discovery
+model is stable and recovers the original parameters of the experimental
+setup with high probability.
+
+
+
+
+
+
+
+\end{abstract}
+
+\section{Introduction}
+\input{intro}
+
+\section{Related Work}
+\input{relatedWork}
+
+% \section{Graphical Model \& Generative Story}
+\section{Approach}
+\input{approach}
+
+\section{Datasets}
+\input{dataset}
+% 
+% \section{Our Method \& Tasks Finished}
+% \input{approach&tasks}
+% 
+\section{Experimental Setup and Evaluation}
+\input{experiments}
+
+\section{Results}
+\input{results}
+
+\section{Conclusion \& Future Work}
+\input{conclusion}
+
+%o\section{Finished Task Split-up}
+
+%\input{appendix}
+
+%\input{06Eval01}
+%\input{06Eval02}
+\bibliography{mybib}
+\bibliographystyle{plain}
+\end{document}
