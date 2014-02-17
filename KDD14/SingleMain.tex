@@ -19,41 +19,31 @@
 \newcommand{\order}[1]{\textit{O}(#1)}
 \newcommand{\comment}[1]{\textcolor{red}{[#1]}}
 
-\title{Scalable Modeling of Conversational-role based Self-presentation
-Characteristics in Large Online Forums}
+\title{Large scale structure aware community discovery in online forums}
 \numberofauthors{6}
 \author{
 \alignauthor
 Abhimanu Kumar \\
-\affaddr{School of Computer Science}\\
-\affaddr{Carnegie Mellon University}\\
 \email{abhimank@cs.cmu.edu}
 \alignauthor
 Shriphani Palakodety \\
-\affaddr{School of Computer Science}\\
-\affaddr{Carnegie Mellon University}\\
 \email{shriphanip@gmail.com}
 \alignauthor
 Chong Wang \\
-\affaddr{School of Computer Science}\\
-\affaddr{Carnegie Mellon University}\\
 \email{chongw@cs.cmu.edu}
 \alignauthor
 \and
+Miaomiao Wen\\
+\email{mwen@cs.cmu.edu}
+\alignauthor
 Carolyn P. Rose\\
-\affaddr{School of Computer Science}\\
-\affaddr{Carnegie Mellon University}\\
 \email{cprose@cs.cmu.edu}
 \alignauthor
 Eric P. Xing\\
-\affaddr{School of Computer Science}\\
-\affaddr{Carnegie Mellon University}\\
 \email{epxing@cs.cmu.edu}
-\alignauthor
-Miaomiao Wen\\
-\affaddr{School of Computer Science}\\
-\affaddr{Carnegie Mellon University}\\
-\email{mwen@cs.cmu.edu}
+\sharedaffiliation
+\affaddr{School of Computer Science}  \\
+\affaddr{Carnegie Mellon University}  \\
 }
 
 
@@ -64,31 +54,38 @@ Miaomiao Wen\\
 
 %\nipsfinalcopy
 
+\def\sharedaffiliation{%
+\end{tabular}
+\begin{tabular}{c}}
+
 \begin{document}
 \maketitle
 \begin{abstract}
-
-Online discussion forums are complex webs of overlapping subcommunities 
-(macrolevel structure, across threads) in which users enact different roles 
-depending on which subcommunity they are participating in within a particular 
-time point (microlevel structure, within threads).  This sub-network structure 
-is implicit in massive collections of threads. To uncover this  structure, 
-we develop a scalable algorithm based on stochastic variational inference and 
-leverage topic models (LDA) along with mixed membership stochastic block (MMSB) 
-models. We evaluate our model on three large-scale datasets, Cancer-ThreadStarter (22K
-users and 14.4K threads), Cancer-NameMention(15.1K users and 12.4K threads) and
-StackOverFlow (1.19 million users and 4.55 million threads). Qualitatively, we
-demonstrate that our model can provide useful explanations of microlevel
-and macrolevel user presentation characteristics in different communities
-using the topics discovered from posts. Quantitatively, we show that our model
-does better than MMSB and LDA in predicting user reply structure within threads. 
-% On another task of user survival prediction (evaluating factors that predict drop 
-% off in participation), indicators extracted using our model increase the predictive 
-% validity of previously published models.  
-In addition, we demonstrate via synthetic 
-data experiments that the proposed active sub-network discovery
-model is stable and recovers the original parameters of the experimental
-setup with high probability.
+Online discussion forums are complex webs of overlapping communities. 
+Users choose to participate in threads according to their interests, 
+whether fleeting or more persistent. Thus, the network structure left 
+behind as their behavior trace can be seen as encoding evidence of 
+coordinated interests and values shared within sub-communities that 
+members move among from time to time.  We propose a latent 
+hierarchical model to incorporate this structure that leverages topic 
+models (LDA) along with mixed membership stochastic block (MMSB) 
+models. This makes the model complex and traditional sampling or 
+variational based inference are very slow to converge on it. We overcome 
+this by a proposing a new parallel inference scheme based on stochastic 
+variational inference that is highly scalable. We evaluate our 
+model on three large-scale datasets, which we refer to as 
+Cancer-ThreadStarter (22K users and 14.4K threads), Cancer-NameMention(15.1K 
+users and 12.4K threads) and StackOverFlow (1.19 million users and 
+4.55 million threads). Qualitatively, we demonstrate that our 
+model uncovers new communities that were hitherto invisible to a 
+simpler MMSB or spectral clustering based methods. Quantitatively, we 
+show that our model performs significantly better than MMSB, LDA, 
+matrix factorization and a bag of words model in predicting 
+user reply structure within threads. In addition, we demonstrate 
+via rigorous synthetic data experiments that the proposed active sub-network 
+discovery model is stable and recovers the original parameters of 
+the experimental setup with high probability. We also provide speed 
+comparisons of our model with varying degree of parallelism and data sizes.  
 
 \end{abstract}
 
@@ -109,8 +106,7 @@ responses to suit specific discussions on different threads. These thread based
 interactions give rise to active sub-networks, within the global network of users,
 that characterize the dynamics of interaction. Overlaying differential changes
 in user interaction characteristics across these sub-networks provides
-insights into users' macroscopic (forum-wide) as well as microscopic (thread
-specific) participation behavior. 
+insights into user communities that exist in the forum. 
 
 Analysing online social networks and user forums have been approached using
 various perspectives such as network ~\cite{Shi:2000:NCI:351581.351611,
