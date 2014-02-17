@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 /ForumStructureWithTextAndMMSB.aux
 /ForumStructureWithTextAndMMSB.log
 /ForumStructureWithTextAndMMSB.out
 /ForumStructureWithTextAndMMSB.pdf
 /SingleMain.pdf
 /tmp
+=======
+*.swp
+*.out
+*.csv
+*.mat
+>>>>>>> fcd30c4b1ed9a3adc500a20e26d7fa4e4dadc8fd
