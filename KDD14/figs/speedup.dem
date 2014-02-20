@@ -1,0 +1,59 @@
+set style data histogram
+set style histogram cluster gap 1
+
+set term postscript eps enhanced color font 'Helvetica Bold,28' 
+#set term postscript eps enhanced color font 'Helvetica,24' 
+
+set termoption dashed
+
+
+# color definitions
+set style line 1 lc rgb '#E69F00' pt 1 ps 1 lt 1 lw 6 # --- orange
+set style line 2 lc rgb '#56B4E9' pt 1 ps 1 lt 1 lw 6 # --- light blue
+set style line 3 lc rgb '#009E73' pt 7 ps 1.4 lt 1 lw 6 # --- green
+set style line 4 lc rgb '#F0E442' pt 4 ps 1 lt 1 lw 6 # --- yellow
+set style line 5 lc rgb '#0072B2' pt 5 ps 1 lt 1 lw 6 # --- dark-blue
+set style line 6 lc rgb '#D55E00' pt 6 ps 1 lt 1 lw 6 # --- dark-orange
+set style line 7 lc rgb '#CC79A7' pt 3 ps 1 lt 1 lw 6 # --- magenta
+
+
+#set style fill solid 1.0 border lt -1 
+set boxwidth 0.9
+
+
+# remove border on top and right and set color to gray
+#set style line 11 lc rgb '#303030' lt 1
+#set border 3 back ls 11
+#set tics nomirror
+
+# define grid
+set style line 12 lc rgb '#C0C0C0' lt 1 lw 1
+set grid back ls 12
+
+
+#set key left top
+#set key at screen 0.95,0.9
+set key at screen 0.95,0.9  font 'Helvetica,22'
+#set key at screen 0.55,0.9 Right 
+
+set style fill solid 0.5 
+#set style fill solid border -1
+
+set xlabel 'Model' offset 0,0.5
+set ylabel 'Time to Converge (seconds)' offset 1.5
+
+
+set output 'speedup.eps'
+plot 'SpeedImprovement.txt' using 2:xtic(1) lc rgb '#009E73' ti col, '' u 3 lc rgb '#0072B2' ti col , '' u 4 lc rgb '#E69F00' ti col, '' u 5 lc rgb '#56B4E9' ti col   
+#plot 'SpeedImprovement.txt' using 2:xtic(1) lc rgb '#009E73' ti col, '' u 3 lc rgb '#0072B2' ti col , '' u 4 lc rgb '#E69F00' ti col
+#
+#
+#
+#set ylabel 'Multiple of FlexiLearn Convergence Time'
+set ylabel 'Times Slower than FlexiLearn' offset 0.0
+set ytics (0,"" 1, "" 2, "" 3, "" 4,"5x" 5, "10x" 10, "15x" 15, "20x" 20,"25x" 25, "30x" 30)
+set yrange [0:30]
+
+set output 'speedup2.eps'
+plot 'Speedup2.txt' using 2:xtic(1) lc rgb '#009E73' ti col, '' u 3 lc rgb '#0072B2' ti col , '' u 4 lc rgb '#E69F00' ti col, '' u 5 lc rgb '#56B4E9' ti col   
+
