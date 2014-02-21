@@ -34,7 +34,7 @@ set style line 12 lc rgb '#C0C0C0' lt 1 lw 1
 set grid back ls 12
 
 
-set output 'datastats.pdf'
+set output 'datastats.eps'
 set multiplot
 
 #set key left top
