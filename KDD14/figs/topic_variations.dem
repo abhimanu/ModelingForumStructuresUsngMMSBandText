@@ -1,0 +1,94 @@
+set style data histogram
+set style histogram cluster gap 1
+
+set term postscript eps enhanced color font 'Helvetica Bold,28' 
+#set term postscript eps enhanced color font 'Helvetica,24' 
+
+set termoption dashed
+set style line 11 lc rgb '#303030' lt 1
+set border 3 back ls 11
+set tics nomirror
+
+
+# color definitions
+set style line 1 lc rgb '#E69F00' pt 1 ps 1 lt 1 lw 6 # --- orange
+set style line 2 lc rgb '#56B4E9' pt 1 ps 1 lt 1 lw 6 # --- light blue
+set style line 3 lc rgb '#009E73' pt 7 ps 1.4 lt 1 lw 6 # --- green
+set style line 4 lc rgb '#F0E442' pt 4 ps 1 lt 1 lw 6 # --- yellow
+set style line 5 lc rgb '#0072B2' pt 5 ps 1 lt 1 lw 6 # --- dark-blue
+set style line 6 lc rgb '#D55E00' pt 6 ps 1 lt 1 lw 6 # --- dark-orange
+set style line 7 lc rgb '#CC79A7' pt 3 ps 1 lt 1 lw 6 # --- magenta
+
+
+#set style fill solid 1.0 border lt -1 
+#set boxwidth 0.9
+
+
+# remove border on top and right and set color to gray
+#set style line 11 lc rgb '#303030' lt 1
+#set border 3 back ls 11
+#set tics nomirror
+
+# define grid
+set style line 12 lc rgb '#C0C0C0' lt 1 lw 1
+set grid back ls 12
+
+
+set output 'topic_variations.eps'
+set multiplot
+
+#set key left top
+#set key at screen 0.95,0.9
+#set key at screen 0.95,0.9  font 'Helvetica,22'
+#set key at screen 0.55,0.9 Right 
+
+set key top right invert  font 'Helvetica,24' 
+set style fill solid 0.5 
+#set style fill solid border -1
+
+set arrow from 1.5,1000000 to 2,4000000  lw 1 back filled
+set object 1 rect from graph 0.25, graph 0.19 to graph 0.90, graph 0.75 back
+set object 1 rect fc rgb "white" fillstyle solid 1.0  noborder
+
+set arrow from -0.05,-500000 to -0.05,1000000 lw 1 front nohead
+set arrow from -0.05,-500000 to 9,-500000 lw 1 front nohead
+set arrow from -0.05,1000000 to 9,1000000 lw 1 front nohead
+set arrow from 9,1000000 to 9,-500000 lw 1 front nohead
+#
+#
+#set ylabel 'Multiple of FlexiLearn Convergence Time'
+set ylabel 'Number of local topic variations' offset -0.5
+#set xtics (0,"1" 1, "2" 2, "3" 3, "4" 4,"5" 5, "6" 6, "7" 7, "8" 8,"9" 9, "10" 10, "11+" 11)
+#set xrange [0:100]
+set yrange [0:25000000]
+set xlabel 'Percentage variations' offset 0,0.5
+
+plot 'topic_variations.txt' using 2:xtic(1) lc rgb '#009E73' ti col, '' u 3 lc rgb '#0072B2' ti col , '' u 4 lc rgb '#E69F00' ti col   
+
+unset object 1
+
+# Now we set the options for the smaller plot
+set size 0.55,0.55
+set origin 0.37,0.25
+#set title 'Zoom'
+set title ''
+#set xrange [0:100]
+unset xtics
+#set xtics ("" 0,"" 10, "" 20, "" 30, "" 40,"" 50, "" 60, "" 70, "" 80,"" 90, "" 100)
+set xtics font 'Helvetica Bold,20'
+set yrange [0:4000000]
+set ytics ("" 0,"" 10000000,"" 2000000, "" 3000000, "" 4000000)
+set xlabel ""
+set ylabel ""
+unset arrow
+#set grid
+set grid back ls 12
+set border #3 back ls 11
+
+#set format y '%.2e'
+#set format y "10^{%L}"
+#set ylabel "Y-AXIS" 2,0
+
+set key off
+plot 'topic_variations.txt' using 2:xtic(1) lc rgb '#009E73' ti col, '' u 3 lc rgb '#0072B2' ti col , '' u 4 lc rgb '#E69F00' ti col   
+unset multiplot
