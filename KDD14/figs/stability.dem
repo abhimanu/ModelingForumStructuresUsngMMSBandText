@@ -47,7 +47,7 @@ set xrange [0:0.5]
 #set origin 0,0
 #set title 'Whole plot'
 set ylabel 'RMSE'
-set xlabel 'Original {/Symbol a} or {/Symbol h} values'
+set xlabel 'Original {/Symbol a} or {/Symbol h} values'    # alpha and eta symbols
 
 
 set output 'stability.eps'
