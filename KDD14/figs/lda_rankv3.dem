@@ -1,0 +1,120 @@
+set style data linespoints
+set term postscript eps enhanced color font 'Helvetica Bold,28' 
+#set term postscript eps enhanced color font 'Helvetica,24' 
+
+set termoption dashed
+
+# define axis
+# remove border on top and right and set color to gray
+set style line 11 lc rgb '#303030' lt 1
+set border 3 back ls 11
+set tics nomirror
+
+# define grid
+set style line 12 lc rgb '#C0C0C0' lt 1 lw 1
+set grid back ls 12
+
+
+# color definitions
+set style line 1 lc rgb '#E69F00' pt 9 ps 1.8 lt 1 lw 6 # --- orange
+set style line 2 lc rgb '#56B4E9' pt 2 ps 1.4 lt 1 lw 6 # --- light blue
+set style line 3 lc rgb '#009E73' pt 7 ps 1.4 lt 1 lw 6 # --- green
+set style line 4 lc rgb '#F0E442' pt 4 ps 1.4 lt 1 lw 6 # --- yellow
+set style line 5 lc rgb '#0072B2' pt 5 ps 1.4 lt 1 lw 6 # --- dark-blue
+set style line 6 lc rgb '#D55E00' pt 6 ps 1.4 lt 1 lw 6 # --- dark-orange
+set style line 7 lc rgb '#CC79A7' pt 3 ps 1.4 lt 1 lw 6 # --- magenta
+
+set style line 21 lc rgb '#E69F00' pt 9 ps 1.8 lt 2 lw 6 # --- orange
+set style line 22 lc rgb '#56B4E9' pt 2 ps 1.4 lt 1 lw 6 # --- light blue
+set style line 23 lc rgb '#009E73' pt 7 ps 1.4 lt 2 lw 6 # --- green
+set style line 24 lc rgb '#F0E442' pt 4 ps 1.4 lt 2 lw 6 # --- yellow
+set style line 25 lc rgb '#0072B2' pt 5 ps 1.4 lt 2 lw 6 # --- dark-blue
+set style line 26 lc rgb '#D55E00' pt 6 ps 1.4 lt 2 lw 6 # --- dark-orange
+set style line 27 lc rgb '#CC79A7' pt 3 ps 1.4 lt 2 lw 6 # --- magenta
+
+
+set output 'lda_rankv3.eps'
+
+set multiplot
+
+#set key bottom right
+#set key at 4500,0.25
+#set key invert at 8000,0.30
+#set key bottom right invert
+#set key below invert
+
+set key top right invert  font 'Helvetica,24' 
+#set key rmargin nobox invert  font 'Helvetica,22' 
+#set key off
+#set rmargin 20
+#set key off
+
+#set rmargin 28
+
+#set yrange [0:1]
+
+#set size 1,1
+
+#set origin 0,0
+#set title 'Whole plot'
+set xtics (0,200,400,600,800,1000)
+set ylabel 'Time to converge (seconds)' offset 2
+set xlabel 'Rank (# of topics)' offset 0,0.5
+
+ ### This is to plot the square. You can skip this ###
+set arrow from 50,2200 to 180,5000  lw 1 back filled
+
+#set object 1 rectangle from screen 0.3,0.5 to screen 0.9,1.0 behind fc '#FFFFFF' fs solid
+set object 1 rect from graph 0.090, graph 0.42 to graph 0.5, graph 0.99 back
+set object 1 rect fc rgb "white" fillstyle solid 1.0  noborder
+
+set arrow from -5,-100 to 205,-100 lw 1 front nohead
+set arrow from -5,-100 to -5,2100 lw 1 front nohead
+set arrow from 205,-100 to 205,2100 lw 1 front nohead
+set arrow from 205,2100 to -5,2100 lw 1 front nohead
+###################################   
+
+
+#plot 'rank_speeds.txt' u 1:2 ls 3 t 'Ours (8 cores)', 'rank_speeds.txt' u 1:3 ls 3 t 'Ours (16 cores)', 'rank_speeds.txt' u 1:4 ls 5 t 'DSGD+ (8 cores)', 'rank_speeds.txt' u 1:5 ls 5 t 'DSGD+ (16 cores)', 'rank_speeds.txt' u 1:6 ls 4 t 'GraphLab'
+#plot 'rank_speeds.txt' u 1:6 ls 4 t 'GraphLab', 'rank_speeds.txt' u 1:5 ls 25 t 'DSGD+ (16 cores)', 'rank_speeds.txt' u 1:4 ls 5 t 'DSGD+ (8 cores)', 'rank_speeds.txt' u 1:3 ls 23 t 'Ours (16 cores)','rank_speeds.txt' u 1:2 ls 3 t 'Ours (8 cores)' 
+#plot 'rank_speeds2.txt' u 1:7 ls 6 t 'PSGD','rank_speeds2.txt' u 1:6 ls 4 t 'GraphLab', 'rank_speeds2.txt' u 1:5 ls 5 t 'DSGD+ (16 cores)', 'rank_speeds2.txt' u 1:4 ls 25 t 'DSGD+ (8 cores)', 'rank_speeds2.txt' u 1:3 ls 3 t 'Ours (16 cores)','rank_speeds2.txt' u 1:2 ls 23 t 'Ours (8 cores)' 
+plot 'rank_speeds2.txt' u 1:7 ls 2 t 'PSGD','rank_speeds2.txt' u 1:6 ls 1 t 'GraphLab', 'rank_speeds2.txt' u 1:5 ls 5 t 'Barriered FlexiLearn (16 cores)', 'rank_speeds2.txt' u 1:4 ls 25 t 'Barriered FlexiLearn (8 cores)', 'rank_speeds2.txt' u 1:3 ls 3 t 'FlexiLearn (16 cores)','rank_speeds2.txt' u 1:2 ls 23 t 'FlexiLearn (8 cores)' 
+
+
+unset object 1
+
+# Now we set the options for the smaller plot
+set size 0.4,0.4
+set origin 0.2,0.37
+#set title 'Zoom'
+set title ''
+set xrange [0:200]
+set yrange [0:2000]
+set ytics ("" 0, "" 500, "" 1000, "" 1500, "" 2000)
+set xtics ("" 0,"" 100,"" 200)
+set xlabel ""
+set ylabel ""
+unset arrow
+#set grid
+set grid back ls 12
+set border 3 back ls 11
+
+#set format y '%.2e'
+#set format y "10^{%L}"
+#set ylabel "Y-AXIS" 2,0
+
+set key off
+
+#set xtics (0,1000,2000)
+#set ytics (0.0058, 0.0064, 0.007, 0.0076)
+
+# And finally let's plot the same set of data, but in the smaller plot
+#plot 'datos.dat' w l lt 1 lc 3 lw 3 t ''
+
+#plot 'us_lda_convergencev2.txt' u 1:2 ls 3 t 'Ours', 'dsgd_lda_convergencev2.txt' u 1:2 ls 4 t 'DSGD+','graphlab_lda_convergencev2.txt' u 1:2 ls 2 t 'GraphLab' 
+#plot 'rank_speeds2.txt' u 1:7 ls 6 t 'PSGD','rank_speeds2.txt' u 1:6 ls 4 t 'GraphLab', 'rank_speeds2.txt' u 1:5 ls 5 t 'DSGD+ (16 cores)', 'rank_speeds2.txt' u 1:4 ls 25 t 'DSGD+ (8 cores)', 'rank_speeds2.txt' u 1:3 ls 3 t 'Ours (16 cores)','rank_speeds2.txt' u 1:2 ls 23 t 'Ours (8 cores)' 
+plot 'rank_speeds2.txt' u 1:7 ls 2 t 'PSGD','rank_speeds2.txt' u 1:6 ls 1 t 'GraphLab', 'rank_speeds2.txt' u 1:5 ls 5 t 'Barriered FlexiLearn (16 cores)', 'rank_speeds2.txt' u 1:4 ls 25 t 'Barriered FlexiLearn (8 cores)', 'rank_speeds2.txt' u 1:3 ls 3 t 'FlexiLearn (16 cores)','rank_speeds2.txt' u 1:2 ls 23 t 'FlexiLearn (8 cores)' 
+
+# It's important to close the multiplot environment!!!
+unset multiplot
+

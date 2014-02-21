@@ -1,0 +1,129 @@
+set style data linespoints
+set term postscript eps enhanced color font 'Helvetica,22' 
+#set term postscript eps enhanced color font 'Helvetica,24' 
+
+set termoption dashed
+
+# define axis
+# remove border on top and right and set color to gray
+set style line 11 lc rgb '#303030' lt 1
+set border 3 back ls 11
+set tics nomirror
+
+# define grid
+set style line 12 lc rgb '#C0C0C0' lt 1 lw 1
+set grid back ls 12
+
+
+# color definitions
+set style line 1 lc rgb '#E69F00' pt 1 ps 1 lt 1 lw 6 # --- orange
+set style line 2 lc rgb '#56B4E9' pt 2 ps 1 lt 1 lw 6 # --- light blue
+set style line 3 lc rgb '#009E73' pt 7 ps 1.4 lt 1 lw 6 # --- green
+set style line 4 lc rgb '#F0E442' pt 4 ps 1 lt 1 lw 6 # --- yellow
+set style line 5 lc rgb '#0072B2' pt 5 ps 1 lt 1 lw 6 # --- dark-blue
+set style line 6 lc rgb '#D55E00' pt 6 ps 1 lt 1 lw 6 # --- dark-orange
+set style line 7 lc rgb '#CC79A7' pt 3 ps 1 lt 1 lw 6 # --- magenta
+
+
+
+#set terminal postscript eps color enhanced
+set output 'multiplot2.eps'
+
+#set ytics 0.25
+#set format y "%.2f"
+
+set multiplot
+
+#set key bottom right
+#set key at 4500,0.25
+set key at 4500,0.25
+
+# Bigger plot options
+set yrange [0:1]
+set size 1,1
+set origin 0,0
+#set title 'Whole plot'
+set xlabel 'Time (seconds)'
+set ylabel 'Objective Value'
+
+
+### This is to plot the square. You can skip this ###
+#set arrow from 2700,0.45 to 1750,0.15 lw 1 back filled
+set arrow from 1500,0.12 to 2400,0.42  lw 1 back filled
+
+### 2 ARROWS DOWN
+#set arrow from 1840,0.55 to -50,0.105 lw 1 back filled
+#set arrow from 3920,0.55 to 3000,0.105 lw 1 back filled
+
+#### 2 ARROWS UP
+#set arrow from -50,0.105 to 1840,0.55 lw 1 back filled
+#set arrow from 3000,0.105 to 3920,0.55 lw 1 back filled
+
+#### 2 arrows up loose
+#set arrow from -50,0.105 to 1840,0.55 lw 1 back filled
+#set arrow from 3000,0.105 to 3720,0.45 lw 1 back filled
+
+
+
+#set arrow from 0,0 to 3000,0.1 lw 1 back filled
+#set arrow from 0,0 to 3000,0.1 lw 1 front nohead
+#
+#set arrow from 0,0 to 3000,0 lw 1 front nohead
+#set arrow from 0,0 to 0,0.1 lw 1 front nohead
+#set arrow from 3000,0 to 3000,0.1 lw 1 front nohead
+#set arrow from 3000,0.1 to 0,0.1 lw 1 front nohead
+#
+
+#set object 1 rectangle from screen 0.3,0.5 to screen 0.9,1.0 behind fc '#FFFFFF' fs solid
+set object 1 rect from graph 0.25, graph 0.42 to graph 0.93, graph 0.99 back
+set object 1 rect fc rgb "white" fillstyle solid 1.0  noborder
+
+set arrow from -50,-0.01 to 3000,-0.01 lw 1 front nohead
+set arrow from -50,-0.01 to -50,0.1 lw 1 front nohead
+set arrow from 3000,-0.01 to 3000,0.1 lw 1 front nohead
+set arrow from 3000,0.1 to -50,0.1 lw 1 front nohead
+###################################
+
+# This plots the big plot
+#plot 'datos.dat' w l lt 1 lc 3 lw 3 t ''
+#plot 'graphlab_convergence.txt' u 1:2 w l lt 1 lc 3 lw 3 t '', 'us_lda_convergence.txt' u 1:2 w l lt 1 lc 3 lw 3 t ''
+#plot 'graphlab_convergence.txt' u 1:2 ls 2 t 'GraphLab', 'us_lda_convergence.txt' u 1:2 ls 3 t 'Ours', 'dsgd_lda_convergence.txt' u 1:2 ls 4 t 'DSGD+'
+plot 'us_lda_convergence.txt' u 1:2 ls 3 t 'Ours', 'dsgd_lda_convergence.txt' u 1:2 ls 4 t 'DSGD+','graphlab_convergence.txt' u 1:2 ls 2 t 'GraphLab' 
+
+
+unset object 1
+
+# Now we set the options for the smaller plot
+set size 0.6,0.5
+set origin 0.3,0.47
+#set title 'Zoom'
+set title ''
+set xrange [0:3000]
+set yrange [0.0058:0.0076]
+set xlabel ""
+set ylabel ""
+unset arrow
+#set grid
+set grid back ls 12
+set border 3 back ls 11
+
+#set format y '%.2e'
+#set format y "10^{%L}"
+#set ylabel "Y-AXIS" 2,0
+
+set key off
+
+set xtics (0,1000,2000,3000)
+set ytics (0.0058, 0.0064, 0.007, 0.0076)
+#set xtics (0,500,1500,2500,3500)
+
+# And finally let's plot the same set of data, but in the smaller plot
+#plot 'datos.dat' w l lt 1 lc 3 lw 3 t ''
+
+#plot 'graphlab_convergence.txt' u 1:2 w l lt 1 lc 3 lw 3 t '', 'us_lda_convergence.txt' u 1:2 w l lt 1 lc 3 lw 3 t ''
+#plot 'graphlab_convergence.txt' u 1:2 ls 2 t '', 'us_lda_convergence.txt' u 1:2 ls 3 t ''
+plot 'graphlab_convergence.txt' u 1:2 ls 2 t 'GraphLab', 'us_lda_convergence.txt' u 1:2 ls 3 t 'Ours', 'dsgd_lda_convergence.txt' u 1:2 ls 4 t 'DSGD+'
+
+# It's important to close the multiplot environment!!!
+unset multiplot
+

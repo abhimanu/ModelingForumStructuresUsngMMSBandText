@@ -1,0 +1,19 @@
+set term postscript eps color enhanced size 5cm,5cm
+set output 'lda_piechart.eps'
+
+set size square
+set style fill solid 1.0 border -1
+
+set object 1 circle at screen 0.5,0.5 size screen 0.45 arc [0   :50  ] fillcolor rgb "red" front
+set object 2 circle at screen 0.5,0.5 size screen 0.45 arc [50  :150] fillcolor rgb "orange" front
+set object 3 circle at screen 0.5,0.5 size screen 0.45 arc [150:220] fillcolor rgb "forest-green" front
+set object 4 circle at screen 0.5,0.5 size screen 0.45 arc [220:360] fillcolor rgb "dark-magenta" front
+
+set label 1 'red'  at 
+
+#plot a white line, i.e., plot nothing
+unset border
+unset tics
+unset key
+plot x with lines lc rgb "#ffffff"
+set output
