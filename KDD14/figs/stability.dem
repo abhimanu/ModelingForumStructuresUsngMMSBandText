@@ -47,9 +47,9 @@ set xrange [0:0.5]
 #set origin 0,0
 #set title 'Whole plot'
 set ylabel 'RMSE'
-set xlabel 'Original alpha or eta values'
+set xlabel 'Original {/Symbol a} or {/Symbol h} values'
 
 
 set output 'stability.eps'
-plot 'stability.txt' u 1:2 ls 1 t 'alpha', 'stability.txt' u 1:3 ls 5 t 'eta'
+plot 'stability.txt' u 1:2 ls 1 t '{/Symbol a}', 'stability.txt' u 1:3 ls 5 t '{/Symbol h}'
 
