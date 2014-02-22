@@ -46,7 +46,7 @@ set xrange [0:250]
 #set size 1,1
 #set origin 0,0
 #set title 'Whole plot'
-set ylabel 'Objective function'
+set ylabel 'Objective Value'
 set xlabel 'Time to converge'
 
 
