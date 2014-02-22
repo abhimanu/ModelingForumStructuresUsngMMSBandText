@@ -4,6 +4,7 @@
 \usepackage{amssymb}
 \usepackage{times}
 \usepackage{microtype}
+\usepackage{enumitem}
 % \usepackage{graphicx, subfigure, fink, grffile, placeins}
 \usepackage{hyperref}
 \usepackage{color}
@@ -15,13 +16,13 @@
 
  \usepackage{upgreek}
 % \input{dfn.tex}
-\newcommand{\eric}[1]{\textcolor{red}{\\ eric-comment: #1}}
+\newcommand{\ericx}[1]{\textcolor{red}{\\ eric-comment: #1}}
 \newcommand{\abhi}[1]{\textcolor{blue}{\\ abhi-comment: #1}}
 
 \newcommand{\order}[1]{\textit{O}(#1)}
 \newcommand{\comment}[1]{\textcolor{red}{[#1]}}
 
-\title{Large scale structure aware community discovery in online forums}
+\title{Large Scale Structure Aware Community Discovery in Online Forums}
 \numberofauthors{6}
 \author{
 \alignauthor
@@ -33,8 +34,8 @@ Shriphani Palakodety \\
 \alignauthor
 Chong Wang \\
 \email{chongw@cs.cmu.edu}
-\alignauthor
 \and
+\alignauthor
 Miaomiao Wen\\
 \email{mwen@cs.cmu.edu}
 \alignauthor
@@ -71,23 +72,24 @@ coordinated interests and values shared within sub-communities that
 members move among from time to time.  We propose a latent 
 hierarchical model to incorporate this structure that leverages topic 
 models (LDA) along with mixed membership stochastic block (MMSB) 
-models. This makes the model complex and traditional sampling or 
+models. This makes the model complex and so both traditional sampling and 
 variational based inference are very slow to converge on it. We overcome 
-this by a proposing a new parallel inference scheme based on stochastic 
+this by proposing a new parallel inference scheme based on stochastic 
 variational inference that is highly scalable. We evaluate our 
 model on three large-scale datasets, which we refer to as 
 Cancer-ThreadStarter (22K users and 14.4K threads), Cancer-NameMention(15.1K 
 users and 12.4K threads) and StackOverFlow (1.19 million users and 
 4.55 million threads). Qualitatively, we demonstrate that our 
-model uncovers new communities that were hitherto invisible to a 
-simpler MMSB or spectral clustering based methods. Quantitatively, we 
+model uncovers new communities that were hitherto invisible to  
+simpler MMSB and spectral clustering based methods. Quantitatively, we 
 show that our model performs significantly better than MMSB, LDA, 
 matrix factorization and a bag of words model in predicting 
 user reply structure within threads. In addition, we demonstrate 
 via rigorous synthetic data experiments that the proposed active sub-network 
 discovery model is stable and recovers the original parameters of 
 the experimental setup with high probability. We also provide speed 
-comparisons of our model with varying degree of parallelism and data sizes.  
+comparisons of our model with varying degrees of 
+parallelism and data sizes.  
 
 \end{abstract}
 
@@ -98,140 +100,72 @@ comparisons of our model with varying degree of parallelism and data sizes.
 % Prem's defense and say that I learn that param of weight.
 
 \section{Introduction}
-Online forums are a microcosm of communities where users' presentation
-characteristics vary across different regions of the forum. Users participate in
-a discussion or group activity by posting on a related thread. During his
-stay on a forum, a user participates in many different discussions and posts on
-multiple threads. The thread level presentation characteristics of a user are different
-than the global presentation characteristics. A participating user gears his
-responses to suit specific discussions on different threads. These thread based
-interactions give rise to active sub-networks, within the global network of users,
-that characterize the dynamics of interaction. Overlaying differential changes
-in user interaction characteristics across these sub-networks provides
-insights into user communities that exist in the forum. 
+Online forums provide a digital representation of the intangible bonds that are more frequently the object of study of social scientists who study how communities form, maintain themselves, and provide opportunities for peripheral or core participation.
+Online communities provide a richly structured environment in which users may choose to affiliate with alternative subcommunities, and in each case, may engage in different topics of discussion or use different communication styles.  Individual choices to start a new thread, or to participate in someone else's thread, add up to an intricate emerging subcommunity structure, where each subcommunity develops its own norms of communication in terms of topic and style.  As researchers, we have the opportunity to uncover this resulting structure.  The behavior signature of a user in terms of distribution of topic and style choices may thus diverge locally within a subcommunity from the distribution one might compute over the whole history of this user's participation.  Thinking within a topic modeling framework, we can think of this as a local versus global topic distribution for a user.  In this paper, we present a model designed to tease apart the local topic distributions by leveraging the evidence of subcommunity structure provided by the reply links in discussion threads.  Using this model, we are able to uncover the intricate subcommunity structure of a discussion forum by integrating hints of this structure that are found in a complementary way in the text as well as the network within the online community behavior trace data.
 
-Analysing online social networks and user forums have been approached using
-various perspectives such as network ~\cite{Shi:2000:NCI:351581.351611,
-Shi00learningsegmentation} , probabilistic 
-graphical models~\cite{ Airoldi:2008:MMS:1390681.1442798}, 
-combined network \& text 
-~\cite{Ho:2012:DHT:2187836.2187936,Nallapati:2008:JLT:1401890.1401957}. 
-However none of these have taken
-into account the dynamics of sub-networks and the related thread-based framework
-within which forum discussions take place. Whereas
-active sub-network modelling has been very useful to the research in
-computational biology in recent years where it's been used to model sub-networks
-of gene interactions~\cite{journals/ploscb/DeshpandeSVHM10,Lichtenstein:Charleston},
-very few approaches using active sub-network have been proposed to model online
- user interactions. Taking into account sub-network interaction
-dynamics is important to correctly model the user participant behavior. For
-example, users post their
-responses on discussion threads after reading through responses of
-other users in the threads. The users possibly post multiple times on the thread
- as a form of reply to other posts in the thread. For analysing such
- interactions it becomes imperative that the structure of the conversation must also be taken
-into account  besides the user interaction network and the
-text posted. This enables us to gain deeper insights into user behavior in the
-online community that was not possible earlier. 
+We build on a long history of analysis of online social networks and discussion forums.  Some prior work focuses entirely on the network data ~\cite{Shi:2000:NCI:351581.351611,
+Shi00learningsegmentation}.  However, recently there has been interested in developing probabilistic 
+graphical models~\cite{ Airoldi:2008:MMS:1390681.1442798} that are able to combine network \& text 
+~\cite{Ho:2012:DHT:2187836.2187936,Nallapati:2008:JLT:1401890.1401957}. These earlier attempts are limited in that they have not yet taken advantage of the dynamics of sub-networks and the related thread-based framework
+within which forum discussions take place. In our work, we apply concepts that have proven their value in computational biology where active sub-network modelling has been used to model sub-networks
+of gene interactions~\cite{journals/ploscb/DeshpandeSVHM10,Lichtenstein:Charleston}. 
 
-The aim of this work is to provide novel insights into online forum discussions
-and the related communities that emerge that have been ovelooked 
-by simpler models. We wish to show that current prevalent techniques like 
-simple aggregation of the forum user network into a single graph and user 
-text across forums into a single document per user makes data miners 
-lose a lot of valuable information about the forum. For example, 
-modelling the structure of the forum along with text and network 
-leads to discovery of new communities that were overlooked by simple
-network discovery models such as spectral learning, MMSB etc. It also 
-provides better user-user link prediction results. Though the  
-model is complex, it is worthwhile because of the better insights that 
-it provides. The resultant inference procedure is very slow due to added
-complexity but our aim is also to make this model 
-practical such that it can be used to analyze 
-real world forums which are typically very large. To achieve this we 
-parallelize our inference procedure such that it can model millions of
-users with billions of threads in matter of hours.
+Taking into account sub-network interaction
+dynamics is important to correctly model participant behavior as users are free to move between emerging sub-communities over their history of participation. For
+example, in an online medical support community, as a user's disease progresses, or that of other participants that user has become friends with, that user may be interested in different issues and therefore participate in different discussions.  In this way, users may participate in different roles, or modes of participation, such as being simultaneously a cancer survivor and a caregiver to someone else who has cancer. In an community like Stack Overflow, users may participate as novices for one programming language while also participating as experts of another.  Without the ability to separate these modes of participation, the model could easily be confused by inconsistent participation patterns either in terms of the reply link structure, or word distributions, or both.  A model that can tease apart the different modes of participation should be able to fit the data more cleanly.
+
+The aim of our work is to provide novel insights into the ways users move between modes of participation in online forum discussions. Our proposed approach contrasts with existing techniques built on  
+simple aggregation of reply networks into a single graph and user 
+text across subforums into a single document per user.  This simplistic approach makes an invalid assumption about consistency of user behavior and can thus cause severe loss of information. 
+In contrast, we show that modeling the thread structure of the forum in a way that is tightly integrated with the text leads to discovery of new sub-communities that were overlooked by simple
+aggregated-network analysis methods such as spectral learning, MMSB, etc. Our approach also 
+provides better user-user link prediction results. 
+The proposed model incurs a heavy computational complexity due to a non-trivial network-text interplay at both latent variable and parameter levels.  To address this issue, we present a highly scalable procedure based on stochastic variational inference that is able to handle millions of users with billions of threads in matter of hours. We believe our proposed approach is practical for analyzing real world forums, as we demonstrated in our experiments. Below, we highlight the specific challenges we have successfuly addressed in our work, and the main technical contributions we have made.
 
 \vspace*{-0.5\baselineskip}
-\paragraph{Challenges} Modelling text, network and 
-structure together such that it provides
-quantifiable improvments over either of the three is a big challenge.
-Moreover we model weighted edges instead of zero and one 
-as is the case in traditional MMSB model. This added to the 
-complexity of the model and made the single-processor inference challenging.
-Another main challenge of this work has been the ability to model
+\paragraph{Challenges} A major computational challenge of this work has been the ability to model
 active sub-networks in a large forum with millions of users and
-threads. A social network spanning around millions of users and threads would 
-be an ideal case to demonstrate the effectiveness of sub-network
-modelling and thread-based structure.
-To efficiently scale our model, we derive a scalable inference based on
-stochastic variational inference (SVI) with sub-sampling~\cite{Hoffman:2013:SVI} 
-that has the capacity to deal with such massive scale data and parameter space.
- The scalability of the SVI
-with sub-sampling is further boosted by employing Poisson distribution 
-to model edge weights of
-the network. A Poisson based scheme need not model zero edges
-(\cite{Kerrer:Newman}), where as MMSB style approaches~\cite{Airoldi:2008:MMS:1390681.1442798}
- must explicitly model them.
-A further set of
-parallelization in inner optimization loops of local variational parameters
-pushes the learning speed even more. This work is to date the largest 
-modelling of any social graph that also takes user contents into
-account. 
+threads.  Modelling the meaningful integration of text and network structure together such that it provides
+quantifiable improvments over either separately is the next major challenge.  In our case, the network structure includes both the separation of data into threads as well as the reply structure within threads.
+In order to model the graded quality of strong and weak ties within a community structure, we model weighted edges instead of binary edges as is the case in the traditional MMSB model. However, this adds to the 
+complexity of the model and makes single-processor inference challenging. Thus, we have been faced with the challenge of developing a novel, highly scalable inference method.  As we will demonstrate, we have successfully met each of these challenges in our work.
 
 \vspace*{-0.5\baselineskip}
 \paragraph{Contributions}
 \vspace*{-0.5\baselineskip}
 \begin{itemize}
-  \item This work provides novel insights
-into how modeling users' varying interactions across threads leads to 
-discovery of novel communities that were ignored by simpler models such as
-spectral clustering and MMSB. This is achieved via active sub-network
-modelling.
-\item Our model outperforms LDA, MMSB, Matrix Factorization and
-bag of words model in link prediction across three
-datasets demonstrating the leverage it gains by 
-combining the text and network along with discussion
-structures in modelling sub-networks.
-\item It is highly scalable and is able to achieve convergence in
-matter of hours for users and threads that are in order of a million despite the
-time complexity of \order{users$\times$users$\times$threads}.
-\item  Stability
-is another aspect of the proposed new approach and is demonstrated by
-the model recovering back its parameters in synthetic experiments. 
+\itemsep0em
+  \item By directly modeling active sub-networks, this work provides new insights into how information about varying interactions across threads amongst users can lead to discovery of novel communities that were ignored by less-sophisticated methods such as spectral clustering and MMSB.
+ \item By combining the text and network along with thread structure in the active sub-networks, our method is able to outperform LDA, MMSB, Matrix Factorization and a bag of words model in link prediction on all three datasets we studied.
+\item We developed a highly scalable inference algorithm for our proposed model, which is able to achieve convergence in
+matter of hours for users and threads that are in order of a million despite the time complexity of \order{users$\times$users$\times$threads}, and we validated correctness of our inference algorithm on synthetic experiments on consistency and stability in model recovery. In particular, we derive a scalable inference approach based on
+stochastic variational inference (SVI) with sub-sampling~\cite{Hoffman:2013:SVI} 
+that has the capacity to deal with this massive scale data and parameter space.  While the graded edge weighting we employ adds complexity to the model, we are also able to creatively leverage its properties to enhance our scalability.  In particular, a Poisson based scheme need not model zero edges
+(\cite{Kerrer:Newman}), where as MMSB style approaches~\cite{Airoldi:2008:MMS:1390681.1442798}
+ must explicitly model them.
+A further effort of parallelization in the inner optimization loops of local variational parameters further enhances the efficiency of our approach. To our knowledge, this work represents the largest 
+model-based effort for analyzing social graph data that takes into account both user content and emerging thread structure
 \end{itemize} 
+\vspace*{-1\baselineskip}
 
-
+%\ericx{Here is a comment: you are using the word "model" in very inaccurate way all over the place. What you really meant can be the graphical model, the algorithm you devised to solve the inference/learning problem with the model, or just the overall method/approach we propose here. I have corrected such confusion in the intro, but please be careful in the main text.}
 
 
 % \section{Graphical Model \& Generative Story}
 % \section{Approach}
 \section{Forum Structure Modeling}
 \label{sec:approach}
-Online forums have a specific discussion structure  that
-provides a lot of context to all the interactions occurring among the users.
-Here we describe a typical forum discussion scenario.
+Online forums have a threaded discussion structure that is used to separate discussions pertaining to different concerns, or interesting to different subsets of users.  Thus, without some explicit leveraging of this aspect of structure, important social context would be lost.  We begin here by offering our conceptual characterization of the structure we seek to leverage in our graphical model.  We then present the generative story of the model.  And finally, we discuss some specifics of terminology we will use throughout the remainder of the paper.
 
 \subsection{Discussion in online forums}
-When two users interact in a thread or through a post
-they play certain conversational roles and project their specific identity.
-It is valuable to know what conversational roles each plays (which topic or
-community they each belong to) in that interaction. When a user $u$ is
-representing community $c$ out of all the communities that he is part of and
-participates in a discussion, he tailors his post content accordingly to suit
-the explicit or implicit community and discussion norms. Knowing the style of
-community specific text content provides a lot of information about that community 
-in general. It also provides information about what role user $u$ plays when he
-is in community $c$ and engaged in a specific discussion thread $t$. This helps
-in better modeling of communities since it takes into account the actual 
-interaction dynamics. In online forums multi-user interactions occur a lot i.e.
-in a thread a user can post by addressing another specific user but he is
-also addressing other users in the thread explicitly or implicitly (via either
-gearing his replies to address other users' concerns into consideration or
-addressing them directly in the post).
-Modeling this phenomenon would bring the model closer to realities of online discussions.
-This can be modelled by aggregating users posts across a thread,
-though not across the whole of the forum. We will elaborate on this more in the
+Each thread within a discussion forum can be seen as conceptually linked with a mixture of subcommunities whose interests and values are represented within that discussion.  Thus, whenever two users interact in a thread, they do so assuming a particular mode of participation that contributes to that mixture of subcommunities.  In our model, each of those subcommunities is represented by a topic.  Thus, we refer to each topic  conceptually as a community.
+
+More formally, when a user $u$ is participating in a thread associated with the interests and values of a community $c$, his personal connection 
+with those values will be reflected in the extent to which his behavior is consistent with the associated
+norms of behavior.  In other words, he tailors his post content accordingly. The interests and values of community $c$ are reflected through its associated topic's
+word distribution.  By observing the topic distribution of user $u$ on thread $t$, we can get a sense of what role the user was playing on that thread.
+In particular, what contribution that user made to the overall distribution of interests and values that were communicated during the discussion.  Threads are primarily group discussions.  We consider that it is important in a model to respect the extent to which each contribution is directed both at a specific user to whom user $u$ replies, but also the entirety of the set of users participating on the thread.  This detailed structure is not typically modelled, however, modeling this phenomenon brings the model closer to realities of online discussions.  We achieve this structuring in our graphical model by aggregating user posts within a thread, and modelling the extent to which the associated topic distribution was influenced by the other users participating on the thread.  We
+ elaborate on this in the
 generative story of our model. 
 % Another interesting property of such structured
 % conversations is that there is an inherent bias towards the thread starter (or
@@ -247,41 +181,43 @@ generative story of our model.
 Based on the description above our graphical model is designed as shown
 in Figure~\ref{fig:finalThreadAggregationModel}. In this model
 we aggregate the posts of 
-a given user in a given thread $t$ into one document which has token
+a given user in a given thread $t$ into one document which has a token
 set $N_{t,p}$ . This helps us incorporate the knowledge that a user's post is
-influenced by the posts of other users present on the thread, assuming that
+influenced by the posts of the other users present on the thread, assuming that
 he reads at least some of them.
 The generative process for the model is as follows:
 \begin{figure}
 \centering
 \includegraphics[height=4cm,width=8.5cm]{model.pdf}
+\vspace*{-2\baselineskip}
 \caption{\small{The proposed approach models active sub-network of users in the forum.
 $U$ is the total number of user in all of the forum, $T$ is the number of
 threads. $N_{T_p}$ is the total number of tokens user $p$ posted in thread $t$.
 }}
+\vspace*{-2\baselineskip}
 \label{fig:finalThreadAggregationModel}
 \end{figure}
 
 %Assuming that there are total $N_t$ users in the thread $t$.  
 % \begin{itemize}
 %   \item For each Thread $t$,
-\begin{itemize}
+\begin{itemize}[noitemsep,nolistsep]
   \item For each user $p $,
-  \begin{itemize}
+  \begin{itemize}[noitemsep,nolistsep]
     \item Draw a $K$ dimensional mixed membership vector 
     $\overset{\rightarrow}{\uppi}_{p} \sim$ Dirichlet($\alpha$). 
 	This represents the community membership vector of the user $p$
 	across $K$ communities.
   \end{itemize}
-  \item for each topic pair $g$ and $h$,
-    \begin{itemize}
+  \item For each topic pair $g$ and $h$,
+    \begin{itemize}[noitemsep,nolistsep]
     \item Draw $B(g,h) \sim Gamma(\kappa,\eta)$; where $\kappa, \eta$ are
 	parameters of the gamma distribution. $B_{g,h}$ provides the interaction
 	strength between users of community $g$ and $h$.
   \end{itemize}
 
   \item For each pair of users $(p, q)$ and each thread $t$,
-  \begin{itemize}
+  \begin{itemize}[noitemsep,nolistsep]
     \item Draw membership indicator for the initiator, 
     $\overset{\rightarrow}{z}_{(p \rightarrow q,t)} \sim$
     Multinomial($\uppi_{p}$). 
@@ -300,10 +236,10 @@ threads. $N_{T_p}$ is the total number of tokens user $p$ posted in thread $t$.
 	the number of times user $p$ replies to user $q$ in thread $t$.
 	\end{itemize}
 	\item For each user $p \in t$,
-	\begin{itemize}
+	\begin{itemize}[noitemsep,nolistsep]
 	  \item Form the set $\delta_{t,p}$ that contains all the users that p
 	  interacts to on thread $t$,
-	  \begin{itemize}
+	  \begin{itemize}[noitemsep,nolistsep]
 	    \item For each word $w \in N_{t,p}$, 
 	    \item Draw $z^{'}_{t,p,w}$ from $Dirichlet(\sum_{\forall q\in \delta_{t,p}} z_{(t,p
 	    \rightarrow q)})$. This is the topic indicator for token $w$ of user's aggregated
@@ -314,14 +250,13 @@ threads. $N_{T_p}$ is the total number of tokens user $p$ posted in thread $t$.
 \end{itemize}  
 % \end{itemize}
 
-The use of Poisson distribution for $Y(p,q,t) \sim$ \\
-    Poisson(${\overset{\rightarrow}{z}}^{\top}_{(p
-\rightarrow q,t)} B~\overset{\rightarrow}{z}_{(p \leftarrow q,t)}$) (the 
+The use of Poisson distribution for $Y(p,q,t)$  (the 
 network edge between the user's $p$ and $q$) besides modelling non-binary edge
 strength enables the model to ignore non-edges between users ($Y_{t,p,q}$) and
 thus achieve faster convergence~\cite{Kerrer:Newman}. In MMSB style community block models, 
 	 non-edges are to be modelled
 explicitly.
+\vspace*{-0.5\baselineskip}
 %\begin{equation}
 \small
 \begin{align}
@@ -343,8 +278,8 @@ Z_{\rightarrow}, \Pi, B, \beta | \alpha, \eta, \theta, \alpha). \nonumber \\
 \end{align}
 %\end{equation}
 \normalsize
-The log-likelihood of the model described in \ref{sec:gen-story} is given
- above and derived in detail in the appendix ~\ref{eqn:LL}.
+The log-likelihood of the model described in figure \ref{fig:finalThreadAggregationModel} is given
+ above.
 
 \vspace*{-1\baselineskip}
 \small
@@ -363,30 +298,26 @@ Equation~\ref{eqn:variationalQ} above is the approximation of the log-likelihood
 use structured mean field~\cite{Xing_et_al:2003} to maximize parameters of $q$.
 The local variational parameters, $\phi$ (MMSB parameters) and $\chi$ (LDA)
 parameters, are maximized using equations \ref{eqn:phiUp} and \ref{eqn:chiUp}.
-$\Delta_{\phi^{'}_{t,p,g,h}}$, $\Delta_{\chi^{'}_{t,p,g,h}}$ 
 %are defined by equations ~\ref{eqn:phiDelta} and~\ref{eqn:chiDelta} respectively.
-\vspace*{-1\baselineskip}
 \small
 \begin{align}
-	&\phi_{t,p,g,h} \propto e^{\Delta_{\phi^{'}_{t,p,g,h}}}.
+	\phi_{t,p,g,h} &\propto e^{\Delta_{\phi^{'}_{t,p,g,h}}}.
 \label{eqn:phiUp}                                 \\
-&\chi_{t,p,i,k} \propto e^{\Delta_{\chi^{'}_{t,p,g,h}}}.
+\chi_{t,p,i,k} &\propto e^{\Delta_{\chi^{'}_{t,p,g,h}}}.
 \label{eqn:chiUp}
 \end{align}
-\vspace*{-1\baselineskip}
+where $\Delta_{\phi^{'}_{t,p,g,h}}$ and $\Delta_{\chi^{'}_{t,p,g,h}}$ are
 \begin{align}
 \Delta_{\phi^{'}_{t,p,g,h}} &= y_{t,p,q}( \log \! \lambda_{g,h} + 
 \Psi(\nu_{g,h})) - \nu_{g,h} \lambda_{g,h} - \log \! (y_{t,p,q}!)
 \nonumber \\ & + \Psi(\gamma_{p,g}) - \Psi(\sum_{g} \gamma_{p,g})
-\nonumber \\  & + \Psi(\gamma_{q,h}) - \Psi(\sum_{h} \gamma_{q,h})
+%\nonumber \\  & 
++ \Psi(\gamma_{q,h}) - \Psi(\sum_{h} \gamma_{q,h})
 \nonumber \\  & + \omega\sum_{i=1}^{N_{T_{P}}} \! \chi_{t,p,i,g} 
 \bigg[ \ln \! \frac{\epsilon}{\delta_{p,t}} - \frac{1}{\delta_{t,p}} 
 + \ln \bigg( 1 + \frac{\epsilon}{\delta_{p,t}} \bigg) 
 \cdot \frac{1}{\delta_{t,p}} \bigg].
-\label{eqn:phiDelta}
-\end{align}
-\vspace*{-1\baselineskip}
-\begin{align}
+\label{eqn:phiDelta}  \\
 \Delta_{\chi^{'}_{t,p,g,h}} &= \bigg[ \Psi(\tau_{k,w_{t,p,i}}) - 
 \Psi(\sum_{w_{t,p,i}} \! \tau_{k, w_{t,p,i}}) \bigg]
 \nonumber \\  & + \ln \! (\frac{\epsilon}{\delta{p,t}}) \frac{1 - 
@@ -396,10 +327,9 @@ $\Delta_{\phi^{'}_{t,p,g,h}}$, $\Delta_{\chi^{'}_{t,p,g,h}}$
 %\nonumber\\  & - 1 - \log \! \chi_{t,p,i,k}
 \label{eqn:chiDelta}
 \end{align}
-
 \normalsize
 and the traditional variational updates for global parameters $\gamma, \nu, \lambda$
-(MMSB) and $\tau$ (LDA) are defined in apendix.
+(MMSB) and $\tau$ (LDA) are defined in the appendix.
 %using equations
 %\ref{eqn:gammaUp}, \ref{eqn:nuUp}, \ref{eqn:lambdaUp} and \ref{eqn:tauUp}
 %respectively (details are in the appendix).
@@ -407,22 +337,46 @@ and the traditional variational updates for global parameters $\gamma, \nu, \lam
 \vspace*{-0.5\baselineskip}
 \subsection{Terminology} 
 \label{sec:term}
-There is a difference to be made between
-community-topic, word topic and user roles. Community topic is the 
+We should distinguish between 
+community, word topic and user roles. User role (or community topic) is the 
 $\pi$ vector that we get from
 the model (figure~\ref{fig:finalThreadAggregationModel}) that decides the 
 membership proportion of a user in
 different latent communities. Word topic is the $\beta$ vector of word topic
-proportions from the LDA component of the model,
-figure~\ref{fig:finalThreadAggregationModel}. There is a one to one
+proportions from the LDA component of the model. There is a one-to-one
 correspondence between $\beta$ and $\pi$ vectors as seen in
 figure~\ref{fig:finalThreadAggregationModel}. $\beta$ helps us in identifying
-what contents users are generally interested in a given latent community.
- A user conversational role (or simply role) is a specific 
- configuration of $\pi$. It can be just the case
-that a role '$r$' might be the $\pi$ vector where $r$-th coordinate is 1
+what content users are generally interested in a given latent community.
+% A user conversational role (or simply role) is closely related to 
+%$\pi$. 
+%$\pi$, as we know, is a community topic vector of length $K$
+%that stores the membership probability of a user in each of the $K$
+%communities. 
+A user role can vary depending upon the 
+context or thread of interaction of user $u$.
+For example, for simplicity we may assume that $\pi$ vector's 
+$k$-th coordinate is 1
 and all else are 0 out of the total K coordinates, i.e. it predominantly relates
-to that $r$-th latent community.
+to the $k$-th latent community when the user $u$ interacts in thread $t$.
+In this case the user role is predominantly in one single community.
+
+
+\begin{table}
+\begin{center}
+\begin{tabular}{c|c|c|c|c|}
+ & users & threads & posts & edges\\\hline
+ TS & 22,095 & 14,416 & 1,109,125 & 287,808\\\hline
+ UM & 15,111 & 12,440 & 381,199 & 177,336\\\hline
+ SO & 1,135,996 & 4,552,367 & 9,230,127 & 9,185,650\\\hline
+\end{tabular}
+\label{tab:dataStats}
+\end{center}
+\vspace*{-1\baselineskip}
+\caption{Dataset statistics. SO mostly has edges with weight one.}
+\vspace*{-1\baselineskip}
+\end{table}
+
+
 
 
 \section{Datasets}
@@ -430,26 +384,29 @@ to that $r$-th latent community.
 
 \begin{figure}
 \begin{center}
-\includegraphics[height=6cm,width=9cm]{EdgeDistribution.pdf}
+%\includegraphics[height=6cm,width=9cm]{EdgeDistribution.pdf}
+\includegraphics[height=6cm,width=9cm]{figs/datastats.pdf}
 \end{center}
+\vspace*{-2\baselineskip}
 \caption{\small{Distribution of different edge weights over the 3 datasets. SO 
-predominantly consists of edges with weight one. Right hand plot is a scaled
-version of the left. The label '11' contains edge weights of 11 and above.}}
+predominantly consists of edges with weight one. 
+The label '11' contains edge weights of 11 and above.}}
 \label{fig:EdgeDistribution}
+\vspace*{-1.5\baselineskip}
 \end{figure}
 We analyse three real world datasets corresponding to two different forums: 1)
 Cancer-ThreadStarter, 2) Cancer-UserName, and 3) Stack Overflow. To test the
 stability of the model we use a synthetically generated dataset. 
 The Cancer forum \footnote{\url{http://community.breastcancer.org}} 
 is a self-help community where users who either have cancer, are 
-concerned they may have cancer, or care for others who have cancer, 
+concerned they may have cancer, or care for others who have cancer 
 come to discuss their concerns and get advice and support.
 StackOverflow is an
 online forum for question answering primarily related to computer science. We
 use the latest dump of Stack
 Overflow~\footnote{\url{http://www.clearbits.net/torrents/2141-jun-2013}}. In
-each of these datasets a user posts multiple times in a thread and all these
-posts are aggregated into one bigger posts per thread as defined in
+each of these datasets, when a user posts multiple times in a thread, all these
+posts are aggregated into one document per thread as defined in
 section~\ref{sec:gen-story}.
 Number of times a user $u$ replies to user $v$ in thread $T$ is the edge weight
 of edge $u\rightarrow v$ in thread $T$.
@@ -461,12 +418,12 @@ in a structured way where users post their responses on a thread by thread
 basis. Every thread has a thread starter that posts the first message and
 starts the conversation. 
 We construct a graph from each thread by drawing a link from each participant on 
-the thread to the participant who started the thread
+the thread to the thread starter and hence the name Cancer-ThreadStarter.
 This graph has 22,095 users and 14,416 Threads. 
 % \comment{Put number of
 % posts and edges}
 \vspace*{-0.5\baselineskip}
-\paragraph{Cancer-Username Mention (UM)} Users call each other by 
+\paragraph{Cancer-Username Mention (UM)} Users mention each other by 
 their usernames (or handle assigned to them in the
 forum) while posting in many cases. We create a graph where in an edge between
 user $u$ and user $v$ in thread $t$ means that user $u$ calls user $v$ by
@@ -477,7 +434,7 @@ username in thread $t$. This graph has 15,111 users and
 \paragraph{Stack Overflow (SO)} In Stack Overflow users ask 
 questions and then other users reply with their
 answers. We obtain the ThreadStarter graph from this structure. This dataset has
-have 1,135,996 users and 4,552,367 threads.
+1,135,996 users and 4,552,367 threads.
 % \comment{Put number of posts and edges}
 \vspace*{-0.5\baselineskip}
 \paragraph{Synthetic data} We generate a synthetic dataset 
@@ -487,30 +444,34 @@ we fix users at 1000 and threads at 100. The number of
 posts and edges vary depending on the choice of priors $\alpha$ and $\eta$.
 For scalability experiments we vary the number of user and threads.  
 % \comment{Put number of posts and edges as well as the parameters}
+
+
 \section{Scalable Estimation}
 \label{estimation}
 
 \begin{figure}
 \begin{center}
-\includegraphics[height=6cm,width=9cm]{SpeedOptimization.pdf}
+\includegraphics[height=6cm,width=9cm]{figs/parallel_model_comparison.pdf}
 \end{center}
-\caption{\small{The log-likelihood vs incremental speed optimization routine. 
-The right hand plot is a zoomed in version of the left. PSSV
+\vspace*{-2\baselineskip}
+\caption{\small{The negative log-likelihood vs incremental speed optimization routine. 
+The inner smaller plot is a zoomed in version of the elbow section of the 
+bigger plot. PSSV
 (Parallel Sub-sampled Stochastic Variational), SSV(Sub-sampled Stochastic
 Variational), SV(Stochastic Variational) and V(Variational). Each addition of
 optimization increases the speed by several orders of magnitude. The final PSSV
-is 4 times faster than (V)ariational and achieves better log-likelihood too.
-\abhi{explain the left and right plot relation in detail}}}
+is 4 times faster than (V)ariational and achieves a better log-likelihood too.
+%\abhi{explain the left and right plot relation in detail}
+}}
 \label{fig:SpeedOptimization}
+\vspace*{-1\baselineskip}
 \end{figure}
-The global update equations in previous sections are computationally
-very expensive and slow as we need to sum over all the updated local
+The global update equations in the previous section are computationally
+expensive, as we need to sum over all the updated local
 variables. $U$ users with $T$ threads and vocabulary size $V$ leads to
 $O(U^2T+UVT)$ local variables. Traditional sampling or 
-variational estimation techniques would be
-quite slow for such a model. In order to obtain faster convergence we
-make use of stochastic variational approximation along with
-sub-sampling and parallelization. 
+variational estimation techniques would be prohibitively slow for such a model. In order to obtain faster convergence we
+make use of stochastic variational approximation along with sub-sampling and parallelization. 
 % Algorithm~\ref{algo:stochasticAlgo} describes in detail the sub-sampled SVI
 % based approximate estimation of the model. 
 
@@ -519,35 +480,46 @@ one computes a local update for the global variables based on the sub-sampled
 updated local variables. The local updates ($\gamma^{'},
 \nu^{'}, \lambda^{'}$ and $\tau^{'}$) for the global variables ($\gamma,
 \nu, \lambda$ and $\tau$) are
-\small
+
+{\small
 \begin{align}
 \gamma_{p,k}^{'} &= \alpha_{k} + \frac{NT}{2|S_p|}\sum_{q \in S_p} \sum_{h}
 \! \phi_{t,p,q,k,h} + \frac{NT}{2|S_p|}\sum_{q \in S_p} \! \sum_{g} \!
 \phi_{t,q,p,g,k}. 
 \label{eqn:gammaUpStoc}
-\end{align}
-\vspace*{-1.5\baselineskip}
-\begin{align}
+\\
+%\end{align}
+%\vspace*{-1.5\baselineskip}
+%\begin{align}
 \nu_{g,h}^{'} &= \nu_{g,h}^{t}+\rho_\nu \frac{NT}{2|S_p|}\sum_{q \in
 S_p}\frac{dL}{\partial\nu_{g,h}}.
 \label{eqn:nuUpStoc}
-\end{align}
-\vspace*{-1.5\baselineskip}
-\begin{align}
+%\end{align}
+%\vspace*{-1.5\baselineskip}
+%\begin{align}
+\\
 \lambda_{g,h}^{'} &= \frac{\bigg( \sum_{t} \! \sum_{p,q} \! \phi_{t,p,q,g,h}
 y_{t,p,q} + \kappa_{g,h} \bigg) }{
  \bigg( \bigg( \sum_{t} \! \sum_{p,q} \! \phi_{t,p,q,g,h} \bigg) + 
 \frac{1}{\theta_{g,h}} \bigg) \nu_{g,h}}.
 \label{eqn:lambdaUpStoc}
-\end{align}
-\vspace*{-1.5\baselineskip}
-\begin{align}
-\tau_{p,v}^{'} = \nu_{v} + \frac{NT}{2|S_p|} 
-\bigg(\sum_{w_{t,p,i}=v}^{N_{t,p}} \chi_{t,p,i,k} \bigg). 
+%\end{align}
+%\vspace*{-1.5\baselineskip}
+%\begin{align}
+\\
+\tau_{p,v}^{'} &= \nu_{v} + \frac{NT}{2|S_p|} 
+\bigg(\sum_{w_{t,p,i}=v}^{N_{t,p}} \chi_{t,p,i,k} \bigg),
 \label{eqn:tauUpStoc}
 \end{align} 
+}
+where $S_p$ is a set of neighborhood edges of user $p$, and $N$ and $T$ are
+total number of edges and threads respectively in the network. The set $S_p$ is
+chosen amongst the neighbors of $p$ by sampling an equal number of zero and non-zero
+edges. 
+
 \normalsize
 \IncMargin{1em}
+
 \begin{algorithm}[t]
 \small
 \SetAlgoLined
@@ -583,41 +555,33 @@ Similarly globally update $\tau,\nu,\lambda$ as above using
 equation~\ref{eqn:globalUpStoc}.
 }
 \label{algo:stochasticAlgo}
-\caption{\textbf{\small{PSSV: Parallel Sub-sampling based Stochastic Variational inference for
+\caption{{\small Parallel Sub-sampling based Stochastic Variational (PSSV) inference for
 the proposed model. Arguments $Y$ and $c$ are the input data and number of processors
-respectively where as rest of the 
-arguments are parameters that are tuned over a heldout set}}}
+respectively, whereas the rest of the 
+arguments are parameters that are tuned over a heldout set.}}
 \end{algorithm}
 
-
-
-where $S_p$ is a set of neighborhood edges of user $p$, and $N$ and $T$ are
-total number of edges and threads respectively in the network. The set $S_p$ is
-chosen amongst the neighbors of $p$ by sampling equal no. zero and non-zero
-edges. 
-
-In step two of the sub-sampled SVI the final update of global variable is
+In step two of the sub-sampled SVI, the final update of global variable is
 computed by the weighted average of the local updates of the global variable and
-the variables value in the previous iteration:
-\small
+the variable's value in the previous iteration:
+%{\small
 \begin{align}
 \mu^{t+1} = (1-\xi^t)\mu^{t} + \xi^t\mu^{'}. 
 \label{eqn:globalUpStoc}
 \end{align} 
 \normalsize
-\vspace*{-1\baselineskip}
-
+%\vspace*{-1\baselineskip}
 where $\mu$ represents any global variable from $\lambda, \nu, \gamma, \tau$.
- $\xi^t$ is chosen appropriately using SGD literature and is
+ $\xi^t$ is chosen appropriately using the SGD literature and is
 decreasing.  $\xi^t$ is standard stochastic
 gradient descent rate at iteration $t$, also expressed as $\xi^t =
 \frac{1}{(t+\zeta)^{\rho}}$~\cite{conf/nips/GopalanMGFB12}. $\zeta$ and
-$\rho$ are set as 1024 and 0.5 respectively for all our experiments in the
+$\rho$ are set as 1,024 and 0.5 respectively for all our experiments in the
 paper, and $t$ is the iteration number. 
 
-We achieve further speed by parallelizing the text ($\chi$) and network
+We achieve further speed up by parallelizing the text ($\chi$) and network
 ($\phi$) local variational updates. This is achievable  as the
-dependency between $phi$ and $\chi$ parameters (defined in
+dependency between $\phi$ and $\chi$ parameters (defined in
 equations~\ref{eqn:chiDelta} and \ref{eqn:phiDelta}) allows us to parallelize their
 variational updates.
 Algorithm~\ref{algo:stochasticAlgo} describes the parallelized SVI with
@@ -627,50 +591,34 @@ quite stable as we will see in section~\ref{sec:results}.
 Figure~\ref{fig:SpeedOptimization} 
 shows a plot of how the final (p)arallel (s)ub-sampling based (s)tochastic
 (v)ariational (PSSV) inference is faster than each of its individual components.
-SO dataset described in section~\ref{sec:dataset} is used as the data for this 
+The SO dataset described in section~\ref{sec:dataset} is used as the data for this 
 experiment.
-The number of parallel cores used in the PSSV scheme is four whereas its one
+The number of parallel cores used in the PSSV scheme is four, whereas it's one
 for the rest of the three.
 The amount of sub-sampled forum threads is 400 and the total number of threads is 14,416.
 All the schemes in the graph start with the same initialization values of the
-hyper-parameters. PSSV is atleast twice as fast as the nearest scheme besides
-obtaining the best log-likelihood of all the four at the point of convergence.
+hyper-parameters. PSSV is at least twice as fast as the nearest scheme and 
+also obtains the best log-likelihood of all the four at the point of convergence.
 The SV (stochastic variational) samples one thread at a time and therefore
 takes some time in the beginning to start minimizing the objective value
-(negative log likelihood).
+(negative log-likelihood).
 The objective value increases in the first few iterations for SV. The number of
-iterations to be done by SV is very large but each iterations takes the smallest time of
-all four. The V (variational) scheme takes the least number of iterations to
-converge though its iterations are the most time consuming as it has to go
+iterations to be done by SV is very large, but each iteration takes the least time of
+all four. The V (variational) scheme takes the smallest number of iterations to
+converge, though its iterations are the most time consuming as it must go
 through all the 14,416 threads in every iteration. 
 
 
-\begin{table}
-\begin{center}
-\begin{tabular}{c|c|c|c|c|}
- & users & threads & posts & edges\\\hline
- TS & 22,095 & 14,416 & 1,109,125 & 287,808\\\hline
- UM & 15,111 & 12,440 & 381,199 & 177,336\\\hline
- SO & 1,135,996 & 4,552,367 & 9,230,127 & 9,185,650\\\hline
-\end{tabular}
-\label{tab:dataStats}
-\end{center}
-\caption{Dataset statistics. SO mostly has edges with weight one.}
-\end{table}
 
-\paragraph{System details} The machine used in all the experiments in this paper
-is ``Intel(R) Xeon(R) CPU E5-2450 0 @ 2.10GHz'' 16 corewith 8GBs of
-RAM per core. The operating system is Linux 2.6.32 x86\_64. 
-
-
- 
 \begin{figure}
 \begin{center}
-\includegraphics[height=6cm,width=9cm]{3LLPlots.pdf}
+\includegraphics[height=6cm,width=9cm]{figs/data_ll.pdf}
 \end{center}
-\caption{The log-likelihood over heldout set for the fully tuned model on the
+\vspace*{-2\baselineskip}
+\caption{The negative log-likelihood over heldout set for the fully tuned model on the
 3 datsets}
 \label{fig:finalLLheld}
+%\vspace*{-1.5\baselineskip}
 \end{figure}
 
 \begin{table}
@@ -683,34 +631,40 @@ RAM per core. The operating system is Linux 2.6.32 x86\_64.
 \end{tabular}
 \label{tab:tunedParameters}
 \end{center}
+\vspace*{-1\baselineskip}
 \caption{Tuned values for the parameters. $\theta$ and $\kappa$ are matrices
 and $a\sim b$ assigned to them means diagonal values are $a$ and non-diagonals
 are $b$. $K$ is the number of topics}
+\vspace*{-1\baselineskip}
 \end{table}
 
+\section{Experiments}
 
-\section{Experimental Setup and Evaluation}
+\subsection{Experimental Setup and Evaluation}
 \label{sec:setup}
 We divide each dataset into three subsets: 1) the training set, 2) the heldout set,
-and 3) the test set. We learn our model on training set and tune our priors 
-($\alpha, \eta, \kappa, \theta$ etc.) on heldout set. The split is done over the
-edges where 80\% of the edges are in training and rest 20\% are divided amongst
-heldout and test equally. By splitting we mean that in the training set we
-omit the 20\% of the edges from the graph and jeep only rest 80\% and similary 
-in the heldout and test set. 
+and 3) the test set. We learn our model on the training set and tune our priors 
+($\alpha, \eta, \kappa, \theta$ etc.) on the heldout set. The split is done over the
+edges where 80\% of the edges are in training and the remaining 20\% are divided amongst
+heldout and test equally. By splitting, we mean that to obtain the training set we
+randomly omit 20\% of the edges from the graph and keep only the remaining 80\%. The 
+edges omitted from the training set are equally divided into the heldout and test sets. 
 %For the two cancer datasets we only predict non-zero edge weights whereas for
 %the Stack Overflow we predict zero as well as non-zero 
 %edge weights.
-Graph \ref{fig:EdgeDistribution} shows the distribution of edge weights in
-cancer and Stack Overflow dataset. We chose Stack Overflow to predict
-zero weights since it has large number of edges with very low weights,
-predominantly weight one. Predicting zero as well as non-zero edge weights
+Figure \ref{fig:EdgeDistribution} shows the distribution of edge weights in
+the Cancer and Stack Overflow datasets. 
+%We choose Stack Overflow to predict
+%zero weights since it has large number of edges with very low weights,
+%predominantly weight one. 
+Predicting zero as well as non-zero edge weights
 demonstrates that the model is versatile and can predict a wide range of 
-edge-weights. In addition to 20\% of the total
-non-zero edges we randomly sample equal number of zero edges from the graph for
-the SO held and test set.
-The optimization objective for learning is defined in
-equation~\ref{eqn:VarLowerBound}.
+edge-weights. Hence in addition to 20\% of the total
+non-zero edges, we randomly sample an equal number of zero edges from the graph for
+the held and test splits of all three datasets.
+The optimization objective for learning is a lower bound 
+on the log-likelihood (defined in the appendix)
+%equation~\ref{eqn:VarLowerBound}.
 
 A link prediction task is incorporated to demonstrate the model's effectiveness.
 It is a standard task in the area of graph clustering and social networks in
@@ -723,69 +677,85 @@ concluded that it extracts important patterns from each of its building
 blocks. Moreover it adds validity to the qualitative analysis of the results. 
 
 \vspace*{-0.5\baselineskip}
-\paragraph{Link-prediction} 
+\paragraph{Link prediction} 
   
- We predict the edge-weight of the edges
+ We predict the edge weight of the edges
 present in the test set. The predicted edge, $\hat{Y}_{t,u,v}$, between users $u$ and
 $v$ in thread $t$ is  defined as 
 \vspace*{-1\baselineskip}
 \small
 \begin{align}
-\hat{Y}_{t,u,v} = \pi^T_uB\pi_v\label{eqn:prediction}.\\
-B=\nu.*\lambda\label{eqn:blockMat}
+	\hat{Y}_{t,u,v} &= \pi^T_uB\pi_v\label{eqn:prediction}.\\
+				B&=\nu.*\lambda\label{eqn:blockMat}
 \end{align}
 \normalsize
-and the prediction error is the $rmse$, defined as given predicted edge
+and the prediction error is the $rmse$, defined in equation
+\ref{eqn:rmse}, given predicted edge
 $\hat{Y}_{t,u,v}$ and the actual edge $Y_{t,u,v}$.
 \vspace*{-0.5\baselineskip}
 \small
 \begin{equation}
 	rmse=\sqrt{\frac{\sum_{(u,v)\in E}(\hat{Y}_{t,u,v}-Y_{t,u,v})^2}{|E|}}.
+	\label{eqn:rmse}
 \end{equation}
 \normalsize
 
 \begin{figure}
 \begin{center}
-\includegraphics[height=6cm,width=9cm]{TopicVariationsLocal.pdf}
+\includegraphics[height=6cm,width=9cm]{figs/topic_variations.pdf}
 \end{center}
+\vspace*{-2\baselineskip}
 \caption{\small{Number of local variations in topic proportion on a per user per thread
-level. The axis is percentage variation (from 10 to 90 percent). The right hand
-plot is a scaled in version of the left.}}
+level. The axis is percentage variation (from 10 to 90 percent).}}
 \label{fig:localTopicVariations}
+\vspace*{-1.5\baselineskip}
 \end{figure}
 
-\begin{center}
 \begin{figure*}
+\begin{center}
 \includegraphics[height=7cm,width=18cm]{SimilarityMatTSAnnotated.png}
-\caption{Adjacency matrix of users sorted by clusters. Left side is 
-clustered by MMSB and right side is clustered by our model using user's dominant
-role as cluster index over TS dataset. Our model is able to correctly cluster 3K
-additional users that MMSB doesnt assign any dominant cluster (or role) and
-discovers a new role (Cluster-6).}
-\label{fig:similarityMatTS}
-\end{figure*}
 \end{center}
+\vspace*{-2\baselineskip}
+\caption{Adjacency matrix of users sorted by community index. The left side is 
+created using MMSB and the right side using our model with the 
+users' dominant role as the community index over the TS dataset. 
+Our model is able to correctly cluster 3K
+additional users that MMSB doesn't assign any dominant community (or role) and
+discovers a new community (role 6).}
+\label{fig:similarityMatTS}
+\vspace*{-1\baselineskip}
+\end{figure*}
 The summation is over the edge set $E$ in the test (or heldout) set. The block matrix
-$B$ described in equation~\ref{eqn:blockMat} is well defined for both MMSB and
-the proposed model. Hence the prediction is obtained for the active network modelling without
-LDA (just MMSB component) and with LDA. We created an artificial
-weighted Identity matrix for LDA $\hat{B}=m*I$. It is a diagonal matrix with
+$B$ described in equation~\ref{eqn:blockMat} is well-defined for both MMSB and
+the proposed model. Hence the prediction is obtained for the active network modelling 
+both without
+LDA (just MMSB component) and with LDA. We create an artificial
+weighted identity matrix for LDA $\hat{B}=m*I$. It is a diagonal matrix with
 all element values $m$. For every user $u$ and every thread $t$ the topics discovered over the
-posts of $u$ in $t$ is used as the vector $\pi_u$ in
+posts of $u$ in $t$ are used as the vector $\pi_u$ in
 equation~\ref{eqn:prediction} for prediction. A diagonal $B$ is desirable in
 block models as it provides clean separation among the clusters
 obtained~\cite{Airoldi:2008:MMS:1390681.1442798}.
-The value of $m$ is tuned over heldout set. 
-The MF model is the normal matrix factorization model. We obtain the 
-matrix factors on training set and use them to predict the edge weight between
-users on the test and heldout sets. It doesn't use text part of the data.
-The BoW model is a simple bag of words model that takes each user $u$'s
+The value of $m$ is tuned over the heldout set. 
+The MF model is the normal matrix factorization model~\cite{Gemulla:2011:LMF}. 
+We obtain the 
+matrix factors on the training set and use them to predict the edge weight between
+users on the test and heldout sets. It does not use the text part of the data.
+The BoW model is a simple bag-of-words model that takes each user $u$'s
 aggregated post across the forum and constructs a vector $V_u$ of words. The 
-edge weight $w_{u,v}$ predicted between users $u$ and $v$ is $w_{u,v}=cosine\_sim(V_u,V_v)*b$
-where $cosine\_sim(x,y)$ is cosine similarity between vectors $x$ and $y$ and $b$ is tuned
-over heldou set. We define a basic baseline that
-always predicts the average weight ($\bar{Y}$) all the edges, zero (Stack
-Overflow) or non-zero (Cancer), in the heldout or test set.
+edge weight $w_{u,v}$ predicted between users $u$ and $v$ is 
+\vspace*{-0.5\baselineskip}
+\small
+\begin{align}
+w_{u,v}=cosine\_sim(V_u,V_v)*b
+\label{eqn:bow}
+\end{align}
+\normalsize
+where $cosine\_sim(x,y)$ is the cosine similarity 
+between vectors $x$ and $y$ and $b$ is tuned
+over the heldout set. We define a naive baseline that
+always predicts the average weight ($\bar{Y}$) of all the edges
+in the heldout or test set.
 \vspace*{-0.5\baselineskip}
 \small
 \begin{equation}
@@ -797,18 +767,18 @@ Overflow) or non-zero (Cancer), in the heldout or test set.
 \paragraph{Community Discovery}
 Besides providing qualitative insights into the communities dicovered
 we also provide a quantitative evaluation of the communities. We use 
-$\rho$, a variation of Davies-Bouldin index~\cite{Davies:1979} 
+$\rho$, a variation of the Davies-Bouldin index~\cite{Davies:1979} 
 \vspace*{-0.5\baselineskip}
 \small
 \begin{align}
 	\rho=\frac{1}{K} \sum_{c=1}^{c=K}\frac{d_{c,in}}{d_{c,out}}
 \end{align}
 \normalsize
-where $d_{d,in}=\frac{\sum_{u,v\in c}Y_{u,v}}{|E_{in}|}$ is the sum of the 
+where $d_{c,in}=\frac{\sum_{u,v\in c}Y_{u,v}}{|E_{in}|}$ is the average weight of the 
 edges of all user pairs inside the community $c$ and $|E_{in}|$ is the number of 
 all such edges. $d_{c,out}=\frac{\sum_{u\notin c,v\in c}Y_{u,v}}{|E_{out}|}$ is the 
-sum of the edges of user pairs where one of the users lies in $c$ and the other 
-outside $c$ and $|E_{out}|$ is the number of such edges. 
+average weight of the edges of user pairs where one of the users lies in $c$ and the other 
+outside $c$, and $|E_{out}|$ is the number of such edges. 
 $\rho$ is the average ratio of the community densities and measures 
 the compactness of the community.
 We compare our model with simple MMSB and Graclus, a scalable spectral clustering
@@ -817,26 +787,30 @@ algorithm~\cite{Dhillon:2005}
 \vspace*{-0.5\baselineskip}
 \paragraph{Parameter tuning}
 We tune our parameters $\eta, \kappa,
-\theta, \alpha$, and $K$ (number of community-topics) over the held set.
+\theta, \alpha$, and $K$ (number of communities) over the heldout set.
 $\omega$, the parameter to balance the contribution of the text side to the 
 network side is tuned over the
 heldout set. It is used in the local variational update of
-$\phi$(equation~\ref{eqn:phiDelta}).
+$\phi$ (equation~\ref{eqn:phiDelta}).
 Equation~\ref{eqn:phiDelta} contains a summation term over all the tokens
 $\sum_{i=1}^{N_{T_p}}\chi_i$ in the per user per thread document and if  not
 balanced by $\omega$ will dominate the rest of the terms. The constant $\epsilon$ used in
 equation~\ref{eqn:phiDelta} and~\ref{eqn:chiDelta} is a smoothing constant and
-is fixed at a low value. The six quantities, $\alpha, \omega, \theta, kappa,
-\eta$ and $K$ are tuned in that sequence. $\alpha$ is tuned first keeping rest
-constant then $\omega$ and so on where each next to be tuned parameter uses
-values of already tuned parameters. Table~\ref{tab:tunedParameters}
-shows the final values of all the parameters.Figure~\ref{fig:finalLLheld} 
-shows plot of tuned log-likelihood over the three
-datasets against time. UM being the smallest of the two takes
+is fixed at a low value. The six quantities, $\alpha, \omega, \theta, \kappa,
+\eta$ and $K$ are tuned in that sequence. $\alpha$ is tuned first keeping the rest
+constant, then $\omega$ and so on, where each parameter uses
+the values of the previously tuned parameters. Table~\ref{tab:tunedParameters}
+shows the final values of all the parameters. Figure~\ref{fig:finalLLheld} 
+shows a plot of the tuned log-likelihood over the three
+datasets against time. UM, being the smallest of the two, takes
 the least amount of time. Tuning for the parameters of MF, BoW, Graclus and LDA
-is also done similarly on the heldout set.
+is done similarly on the heldout set.
 
-\section{Results}
+\paragraph{System details} The machine used in all the experiments in this paper
+is ``Intel(R) Xeon(R) CPU E5-2450 0 @ 2.10GHz'' 16 corewith 8GBs of
+RAM per core. The operating system is Linux 2.6.32 x86\_64. 
+
+\subsection{Results}
 \label{sec:results}
 
 \begin{table}
@@ -851,9 +825,11 @@ MF & 1.412 & 1.468 & 2.925 & 2.905 & 0.413 & 0.420 \\\hline
 BoW &1.834 & 1.851 & 4.012 & 4.105 & 0.497 & 0.491 \\\hline
 Baseline &1.886& 1.983 &4.504 &4.417&0.502& 0.509\\\hline
 \end{tabular}
+\vspace*{-0.5\baselineskip}
 \caption{\small{Link prediction results over the three datsets}}
 \label{tab:predictionResults}
 \end{center}
+\vspace*{-0.5\baselineskip}
 \end{table}
 
 \begin{table}
@@ -865,69 +841,80 @@ Our Model & \textbf{1.963} &\textbf{1.91} &\textbf{1.932} & \textbf{1.935} &
 MMSB &1.421& 1.417 & 1.443& 1.416 &1.387 & 1.404 \\\hline 
 Graclus &1.598& 1.531	&1.460 & 1.457 &1.461 & 1.438\\\hline
 \end{tabular}
+\vspace*{-0.5\baselineskip}
 \caption{\small{Average density ratios $\rho$ of different community 
 discovery models over three datasets}}
 \label{tab:rhoResults}
 \end{center}
+\vspace*{-1\baselineskip}
 \end{table}
 
 \begin{figure}
 \centering
-  \includegraphics[width=0.7\linewidth]{synth.pdf}
-\caption{\small{Time taken in hours with increasing number of threads and users}}
+\hspace*{-1.5\baselineskip}
+\begin{tabular}{l|l}
+%	\hline
+	\includegraphics[width=0.5\linewidth]{figs/scalabilityUsers.pdf}&
+	\includegraphics[width=0.5\linewidth]{figs/scalabilityThreads.pdf}\\
+%\hline
+\end{tabular}
+\vspace*{-1\baselineskip}
+\caption{\small{Time taken in hours with increasing number of users and threads}}
 \label{fig:syntheticScalability}
 \end{figure}
  
 \vspace*{-0.5\baselineskip}
 \paragraph{Link prediction} Table~\ref{tab:predictionResults} shows the link
-prediction results on heldout and test set for six prediction
+prediction results on the heldout and test sets for the six prediction
 models. The proposed approach to model thread 
 level conversational roles outperforms
 all of the other models. LDA performs poorer than MMSB since LDA does not 
-explicitly model network information. MF perfroms slightly better than MMSB 
-where as BoW perfoms worse than LDA and slightly better than the baseline. 
-This means that text topic similarity contains valuable information regarding 
+explicitly model network information. MF performs slightly better than MMSB, 
+whereas BoW performs worse than LDA and slightly better than the baseline. 
+This means that the text topic similarity contains valuable information regarding 
 the users.
 
 \vspace*{-0.5\baselineskip}
 \paragraph{Cancer dataset}
 Figure~\ref{fig:localTopicVariations} shows the number of times the global role
-of a user is different from the thread level role that he plays. It is 
-interesting to see that the variation between global and thread level role
-assignment is high among all the datasets. A model that ignores this local vs
+of a user is different from the thread level role that he or she plays. It is 
+interesting to see that the variation between global and thread-level role
+assignment is high among all the datasets. A model that ignores these local vs
 global dynamics tends to lose a lot of information.
-Figure~\ref{fig:similarityMatTS} shows the plot of the user by user adjacency 
-matrix for TS dataset. The users are sorted based on the community-topic cluster
-(roles) assigned by the respective models (our model and MMSB model). The number of
-community-topics are 10 and every user is assigned the dominant
-community-topic, $\pi$, (role) that they have more than 50\% of chance of lying in. A user 
-is discarded if he
-doesn't have the said dominant role. Thus here user role and community are the same
-as explaine in section~\ref{sec:term}.
+Figure~\ref{fig:similarityMatTS} shows the plot of the user-by-user adjacency 
+matrix for TS dataset. The users are sorted based on the community topic
+(roles) assigned by the respective models (our model and MMSB). The number of
+community topics are 10 and every user is assigned the dominant
+community topic (role) in $\pi$: the community $k$ such that $\pi[k]\geq0.5$, 
+i.e. the user has more than 50\% of chance of lying in the community $k$. A user 
+is discarded if he or she
+doesn't have the said dominant role. Thus in this figure user role and community are the same
+as explained in section~\ref{sec:term}.
 Our model is unable to assign a clear 
-role to 3.3K users and
-the MMSB approximately to 6.3K users out of 22K. Based on the topics assigned,
+role to 3.3K users, whereas
+MMSB is unable to do so for approximately 6.3K users out of 22K. Based on the topics assigned,
 users are sorted and their adjacency matrix shows clean clustering along the
 block diagonals.
-As seen in the figure, the combined model is able to effectively find the
-primary roles (dominant topic) for the extra 3K users that the MMSB model was
-unable to provide for. Besides a new role (Role 6) that is not accounted for by
+As seen in figure~\ref{fig:similarityMatTS}, 
+the combined model is able to effectively find the
+primary roles (dominant communities) for the extra 3K users that the MMSB model is
+unable to account for. Besides that, a new role (role 6) that is not accounted for by
 MMSB or Graclus is discovered by the proposed model (figure~\ref{fig:similarityMatTS}).
 Users that predominantly have role 6 on a global scale tend to vary their roles
 often on a thread level, i.e. their topic probabilities change quite often. The
 average change in topic probabilities per role per user-thread pair across the
 10 roles discovered in TS is 30.6\%; for role 6 it is 41.5\% (highest of all the roles). 
 This means
-that this role is very dynamic and an active sub-network modelling helps here as 
+that this role is very dynamic and an active sub-network modeling helps here as 
 it captures the
-dynamism of this entity. From figure~\ref{fig:similarityMatTS} cluster of roles
+dynamism of this entity. As seen in figure~\ref{fig:similarityMatTS}, roles
 4, 5, 6, 7 and 8 are the largest. 
-Graclus discovers a similar set of communities as MMSB model. It also misses
-the community 6. Table~\ref{tab:rhoResults} shows that Graclus communities 
-are marginally more compact than MMSB but our model has the most compact 
-communities. This is due to the fact that besides discovering role 6 and putting all 
-such users in a separate role it also takes into account local variations
-in the user roles that helps it find better boundaries for other communities.
+Graclus discovers a similar set of communities as the MMSB model. It also misses
+community 6. Table~\ref{tab:rhoResults} shows that Graclus communities 
+are marginally more compact than MMSB, but our model has the most compact 
+communities. This is due to the fact that our model 
+also takes into account local variations
+in the user roles that helps it find better boundaries for the communities.
 %\abhi{I will also put here the coommunities discovered by spectral clustering
 %and make a contrast. To contrats with the better communties discovered by our model
 %I will use the within-cluster-weight/without-cluster-weight and show that our
@@ -937,34 +924,38 @@ in the user roles that helps it find better boundaries for other communities.
 A detailed inspection reveals that role 4, role 7 and role 8 are
 related to discussion regarding cancer where as role 5 is related to
 conversations regarding spiritual and family matters.  But role 6 does not seem
-to be related to any specific type of conversation. It is free flowing and has
-lots of non specific discussion threads where users play games,
+to be related to any specific type of conversation. It is free-flowing and has
+lots of nonspecific discussion threads where users play games,
 discuss cancer stages, talk about religious beliefs, share stories etc. 
-This tells us that there is a cornucopia of
-discussions happening in this role with no specific matter at hand. 
+This tells us that there is a multitude of
+discussions happening within this role with no specific matter at hand. 
 Users who are
 predominantly in this role tend to post across many discussion threads and
-variety of conversation topics. This role is only detected by our model due to the
-fact that it takes into account the dynamics of such a role.
+variety of conversation topics. This role is only detected by our model 
+because it can take into account the dynamics of such a role.
 
 \begin{figure*}
 \centering
   \includegraphics[width=1\linewidth]{piSOAnnotated.png}
-\caption{\small{The 20 roles assigned to users in the stack overflow
+\vspace*{-2\baselineskip}
+\caption{\small{The 20 roles assigned to users in the Stack Overflow
 dataset. The numbers at the vertex are the role numbers. Due to the large
-number of roles we visualize them 5 at a time with first 5 first then second
-5 and so on.
+number of roles we visualize them five at a time starting 
+with first five then second five and so on.
 We can see that the roles are separated cleanly and clustered around the
 pentagon corners.}}
 \label{fig:SOclusters}
+\vspace*{-1\baselineskip}
 \end{figure*}
 
 \begin{figure}
 \centering
-  \includegraphics[width=0.7\linewidth]{synth.pdf}
+  \includegraphics[width=1\linewidth]{figs/stability.pdf}
+\vspace*{-2\baselineskip}
 \caption{\small{RMSE vs $\alpha$ and $\eta$ for the synthetic dataset. The X-axis is
 $\alpha$ or $\eta$ values and the Y-axis is the RMSE of the recovered $\pi$}}
 \label{fig:syntheticRMSE}
+\vspace*{-1\baselineskip}
 \end{figure}
  
  
@@ -1005,10 +996,10 @@ $\alpha$ or $\eta$ values and the Y-axis is the RMSE of the recovered $\pi$}}
 
 \vspace*{-0.5\baselineskip}
 \paragraph{Stack Overflow} 
-The optimal topic number for SO dataset is 20 community-topics as noted in
-table~\ref{tab:tunedParameters} and the number of users are 1.13 million. It is
-difficult to visualize the user-user adjacency matrix of this size. The 20
-topic set is divided into four sets with size 5 each. Topics 1 to 5
+The optimal topic number for the SO dataset is 20 as noted in
+table~\ref{tab:tunedParameters} and the number of users is 1.13 million. It is
+difficult to visualize a user-user adjacency matrix of this size. The 20
+topic set is divided into four sets of five. Topics 1 to 5
 form set one, topics 6 to 10 form set two and so on. Every user's role is
 visualized by projecting user's $\pi$ over a pentagon as shown in
 figure~\ref{fig:SOclusters}. The projection uses both position and
@@ -1031,11 +1022,11 @@ communities. We observe a big black circle at the back ground of every plot.
 This circle represents the user with id 22656
 \footnote{\url{http://stackoverflow.com/users/22656/jon-skeet}} that 
 has the highest node-degree of 25,220 in the SO dataset. 
-This user has the highest all time reputation on
-stack overflow and tends to take part in myriads of question answering threads.
+This user has the highest all-time reputation on
+Stack Overflow and tends to take part in myriads of question answering threads.
 Hence he is rightly picked up by the model to be in the middle of all the roles. 
 
-Figure~\ref{fig:SOclusters} has a cleanly separated communities
+Figure~\ref{fig:SOclusters} has cleanly separated communities
 where the nodes are clustered
 around the pentagon vertices. This indicates that the model is able to find
 primary roles for most of the users in the forum.  
@@ -1044,21 +1035,23 @@ variation with respect to the global role of a user at a thread level.
 Modeling this variation helps our model in
 getting better clusters as compared to simple MMSB and Graclus; 
 this fact is apparent from
-the $\rho$s obtained, table~\ref{tab:rhoResults}. 
-While Graclus's $rho$ is margianlly better than MMSB, our model outperforms
-it with a significant margin. 
+the $\rho$'s obtained, table~\ref{tab:rhoResults}. 
+While Graclus's $\rho$ is marginally better than MMSB, our model outperforms
+it by a significant margin. 
 In terms of new communities discovered, we again observe a similar pattern
-as in the case of cancer dataset wherein roles that have too much diversity 
+as in the case of the Cancer dataset where roles that have too much diversity 
 are overlooked by MMSB and Graclus. 
-While roles 1, 2, 3 are related to discussions regarding database 
-conversations, general coding, android
-and J2EE respectively, role 4 is diverse and related to 
-online blogs, Java, C++ multi threading, Unix programming and browsing apis. 
-Role 5 and role 6 are related to server/client side browser based 
-coding and general coding respectively. Role 7 like role 6 is diverse and 
-conversations here are related to JSON, python scripts, functional programing,
-Clojure. MMSB and Graclus both overlook role 6 and 7 whereas our model
-discovers them as a separate community.
+Roles 1, 2 and 3 are related to discussions about a single
+subject matter: database 
+conversations, general coding and Android, respectively. 
+By contrast, role 4 is diverse and users here discuss multiple 
+subject matters: 
+online blogs, Java, C++ multi-threading, Unix programming and browsing APIs. 
+Role 5 and role 6 are associated with server/client-side browser-based 
+coding and general coding, respectively. Role 7, like role 4, is diverse and 
+conversations here are related to JSON, Python scripts, functional programing and
+Clojure. MMSB and Graclus both overlook roles 4 and 7, whereas our model
+discovers them as separate communities.
 
 %\abhi{I will put here the communties discovered by simple MMSB 
 %and Spectral Clutering and will make a point that our model discover 
@@ -1097,13 +1090,13 @@ discovers them as a separate community.
 
 %\abhi{Some text topic interpretation can be there but it could be removed
 %in case of space crunch.}
-Our model is not only better at discovering diverse roles but also roles 
+Our model is not only better at discovering diverse roles, but also roles 
 that predominantly belong to one category but are obscured at times. 
-If the user deviates from his dominant role
+If the user deviates from his or her dominant role
 for a short while then Graclus and MMSB have difficulty assigning
 a predominant role. 
-Take the user 20860 in SO dataset. 20860 is globally assigned 
-role 1 as the dominant role but he also takes part in coding related 
+Take the user 20860 in the SO dataset. 20860 is globally assigned 
+role 1 as the dominant role, but he also takes part in coding-related 
 discussions sometimes. For example, 
 \small
 \begin{itemize}
@@ -1117,17 +1110,20 @@ the code in a couple of minutes and then get back to working on something useful
 Writing a PHP script to run any SQL script could take you weeks\ldots.}
 \end{itemize}
 \normalsize
-But in most of the cases he visits general software or coding questions
-that are specifically related to databases and this fact is picked up by our
-model and it assigns him predominantly (>0.8) a database role even though he 
-is active contributor to
-general software and coding discussions. MMSB on the other hand assins him 30\%
-database (role 1) 30\% general coding (role 2) and rest is distributed among the
-remaining 18 roles. Similarly Graclus assigns the user role 1 as 35\%, role 2
-\25\% and remaining are divided almost equally to the rest of the roles. 
-
+But in most of the cases, he participates in threads that are 
+related to databases and this fact is picked up by our
+model. It assigns him predominantly (>0.8) a database role 
+even though he sometimes visits 
+more general software and coding threads. 
+MMSB, on the other hand, assigns him 30\%
+database (role 1), 30\% general coding (role 2) and the 
+rest is distributed among the
+remaining 18 roles. Similarly, Graclus assigns the user role 1 as 35\%, role 2
+as 25\% and the remainder is distributed almost equally 
+to the rest of the roles. 
 The model picks up other similar cases for which it is able
-to successfully distinguish (compared to MMSB) between user's global and local
+to successfully distinguish (compared to MMSB and Graclus) 
+between users' global and local
 roles even though they are dynamic in nature.
 % E.g.
 % user\ldots~\comment{Write about the top 20 and bottom 20 users with most and
@@ -1138,23 +1134,30 @@ roles even though they are dynamic in nature.
 
 \vspace*{-0.5\baselineskip}
 \paragraph{Synthetic dataset: stability and scalability}
-Figure~\ref{fig:syntheticRMSE} gives the rmse of the model for the recovery of
+Figure~\ref{fig:syntheticRMSE} gives the RMSE of the model for the recovery of
 community topic $\pi$ over the synthetic dataset. From the graph, higher values
-of the parameters make it harder to recover the $pi$ values. For this experiment
-we fix topic number at 5 and vary $\alpha$ or $\eta$ by fixing the other at
+of the parameters make it harder to recover the $\pi$ values. For this experiment,
+we fix the number of communities (K) at 5 and vary $\alpha$ or $\eta$ while fixing the other at
 0.01. The other priors such as $\kappa, \theta,
-\omega$ etc. are fixed at the values used to generate the dataset.  
-It is apparent that the rmse is more sensitive towards $\alpha$ values and
+\omega$, etc. are fixed at the values used to generate the dataset.  
+It is apparent that the RMSE is more sensitive towards $\alpha$ values and
 recovers them well compared to $\eta$. The results are averaged over 20 random
-runs of the experiment for the given values of $\alpha$ and $\eta$. The rmse
+runs of the experiment for the given values of $\alpha$ and $\eta$. The RMSE
 achieved for lower values of priors $\alpha$ and $\eta$ is very promising as
-it means that the confidence interval of the estimate is very high for sparse
+it means that the estimate is very good for sparse
 priors for this model given sufficient data. 
 Figure~\ref{fig:syntheticScalability} shows the scalability plot for two cases:
-1) varying number users with fixed number for threads at 100, and 2) varying number of 
-threads with fixed number of users at 1000. We observe that in both cases 
-the model scale linearly with increasing threads or users. It is highly scalable 
-even when the number users or threads approach 10 million. 
+1) varying the number of users with a fixed number of threads at 100, and 2) 
+varying the number of 
+threads with a fixed number of users at 1000. We fix 
+$\alpha=0.01$, $\eta=0.01$ and keep $\pi$ sparse.
+In figure~\ref{fig:syntheticScalability}, for both cases 
+the PSSV inference scales sub-linearly with an increasing number of threads or users. 
+This implies that it is highly scalable in users and threads. A closer look
+into the figure tells that increasing users has more effect on the time complexity 
+than increasing threads. This is due to the fact that runtime is 
+quadratic 
+in the number of users ($O(users^2)$), but linear in number of threads ($O(threads)$)
 
 %\abhi{I will put in more time plots on paralleization for synthetic data with 
 %varying number of users, threads, topics, words. Also plots from section
@@ -1162,46 +1165,60 @@ even when the number users or threads approach 10 million.
 
 \section{Related Work}
 
-White et al.\cite{ICWSM124638} proposed a mixed-membership model that obtained
-membership probabilities for discussion-forum users for each statistic
-(in- and out-degrees, initiation rate and reciprocity) in various profiles and
-clustered the users into ``extreme profiles'' for user role-identification
-and clustering based on roles in online communities,. Ho et al.
-\cite{Ho:2012:DHT:2187836.2187936} presented TopicBlock that combines text and
-network data for building a taxonomy for a corpus.
-The LDA model and MMSB models were combined by
-Nallapati et al. \cite{Nallapati:2008:JLT:1401890.1401957} using the
-Pairwise-Link-LDA and Link-PLSA-LDA models where documents are assigned
-membership probabilities into bins obtained by topic-models. Sachan et
+Ho et al.
+\cite{Ho:2012:DHT:2187836.2187936} provide TopicBlock, a model 
+that combines text and
+network data in an efficient way for building a taxonomy for a corpus.
+Nallapati et al. \cite{Nallapati:2008:JLT:1401890.1401957}
+combine LDA and MMSB to obtain 
+Pairwise-Link-LDA and Link-PLSA-LDA models that assign membership 
+probabilities to documents for a set of bins (or classes).
+These works 
+combine MMSB and LDA to bring network and text together in a way
+similar to our work, although for a tagential task. 
+For simultaneously modeling topics in bilingual corpora, Smet et al.
+\cite{Smet:2011:KTA:2017863.2017915} propose the Bi-LDA model that generates
+topics in the target languages for paired documents in these languages.
+They propose a latent space model that combines two LDA models 
+where the end-goal is to classify any document into one of the
+obtained set of topics. All the above works combine basic latent space modeling
+blocks in interesting ways to provide useful results.  
+
+White et al.\cite{ICWSM124638} propose a mixed-membership model that obtains
+membership probabilities for discussion forum users for each statistic
+(in- and out-degrees, initiation rate and reciprocity) in various profiles. It
+then 
+clusters the users into ``extreme profiles'' for user role-identification
+and clustering based on roles in online communities. However, this approach
+doesn't take into account the text used by users.
+Sachan et
 al.~\cite{Sachan:2012:UCI:2187836.2187882} provide a model for community
 discovery that combines network edges with hashtags and other heterogeneous data
-and use it to discover communities in twitter and Enron email dataset.
-
-For simultaneously modeling topics in bilingual-corpora, Smet et al.
-\cite{Smet:2011:KTA:2017863.2017915} proposed the Bi-LDA model that generates
-topics from the target languages for paired documents in these very languages.
-The end-goal of their approach is to classify any document into one of the
-obtained set of topics. For modeling the behavioral aspects of entities and
+and use it to discover communities in Twitter and the Enron email dataset. But they
+don't take the structure of the interaction into account. Additionally, they are 
+not scalable; their largest dataset has less than 8,500 users.
+For modeling the behavioral aspects of entities and
 discovering communities in social networks, several game-theoretic approaches
 have been proposed (Chen et al. \cite{Chen:2010:GFI:1842547.1842566}, Yadati and
-Narayanam \cite{Yadati:2011:GTM:1963192.1963316}). Zhu et
+Narayanam \cite{Yadati:2011:GTM:1963192.1963316}). However, none of them use it for
+forum data containing both network and text. 
+
+Zhu et
 al.~\cite{Zhu:getoor:MMSB-text} combine MMSB and text for link prediction and
 scale it to 44K links.
-
 Ho et al.~\cite{HoYX12} provide  unique triangulated sampling schemes for scaling
 mixed membership stochastic block models~\cite{Airoldi:2008:MMS:1390681.1442798} to
 the order of hundreds of thousands of users. Prem et
 al.~\cite{conf/nips/GopalanMGFB12} use stochastic variational inference 
 coupled with sub-sampling techniques to
-scale MMSB like models to hundreds of thousands of users.
-
-
-None of the works above address the sub-network dynamics of thread based
-discussion in online forums. Our work is unique in this context and tries to
-bring user role modelling in online social networks closer to the
+scale MMSB-like models to hundreds of thousands of users.
+However, none of the works above address the sub-network dynamics of thread-based
+discussion in online forums. Our work is unique in this context; it
+brings user role modeling in online social networks closer to the
 ground realities of online forum interactions.
+
 Active sub-network modelling has been used recently to model gene interaction 
-networks~\cite{Lichtenstein:Charleston}. They
+networks. Lichtenstein et al.~\cite{Lichtenstein:Charleston}
 combine gene expression data with network topology to provide bio-molecular 
 sub-networks, though their approach is not scalable as they use simple EM for
 their inference. We leverage the scalable aspects of
@@ -1212,57 +1229,56 @@ obtain a highly scalable active sub-network discovery model.
 Matrix factorization and spectral learning based approaches are some of the
 other popular schemes for modelling user networks and content. In recent
 past both approaches have been made scalable to a million order node size graph
-~ \cite{Gemulla:2011:LMF,Dhillon:2005:FKM}. But these methods are unable to incorporate 
-the rich structure that a probabilistic modelling based method can take into account.
-For example modelling active sub-networks besides incorporating content as well
-as network graph will be very hard to achieve in matrix factorization or 
-spectral clustering paradigm.
+~ \cite{Gemulla:2011:LMF,Dhillon:2005}. But these methods are unable to incorporate 
+the rich structure that a probabilistic modeling based method 
+can take into account as shown by the empirical results in the 
+previous section.
 
 
 
 \section{Discussion and Future Work}
 The  proposed model relies on the fact that forum users have dynamic role
-assignments in online discussions and leveraging this fact helps to increase
-prediction performance as well as understand the forum activity. The model
+assignments in online discussions and leveraging this fact helps increase
+prediction performance as well as understand forum activity. The model
 performs very well in its prediction tasks. It outperforms all the other methods
-over all the datsets by a huge margin. The model is scalable and is able to run
-on social network dataset of unprecedented content size. There is no past
-research work that scales forum contents to more than one  million user and
-around 10 million posts. 
+over all the datsets by a large margin. The model is scalable and is able to run
+on social network datasets of unprecedented sizes. There is no past
+research work that scales forum contents to more than one million users 
+and 9 million posts. 
 
-The idea that active subnetwork is useful in modelling online forums is
+The idea that active subnetwork is useful in modeling online forums is
 demonstrated qualitatively and quantitatively. Quantitatively it provides better
 prediction performance and qualitatively it captures the dynamics of user
-roles in forums. This dynamism can help us find new cluster roles that may have
-been missed by state of the art clustering approaches, as we observed for
-TS dataset. From the synthetic experiments it is observed that the model
+roles in forums. This dynamism helps us find new user roles that may have
+been missed by state-of-the art clustering approaches.
+From the synthetic experiments it is observed that the model
 recovers its parameters with high likelihood with sparse priors. This works to
-its advantage for scalable learning as big data sets tend to be sparse.
+its advantage for scalable learning as big datasets tend to be sparse.
 
 The scalability aspects of the inference scheme proposed here are worth noting.
 Besides the multi-core and stochastic sub-sampling components of the proposed
 inference, the use of Poisson to model the edge weights has enabled us to 
-ignore zero-edges if need be. This reduces the amount of work needed for
-learning the network parameters. The learned network is at par with the state of the art
+ignore zero-edges if need be. This reduces the amount of work needed to
+learn the network parameters. The learned network is at par with the state-of-the art
 inference schemes as demonstrated in the prediction tasks.   
 
-One aspect to explore in future is to combine multiple types of links in
-network. For example in many online forums users explicitly friend other users,
-follow other users or are members of same forum related sub-groups as other
-users. All these relations can be modelled as a graph. It is worth finding out
-how important is modelling active sub-network in such a case. It is
+One aspect to explore in the future is to combine multiple types of links in the
+network. For example, in many online forums users explicitly friend or
+follow other users or join forum groups. 
+All these relations can be modeled as a graph. It is worth finding out
+how important modeling active sub-network is in such a case. It is
 possible that various types of links might reinforce each other in learning
 the parameters and thus will obviate the need to model a computationally
-costly sub-network aspect. As we saw in figure~\ref{fig:syntheticRMSE} that
-sparsity helps, but how sparser can we get before we start getting poor results
+costly sub-network aspect. As we saw in figure~\ref{fig:syntheticRMSE}, 
+sparsity helps, but how much sparser we can get before we start getting poor results
 needs some exploration.
 
-As we have
-seen, figure ~\ref{fig:syntheticRMSE}, that the model recovers the
+Also
+seen in figure ~\ref{fig:syntheticRMSE}, the model recovers the
 community-topic parameters with very high likelihood for lower values of model
 priors $\alpha$ and $\tau$. If this is a general attribute of active sub-network
-models then it can be leveraged for sparse learning. Moreover, although in case
-of large online forums modelling active sub-networks is computationally
+models then it can be leveraged for sparse learning. Although in the case
+of large online forums modeling active sub-networks is computationally
 challenging and costly, the sparsity aspects of active sub-networks might help
 reduce the computation costs.
 
